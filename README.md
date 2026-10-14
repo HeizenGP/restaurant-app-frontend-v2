@@ -1,5 +1,5 @@
 # Restaurant App V2 — Frontend
 
-**Estado: ETAPA 01 — Por iniciar.** Sin aplicaciones Flutter implementadas.
+**Estado: ETAPA 00 — Por iniciar.** Sin aplicaciones Flutter implementadas.
 
-[Etapa 01](docs/etapas/etapa-01.md)
+[Plan maestro de etapas 00–11](docs/etapas/README.md)
