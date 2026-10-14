@@ -1,0 +1,58 @@
+# Artefactos generales
+*.class
+*.log
+*.pyc
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ y Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# `.vscode/` puede contener tareas y configuraciones compartidas, por lo que
+# permanece versionable cuando el equipo decida incorporarla.
+
+# Dart y Flutter generados
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+.widget_preview/
+
+# Simbolización, ofuscación y salidas Android
+app.*.symbols
+app.*.map.json
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/local.properties
+
+# Secretos y material de firma local
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.mobileprovision
+
+# Deben versionarse cuando existan: pubspec.yaml, pubspec.lock, .metadata,
+# código fuente y configuraciones de plataforma requeridas por Flutter.
