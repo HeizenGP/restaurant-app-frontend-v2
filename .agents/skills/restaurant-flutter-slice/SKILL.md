@@ -1,9 +1,13 @@
 ---
 name: restaurant-flutter-slice
-description: Diseña, implementa o revisa un slice Flutter de Restaurant App V2 en customer_app o staff_app, con módulo, estado, permisos y contrato REST trazables. No usar para trabajo exclusivamente backend o para inventar pantallas y funciones sin RF.
+description: Usar al diseñar, implementar o revisar un slice Flutter/Dart de customer_app o staff_app de Chifa ASIA, incluyendo Flutter Web administrativo, estados, permisos y consumo REST. No usar para diseñar PostgreSQL, implementar backend ni inventar pantallas sin RF.
 ---
 
 # Slice Flutter de Restaurant App V2
+
+## Cuándo usarla
+
+Activar para una **funcionalidad Flutter** o su revisión técnica cuando la etapa lo permita (implementación en ETAPA 10). No activar para diseño de base de datos en ETAPA 06, trabajo exclusivo FastAPI ni para crear pantallas no respaldadas por RF y CU. Si la etapa solo admite diseño, no crear código Flutter.
 
 ## Contexto mínimo
 
