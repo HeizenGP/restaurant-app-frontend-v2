@@ -16,7 +16,7 @@ Lee `AGENTS.md`, `docs/etapas/README.md` y las secciones Flutter/REST pertinente
 3. No uses DTO en widgets ni importes infraestructura de otro slice. La composición de la app conecta puertos y adaptadores.
 4. Modela estado unidireccional e inmutable y navegación declarativa por sesión/capacidad. Ocultar UI mejora experiencia, pero nunca sustituye autorización del servidor.
 5. Trata el backend como fuente de verdad. Muestra éxito de una mutación solo tras confirmación; reutiliza `Idempotency-Key` en reintentos y traduce los códigos de error uniformes.
-6. Comparte únicamente `foundation`, `rest_api`, `auth_session` y `design_system` hasta demostrar otra reutilización. No dupliques reglas del backend en Flutter.
+6. No crees `packages/` ni paquetes compartidos desde el inicio. Extrae un paquete solo cuando `customer_app` y `staff_app` reutilicen código real; evita duplicar las reglas del backend.
 7. Conserva pendientes: no asignes actores de recojo/delivery/cierre ni agregues pasarelas, mapas, SUNAT o logística.
 8. Verifica controlador/caso de uso, mapeo REST, guardas y estados de error pertinentes. Reporta RF/RNF, aplicación elegida, archivos y pruebas reales.
 
