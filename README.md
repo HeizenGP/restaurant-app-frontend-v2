@@ -1,7 +1,41 @@
 # Restaurant App V2 — Frontend
 
-**Estado: ETAPAS 00–03 aprobadas; ETAPA 04 en revisión; ETAPA 05 documentada y pendiente de aprobación.** Sin aplicaciones Flutter implementadas.
+Base técnica Flutter de Chifa ASIA para la ETAPA 07. No contiene funcionalidades
+de negocio ni navegación por roles.
+
+- `apps/customer_app`: Cliente e Invitado en Android.
+- `apps/staff_app`: personal en Android y panel administrativo en Flutter Web.
+- Configuración de API: `--dart-define=API_BASE_URL=<url-absoluta>`.
+
+## Verificación
+
+Ejecutar en cada aplicación:
+
+```powershell
+flutter pub get
+flutter analyze
+flutter test
+```
+
+Para comprobar el destino Web de `staff_app`:
+
+```powershell
+flutter build web --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+```
+
+Para comprobar Android en cualquiera de las dos aplicaciones:
+
+```powershell
+flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
+```
+
+La compilación Android requiere Flutter y un Android SDK configurado. En el
+emulador Android, la API del host se alcanza normalmente mediante
+`http://10.0.2.2:8000/api/v1`. Ese tráfico HTTP se permite solo en el variant
+debug; los builds release conservan la política segura de Android y deben usar HTTPS.
 
 - [Plan maestro de etapas 00–11](docs/etapas/README.md)
-- [ETAPA 05 — arquitectura de software](docs/etapas/etapa-05.md)
+- [ETAPA 07 — configuración técnica](docs/etapas/etapa-07.md)
 - [Guía para Codex y AGY](docs/agentes/README.md)
+
+**Estado:** ETAPA 07 implementada y pendiente de revisión y aprobación expresa.
