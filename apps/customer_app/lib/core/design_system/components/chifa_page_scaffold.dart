@@ -11,6 +11,7 @@ class ChifaPageScaffold extends StatelessWidget {
     required this.child,
     required this.themeModeController,
     this.pageKey,
+    this.safeBottom = false,
     super.key,
   });
 
@@ -19,13 +20,14 @@ class ChifaPageScaffold extends StatelessWidget {
   final Widget child;
   final ThemeModeController themeModeController;
   final Key? pageKey;
+  final bool safeBottom;
 
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
-      bottom: false,
+      bottom: safeBottom,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return SingleChildScrollView(

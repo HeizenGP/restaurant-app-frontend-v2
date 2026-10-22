@@ -80,7 +80,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   state.categories.isNotEmpty) ...<Widget>[
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Fotos y descripciones: la API del catálogo no las ofrece.',
+                  'Fotos y descripciones no disponibles.',
                   key: const Key('catalog-api-field-notice'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

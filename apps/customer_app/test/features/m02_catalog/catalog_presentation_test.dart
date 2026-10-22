@@ -45,6 +45,14 @@ void main() {
     expect(find.text('Arroces'), findsOneWidget);
     expect(find.text('Bebidas'), findsOneWidget);
     expect(find.byKey(const Key('catalog-home-hero')), findsOneWidget);
+    final Finder firstCategoryTarget = find.descendant(
+      of: find.byKey(Key('catalog-category-$categoryOneId')),
+      matching: find.byType(InkWell),
+    );
+    expect(
+      tester.getSize(firstCategoryTarget).height,
+      greaterThanOrEqualTo(48),
+    );
 
     await tester.tap(find.byKey(const Key('home-open-catalog')));
     expect(openedCatalog, isTrue);
@@ -134,6 +142,28 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Catálogo vacío'), findsOneWidget);
 
+      final FakeCatalogRepository emptyCategoryRepository =
+          FakeCatalogRepository()
+            ..products[categoryOneId] = const <CatalogProduct>[];
+      final CatalogController emptyCategoryController = CatalogController(
+        repository: emptyCategoryRepository,
+      );
+      addTearDown(emptyCategoryController.dispose);
+      await tester.pumpWidget(
+        _testApp(
+          CatalogPage(
+            catalogController: emptyCategoryController,
+            themeModeController: themeController,
+            onProductSelected: (
+              CatalogCategory category,
+              CatalogProduct product,
+            ) {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Categoría sin productos'), findsOneWidget);
+
       var shouldFail = true;
       final FakeCatalogRepository retryRepository = FakeCatalogRepository()
         ..categoriesHandler = () async {
@@ -195,9 +225,7 @@ void main() {
     expect(find.text('S/ 24.25'), findsOneWidget);
     expect(find.text('Disponible para la venta'), findsOneWidget);
     expect(
-      find.text(
-        'La API del catálogo no ofrece descripción para este producto.',
-      ),
+      find.text('No hay una descripción disponible para este producto.'),
       findsOneWidget,
     );
     expect(find.text('Agregar al carrito'), findsNothing);
@@ -290,6 +318,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('page-menu')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      _testApp(
+        CatalogHomePage(
+          catalogController: controller,
+          themeModeController: themeController,
+          onOpenCatalog: () {},
+          onCategorySelected: (CatalogCategory category) {},
+        ),
+        textScaler: const TextScaler.linear(1.6),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('page-inicio')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      _testApp(
+        ProductDetailPage(
+          repository: repository,
+          categoryId: categoryOneId,
+          productId: productOneId,
+          themeModeController: themeController,
+        ),
+        textScaler: const TextScaler.linear(1.6),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('page-product-detail')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

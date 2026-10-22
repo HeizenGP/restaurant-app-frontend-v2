@@ -114,10 +114,10 @@ class CatalogFoodGlyph extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,
-        child: Text(
-          '食',
-          style: Theme.of(context).textTheme.displayLarge
-              ?.copyWith(color: palette.accentGold, fontSize: 82, height: 1),
+        child: Icon(
+          LucideIcons.utensilsCrossed,
+          color: palette.accentGold,
+          size: 72,
         ),
       ),
     );
@@ -132,7 +132,7 @@ class CatalogDescriptionNotice extends StatelessWidget {
     return const ChifaCard(
       icon: LucideIcons.info,
       title: 'Descripción',
-      subtitle: 'La API del catálogo no ofrece descripción para este producto.',
+      subtitle: 'No hay una descripción disponible para este producto.',
       minimumHeight: 84,
     );
   }
@@ -171,27 +171,28 @@ class _CatalogCategoryChip extends StatelessWidget {
       child: SizedBox(
         key: Key('catalog-category-${category.id}'),
         height: AppSpacing.minimumTouchTarget,
-        child: Center(
-          child: Material(
-            color: background,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadii.chip),
+          child: InkWell(
+            onTap: enabled ? onTap : null,
             borderRadius: BorderRadius.circular(AppRadii.chip),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: enabled ? onTap : null,
-              child: ConstrainedBox(
+            child: Center(
+              child: Container(
                 constraints: const BoxConstraints(minWidth: 103, minHeight: 35),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Center(
-                    child: Text(
-                      category.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: foreground,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  category.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

@@ -1,7 +1,7 @@
 # ETAPA 10 — Checkpoint de ejecución · App de clientes
 
 **Estado:** 10.03 — Catálogo M02 implementado y verificado; **listo para revisión y pendiente de aprobación expresa del usuario**. No iniciar 10.04.
-**Repo/rama/base:** `restaurant-app-frontend-v2` / `develop` / `b5744c4c48709a5b7a92c22a2153b994a0ebb0b7`; cambios locales de 10.03 sin commit/push.
+**Repo/rama/HEAD observado:** `restaurant-app-frontend-v2` / `develop` / `6f9b4dcc9d917063d0cefde066c6efb32f7b5f21`, alineado con `origin/develop`; este cambio remoto apareció durante la ejecución y no fue creado ni publicado por este agente. Ajustes finales locales sin commit ni push.
 **Alcance:** solo `apps/customer_app` y documentación de estado; `staff_app`, backend y Figma no modificados.
 **Guía:** [hoja de ruta](etapa-10-hoja-ruta-clientes.md) · [contratos cliente](etapa-10.md) · [Figma claro/oscuro](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
 
@@ -16,12 +16,12 @@
 - **UX/UI:** Inicio, catálogo por categorías y detalle usan el sistema visual 10.01, Lucide, temas claro/oscuro, `SafeArea`, componentes reutilizables y estados de carga/vacío/error/no disponible.
 - **Navegación:** acceso declarativo desde Inicio a Menú, selección de categoría y apertura/retorno del detalle; Pedidos, carrito y acciones de compra permanecen fuera de 10.03.
 - **Pruebas núcleo M02:** **21/21 passed** para mapeo JSON, adaptador REST contractual, catálogo y detalle; no se usó un endpoint ficticio.
-- **Validación final:** `[ROOT: registrar resultado exacto de flutter analyze]`.
-- **Suite final:** `[ROOT: registrar N/N exacto de flutter test y desglose M02/regresión]`.
-- **Goldens/widgets:** `[ROOT: registrar cantidad y revisión visual final de claro/oscuro y adaptación]`.
-- **Build Android:** `[ROOT: registrar resultado de flutter build apk --debug y artefacto]`.
-- **Límites reales:** `[ROOT: confirmar disponibilidad de AVD/teléfono y backend vivo]`; las pruebas REST Flutter usan respuestas acordes con contratos auditados del backend, no datos comerciales inventados.
-- **Calificación técnica provisional 10.03:** **9/10**; sujeta a confirmar la suite final. Para 10/10 faltan validación táctil Android y recorrido contra backend desplegado si esos entornos siguen no disponibles.
+- **Validación final:** `flutter analyze` → **No issues found**.
+- **Suite final:** `flutter test` → **96/96 passed**: 61 de regresión 10.00–10.02 y 35 incorporadas para M02 (21 de dominio/aplicación/REST, 6 de widgets/estados, 6 goldens claro/oscuro y 2 de navegación integrada).
+- **Goldens/widgets:** seis baselines M02 a 390×844 inspeccionadas visualmente (Inicio, Catálogo y Detalle, claro/oscuro); se renovaron además las dos baselines históricas de Inicio. Adaptación sin overflow comprobada a 320×568 con texto 1.6.
+- **Build Android:** `flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1` → **correcto**; `build/app/outputs/flutter-apk/app-debug.apk` (202 862 578 bytes). Gradle informó una advertencia no bloqueante por diferencia de versiones XML entre Android Studio y command-line tools.
+- **Límites reales:** no hay AVD/teléfono ni backend escuchando en `127.0.0.1:8000` (`HTTP 000`); las pruebas REST Flutter usan respuestas acordes con el código y las pruebas de integración reales auditadas del backend, sin datos comerciales inventados. Goldens verifican render Linux, no captura Android nativa.
+- **Calificación técnica 10.03:** **9/10**. Cumple alcance, contratos, arquitectura, estados, fidelidad y pruebas; para 10/10 faltan validación táctil Android y recorrido contra backend desplegado.
 - **Próxima acción única:** revisión y aprobación expresa del usuario; mantener 10.04 y posteriores pendientes.
 
 > “Implementado y verificado” no equivale a “aprobado”; la aprobación corresponde exclusivamente al usuario.

@@ -89,6 +89,42 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('home category opens its catalog selection', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(_authenticatedApp(environment));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('catalog-category-$categoryTwoId')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-menu')), findsOneWidget);
+    expect(find.text('S/ 2.00 · No disponible para la venta'), findsOneWidget);
+  });
+
+  testWidgets('available product opens detail outside the bottom shell', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(_authenticatedApp(environment));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('nav-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('catalog-product-$productOneId')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-product-detail')), findsOneWidget);
+    expect(find.text('Chaufa especial'), findsOneWidget);
+    expect(find.byKey(const Key('nav-menu')), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('page-menu')), findsOneWidget);
+    expect(find.byKey(const Key('nav-menu')), findsOneWidget);
+  });
+
   testWidgets('shell remains usable on a narrow Android screen', (
     WidgetTester tester,
   ) async {

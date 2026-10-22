@@ -67,6 +67,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       title: 'Detalle del plato',
       subtitle: 'Información vigente proporcionada por el catálogo.',
       themeModeController: widget.themeModeController,
+      safeBottom: true,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
