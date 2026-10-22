@@ -1,13 +1,16 @@
 # ETAPA 10 — Checkpoint de ejecución · App de clientes
 
-**Estado:** DOCUMENTADO, NO INICIADO. **Bloque siguiente:** 10.00 — Línea base. **Aprobación:** pendiente de autorización expresa para implementar.
-**Repo/rama:** `restaurant-app-frontend-v2` / `develop`. **Ruta única:** `apps/customer_app`; `staff_app` fuera de alcance.
+**Estado:** 10.00 — Línea base ejecutada con verificaciones parciales; **pendiente de revisión/aprobación del usuario**. No iniciar 10.01.
+**Repo/rama:** `restaurant-app-frontend-v2` / `develop`, HEAD `bad495ab3fa6ee45bf7bb194bb244832f49dcd21`. **Ruta única:** `apps/customer_app`; `staff_app` fuera de alcance.
 **Guía:** [hoja de ruta](etapa-10-hoja-ruta-clientes.md) · [contratos cliente](etapa-10.md) · [Figma claro/oscuro](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
 
-- **Base verificada documentalmente (2026-10-22):** ETAPA 07 dejó el arranque Flutter y `ApiEnvironment` (sin negocio); el backend implementó y auditó 08.00–08.10. Figma contiene 20 pantallas de cliente por tema; no se acredita aquí aprobación formal del prototipo.
-- **RF/CA del bloque activo:** por seleccionar al iniciar 10.00; no afirmar cobertura Flutter aún.
-- **Ejecuciones de este checkpoint:** ninguna; no se ejecutó `flutter analyze`, `flutter test`, emulador ni integración por crear documentación remota.
-- **Cambios de código:** ninguno. **Datos/decisiones pendientes:** RN-20/RN-21 (texto), RNF-08 y comprobantes; ver `etapa-10.md`.
-- **Próxima acción:** con autorización, revisar workspace real y OpenAPI, ejecutar verificaciones base de 10.00 y registrar evidencias aquí; detenerse para revisión del usuario.
+- **Workspace/Git (2026-10-22):** árbol limpio al inicio, `develop` = `origin/develop` local. `git ls-remote` por HTTPS en Windows confirmó el `develop` **vivo de GitHub** en el mismo HEAD `bad495ab3fa6ee45bf7bb194bb244832f49dcd21`: documentación ya sincronizada, sin cambios remotos que incorporar ni necesidad de pull. SSH en WSL/Windows devolvió `Permission denied (publickey)` y el conector GitHub no vio el repositorio privado; HTTPS permitió verificarlo sin sobrescribir archivos. Sin commit ni push.
+- **Entorno Android:** `flutter doctor -v` → Flutter 3.47.5, Dart 3.13.4, Android SDK 36.0.0/API 36, JDK 21 y licencias ✓. Doctor marca Chrome y toolchain Linux ausentes; no son destinos de `customer_app` Android y no se instalaron. `flutter devices` → solo Linux; `flutter emulators` → ningún AVD, por lo que **arranque Android real no ejecutado**.
+- **Estructura/configuración:** proyecto existente `apps/customer_app` con `main.dart`, `CustomerApp`, `ApiEnvironment` y Android; sin slices de negocio. `API_BASE_URL` por `--dart-define` usa `http://10.0.2.2:8000/api/v1` por defecto; `INTERNET` en manifest y cleartext local solo en debug. La app **muestra la URL, no realiza aún HTTP**; la ruta desde emulador queda sin probar.
+- **Pruebas Flutter:** desde `apps/customer_app`, `flutter analyze` → **No issues found**; `flutter test` → **2/2 passed** (`api_environment_test.dart`). Resolución de dependencias notificó cuatro versiones más recientes incompatibles con restricciones actuales, sin fallo ni actualización solicitada.
+- **FastAPI/OpenAPI:** desde WSL `GET http://localhost:8000/health` → **200**, `database: up`; `/openapi.json` → **200**, 35 rutas/40 operaciones y **13/13 rutas cliente previstas presentes**. Es conectividad host→API y cotejo de contratos, **no integración HTTP de Flutter ni prueba desde Android**.
+- **Figma:** la hoja de ruta enlaza el archivo de 20 pantallas por tema; la inspección visual directa falló porque Web no accede al enlace y el navegador local está deshabilitado en Work. Se conserva como referencia aprobada por el usuario para 10.00, **sin afirmar inventario visual independiente**.
+- **RF/CA:** 10.00 no implementa ni valida RF/CA en UI; el backend auditó 40 RF/48 CA. **Cambios de código/configuración:** ninguno; no se halló defecto comprobado. **Calificación técnica provisional:** 8/10 por GitHub alineado, pruebas y API verdes; limitada por Figma y arranque Android no verificables.
+- **Pendientes oficiales:** aprobación final documentada de 08/09 según fuentes, RN-20/RN-21 (texto), RNF-08 y comprobantes; ver `etapa-10.md`. **Próxima acción:** detenerse para revisión del usuario de 10.00 y resolver acceso visual a Figma/dispositivo Android antes de declarar cierre pleno o iniciar 10.01.
 
 > Al implementar: mantener el estado vivo aquí en ~25 líneas. Conservar solo último resultado por bloque y enlace/archivo de evidencia; no transcribir logs, especificaciones ni commits extensos.
