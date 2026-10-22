@@ -2,8 +2,8 @@
 
 ## Estado y autoridad
 
-- **ETAPAS 00–07 aprobadas expresamente por el usuario; ETAPA 08 con bloques 08.00–08.10 verificados técnicamente en el backend, pendiente de aprobación final del usuario; ETAPAS 09–11 no iniciadas.** No aprobar etapas por inferencia.
-- Índice oficial: `docs/etapas/README.md`. Fuente de verdad de ETAPA 08: `docs/etapas/etapa-08.md`, `etapa-08-progreso.md` e `etapa-08-informe-auditoria.md` del backend en `develop`. Contexto preparatorio frontend: `docs/etapas/etapa-10.md`.
+- **ETAPAS 00–07 aprobadas expresamente por el usuario; ETAPA 08 con bloques 08.00–08.10 verificados técnicamente en el backend, pendiente de aprobación final del usuario; ETAPA 09 con diseño de clientes existente en Figma, pendiente de aprobación formal; ETAPAS 10–11 sin implementación.** No aprobar etapas por inferencia.
+- Índice oficial: `docs/etapas/README.md`. Fuente de verdad de ETAPA 08: `docs/etapas/etapa-08.md`, `etapa-08-progreso.md` e `etapa-08-informe-auditoria.md` del backend en `develop`. Contexto preparatorio frontend: `docs/etapas/etapa-10.md`; planificación por bloques de clientes: `docs/etapas/etapa-10-hoja-ruta-clientes.md`; checkpoint mínimo: `docs/etapas/etapa-10-progreso-clientes.md`.
 - Las ETAPAS 01–03 prevalecen como línea base de negocio y requisitos (40 RF / 48 CA). ETAPA 04 es línea base documental de casos de uso aprobada, pero no resuelve por sí sola RN-20/RN-21, RNF-08 ni comprobantes. Los permisos M07 quedaron aprobados en 08.09: Mozo registra servido; Administrador registra recojo, entrega y cierre; Super Administrador conserva acceso total.
 
 ## Carga selectiva
@@ -16,7 +16,7 @@
 ## Alcance seguro
 
 - Mantener los siete módulos M01–M07 y las decisiones aprobadas. Distinguir siempre heredado, propuesto y pendiente.
-- ETAPA 07 es la base técnica aprobada. La ETAPA 08 implementó y auditó el backend, **no la interfaz**. Preparar ETAPA 10 solo para `customer_app` hasta contar con la aprobación final de 08, el diseño Figma aprobado de 09 y una instrucción de implementación; no adelantar `staff_app` ni inventar pantallas, permisos o estados.
+- ETAPA 07 es la base técnica aprobada. La ETAPA 08 implementó y auditó el backend, **no la interfaz**. Planificar ETAPA 10 solo para `customer_app`; la implementación requiere autorización específica y aprobación formal de las etapas previas aplicables; no adelantar `staff_app` ni inventar pantallas, permisos o estados.
 - Hacer cambios mínimos dentro de la etapa. No sobrescribir trabajo ajeno, registrar secretos, ejecutar commits/push/merge ni usar conectores externos sin necesidad.
 - Mantener iguales los documentos de línea base realmente compartidos; los planes, bitácoras e informes exclusivos de backend no se duplican por sistema. Las Skills específicas viven solo en su repositorio.
 - Usar archivos y Git locales primero. GitHub se reserva para operaciones remotas solicitadas; Figma para ETAPA 09; otros MCP requieren una necesidad vigente.

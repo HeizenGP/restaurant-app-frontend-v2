@@ -37,6 +37,8 @@ debug; los builds release conservan la política segura de Android y deben usar 
 - [Plan maestro de etapas 00–11](docs/etapas/README.md)
 - [ETAPA 07 — configuración técnica aprobada](docs/etapas/etapa-07.md)
 - [ETAPA 10 — contexto preparatorio de `customer_app`](docs/etapas/etapa-10.md)
+- [ETAPA 10 — hoja de ruta de la app de clientes](docs/etapas/etapa-10-hoja-ruta-clientes.md)
+- [Checkpoint compacto para Codex/AGY](docs/etapas/etapa-10-progreso-clientes.md)
 - [Guía para Codex y AGY](docs/agentes/README.md)
 
-**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09/Figma y la implementación Flutter de ETAPA 10 no han comenzado.
+**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09 tiene diseños de clientes existentes en Figma (pendientes de aprobación formal); ETAPA 10 tiene hoja de ruta preparada y código de negocio aún sin iniciar.

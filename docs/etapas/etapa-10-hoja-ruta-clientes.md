@@ -1,0 +1,53 @@
+# ETAPA 10 — Hoja de ruta de implementación Flutter · App de clientes
+
+**Proyecto:** Chifa ASIA V2 · **Rama:** `develop` · **Destino exclusivo:** `apps/customer_app` (Android) · **Estado:** PLAN DOCUMENTAL; bloques 10.00–10.10 pendientes de implementación y validación.
+**Plan maestro:** [índice de etapas](README.md) · **Contratos y reglas:** [contexto ETAPA 10](etapa-10.md) · **Punto de reanudación:** [checkpoint de clientes](etapa-10-progreso-clientes.md).
+**Diseño de referencia:** [Figma Chifa ASIA — clientes, tema claro/oscuro](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1); el enlace suministrado a la [tarjeta «Sin registro»](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=179-31) es solo un nodo de la pantalla 03, no el flujo completo.
+
+> **Límite de autorización:** existe diseño Figma de clientes (20 pantallas por tema), aún sin aprobación formal registrada para toda la ETAPA 09. Backend 08.00–08.10 auditado técnicamente; aprobación formal de ETAPA 08 pendiente en documentos oficiales. Este plan **no** aprueba etapas ni autoriza implementar por sí mismo. Al recibir autorización, comenzar por 10.00 y avanzar bloque a bloque con revisión del usuario. `staff_app`, panel web y las interfaces de personal quedan fuera de esta hoja de ruta.
+
+## 1. Principios de implementación
+
+1. **Fuente funcional:** ETAPAS 01–03 (40 RF/48 CA globales), contratos reales OpenAPI del backend `develop` y [contexto de cliente](etapa-10.md). **Fuente visual:** Figma existente; no alterar el negocio para igualar un mockup. Revalidar `GET /openapi.json` y esquemas **antes de programar cada endpoint**. El backend determina permisos, precios, stock, anticipo, transiciones y saldo.
+2. **Stack existente:** Flutter/Dart, app `apps/customer_app`; reutilizar `ApiEnvironment` y arranque de ETAPA 07. Arquitectura por funcionalidad `lib/features/mXX_<modulo>/<caso_de_uso>/` con presentación, aplicación, adaptador REST y modelos necesarios; el dominio no depende de widgets/HTTP. Estado unidireccional, navegación declarativa y componentes reutilizables. Activar exclusivamente `.agents/skills/restaurant-flutter-slice/SKILL.md` cuando el bloque de implementación esté autorizado.
+3. **Identidad visual:** reproducir Figma en **claro y oscuro**, superficies crema/blanco/carbón, rojo/dorado, tipografía, tarjetas con Lucide y barra inferior Inicio/Menú/Pedidos/Cuenta. Componentes compartidos **dentro de `customer_app`**; no crear paquetes globales sin reutilización real. Respetar `SafeArea`, teclado, escalado de texto y estados responsive razonables.
+4. **Sin funciones ficticias:** no introducir recuperación de contraseña, edición de perfil, checkout real, comprobantes, notificaciones externas, GPS, chat, repartidores o reservas sin RF/CA y endpoint autorizado. No colocar acciones de Mozo/Cocina/Caja/Admin en cliente.
+5. **Red y errores:** tokens/sesiones según contratos M01; manejar 401/403/404/409/422, desconexión y expiración. Reintentos de **la misma solicitud** reutilizan su `Idempotency-Key`; nuevas solicitudes requieren otra. Nunca afirmar éxito antes de respuesta real. No registrar credenciales ni tokens en logs.
+6. **Evidencia obligatoria:** por bloque registrar RF/CA específicos, pantallas, endpoints reales, archivos, pruebas ejecutadas, fallos y siguiente paso en el [checkpoint](etapa-10-progreso-clientes.md). No confundir «dibujado» con «conectado» ni auditoría backend con prueba Flutter.
+
+## 2. Orden incremental y puertas de salida
+
+| Bloque | Trabajo en `customer_app` | Pantallas Figma | Contratos / evidencia mínima |
+|---|---|---|---|
+| **10.00 — Línea base** | Verificar `develop`, árbol limpio, Flutter/Android, arranque real, API base `--dart-define`, conexión de red y OpenAPI. **No reinstalar ni recrear apps.** | Inventario 01–20 (ambos temas) | `flutter doctor`, `flutter analyze`, `flutter test`; registrar limitaciones reales. |
+| **10.01 — UI Foundation** | Tema claro/oscuro, tokens, tipografía, Lucide, tarjetas, botones, inputs, bottom nav, `SafeArea`, rutas y estados loading/empty/error. Componentes reutilizables dentro de app. | 08, 09, 15, 19, 20 + componentes comunes | Golden/widget tests donde proceda; verificar similitud con Figma y que cambiar de tema no altere datos. |
+| **10.02 — Acceso M01** | Registro con `display_name/email/password`; login por **correo**; sesión invitado; refresh/logout y protección de rutas según sesión. | 01 Login, 02 Registro, 03 Invitado, 19 Cuenta | `POST /auth/register`, `/auth/login`, `/auth/guest`, `/auth/refresh`, `/auth/logout`; 401 y sesión caducada; pruebas de formularios y REST. |
+| **10.03 — Catálogo M02** | Inicio, categorías, productos, precios y disponibilidad; estado vacío y producto inhabilitado; sin datos inventados. | 08 Inicio, 09 Catálogo, 10 Producto | `GET /catalog/categories`, `GET /catalog/categories/{category_id}/products`; lectura real + widget tests. |
+| **10.04 — Carrito** | Selección de producto, cantidades, subtotal visual y edición local; bloquear no disponibles. **Importes definitivos solo del backend al crear pedido.** | 10 Producto, 11 Carrito | Estado local testeado; no API de carrito inexistente ni stock reservado anticipadamente. |
+| **10.05 — Modalidad y mesas** | Elegir LOCAL/PICKUP/DELIVERY; mesa seleccionada (sin autoaprobar), datos de recojo/delivery solo según esquema API vigente. | 04 Modalidad, 05 Mesa, 06 Recojo, 07 Delivery | `GET /tables` y campos autorizados de `POST /orders`; 422/409 y mesa ocupada; sin inventar zonas/tarifas. |
+| **10.06 — Envío M04** | Revisión y envío de solicitud cliente canal APP, una `Idempotency-Key` por intento lógico, estado REQUESTED y manejo de rechazo. | 12 Revisar, 13 Pendiente, 18 Excepciones | `POST /orders` con headers/DTO reales, `GET /orders/{id}`; reintento sin duplicar; pruebas request/errores. |
+| **10.07 — Anticipo M06 (solo lectura)** | Visualizar anticipo 50 % y su verificación administrativa en pickup/delivery; sin formulario de cobro real ni aprobación desde cliente. | 14 Anticipo, 17 Estado de pago | `GET /orders/{id}/advance` y `/payments`; mostrar valores del servidor y distinguir pendiente/verificado. |
+| **10.08 — Historial y seguimiento** | Listar propios pedidos, detalle, estados de cocina/entrega/pago y seguimiento compuesto sin inventar estados. | 15 Historial, 16 Seguimiento, 17 Pago | `GET /orders`, `GET /orders/{id}`, `GET /orders/{id}/tracking`; acceso a pedidos ajenos 404; empty/error. |
+| **10.09 — Resiliencia y UX** | Pulir excepciones, accesibilidad, navegación de retorno, conservación de sesión y configuración visual sin inventar API. | 18 Excepciones, 19 Cuenta, 20 Estados de UI | Widgets para red, expiración, no autorizado, stock agotado, temas, tamaño de texto y accesibilidad. |
+| **10.10 — Validación integral de cliente** | Recorridos Android completos de las tres modalidades, sesiones registrado/invitado, permisos, regresión, contraste con Figma y documentación de entrega. | 01–20, claro y oscuro | `flutter analyze`, `flutter test`, `flutter build apk --debug`, pruebas en emulador/teléfono disponibles; informe real de cobertura y pendientes. |
+
+**Importante:** `POST /orders` crea `REQUESTED`; aprobación y `ConfirmOrder` son del personal/backend. En pickup/delivery, el anticipo simulado **50 %** lo verifica Administrador antes de cocina; en local el Mozo/Admin verifica la mesa. Solo una comanda por confirmado, descontar stock al confirmar. Cliente **consulta** seguimiento/pagos: `SERVED`, `PICKED_UP`, `DELIVERED` y `CLOSED` los registra el personal. Mostrar `stage` del backend, no reconstruir un estado paralelo.
+
+## 3. Contrato de entrega de cada bloque
+
+Un bloque se considera **listo para revisión**, no aprobado automáticamente, cuando: (a) identifica RF/CA y pantallas afectadas; (b) preserva arquitectura y contratos reales; (c) implementa happy path + estados de carga/vacío/error correspondientes; (d) presenta pruebas ejecutadas y resultados reales, incluyendo fallos; (e) actualiza solo el [checkpoint](etapa-10-progreso-clientes.md) con próximo bloque. La aprobación expresa sigue siendo del usuario.
+
+**No realizar commits/push/merge en la futura implementación salvo orden explícita.** La publicación de este documento en GitHub constituye únicamente documentación autorizada.
+
+## 4. Protocolo para ahorrar tokens de Codex / AGY
+
+- **Entrada mínima por sesión:** `AGENTS.md` → este plan **solo la fila del bloque activo** → [checkpoint](etapa-10-progreso-clientes.md) → Skill `restaurant-flutter-slice` → RF/CA y endpoint exactos. `etapa-10.md` solo para aclarar contrato/regla; Figma solo la pantalla activa. No abrir a la vez las 20 pantallas ni los 40 RF.
+- **Un escritor por bloque:** Codex implementa y AGY revisa secuencialmente; no trabajan sobre los mismos archivos simultáneamente. Antes: `git status --short --branch`; después: `flutter analyze`, `flutter test` y la prueba de integración aplicable.
+- **Checkpoint corto (máx. ~25 líneas de estado vivo):** bloque actual + estado, evidencias reales, archivos tocados, deuda/bloqueos, próxima acción única. No pegar logs extensos, diffs completos ni copiar OpenAPI a `docs/`.
+- **Parada segura:** si falta autorización, una regla de negocio, una pantalla o un campo del esquema, documentar la incertidumbre y detener **solo** ese caso. No adivinar. Al terminar cada bloque, solicitar revisión y **no adelantar el siguiente**.
+
+## 5. Pendientes externos y exclusiones
+
+- **Aprobaciones formales:** el usuario decide el cierre de ETAPA 08, el diseño de clientes en ETAPA 09 y el inicio de código de ETAPA 10. Figma **sí existe y fue revisado**, pero una calificación visual previa no equivale a aprobación formal.
+- **Pendientes previos:** RN-20/RN-21 (ratificación de texto), RNF-08 (umbral de rendimiento), comprobantes sin RF/CA. No asignarles valores ni agregar pantallas funcionales por intuición.
+- **Futuro:** `staff_app` (Mozo, Caja, Cocina, Administración y Flutter Web) se planificará por separado tras tu instrucción. ETAPA 11 certificará la integración global; ETAPA 10.10 solo valida `customer_app`.
