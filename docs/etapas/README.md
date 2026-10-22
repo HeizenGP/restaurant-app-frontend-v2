@@ -3,7 +3,7 @@
 **Proyecto:** Chifa ASIA — sistema académico para un solo restaurante.  
 **Actualización:** 2026-10-22. **Rama de trabajo:** develop.
 
-**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPAS 09–11 **por iniciar**. Este repositorio prepara solo el contexto documental de ETAPA 10 para `customer_app`. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
+**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPA 09 con diseño de clientes existente en Figma y pendiente de aprobación formal; ETAPA 10 con bloques **10.00–10.03 implementados y verificados en `customer_app`, pendientes de aprobación expresa**; ETAPA 11 por iniciar. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
 
 ## 1. Propósito y reglas del plan
 
@@ -34,8 +34,8 @@ Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y a
 | **06** | Diseño de base de datos | **Aprobada (2026-10-21)** | [Modelo PostgreSQL y trazabilidad](etapa-06.md), [DER editable](diagramas/etapa-06/etapa-06-der.drawio) |
 | **07** | Configuración técnica | **Aprobada por el usuario (2026-10-21)** | [Implementación y evidencia](etapa-07.md), infraestructura y migraciones iniciales |
 | **08** | Desarrollo del backend | **08.00–08.10 verificados técnicamente; pendiente de aprobación final** | [Plan](../../../restaurant-app-backend-v2/docs/etapas/etapa-08.md), [bitácora](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-progreso.md) e [informe](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-informe-auditoria.md) en backend |
-| **09** | Diseño UX/UI en Figma | Por iniciar | Interfaces y prototipos aprobados |
-| **10** | Desarrollo del frontend | Por iniciar; [contexto documental de `customer_app`](etapa-10.md) preparado | Apps Flutter conectadas al backend |
+| **09** | Diseño UX/UI en Figma | Diseño de clientes existente; pendiente de aprobación formal | Interfaces y prototipos aprobados |
+| **10** | Desarrollo del frontend | 10.00–10.03 implementados y verificados en `customer_app`; pendientes de aprobación expresa | [Contexto](etapa-10.md), [hoja de ruta](etapa-10-hoja-ruta-clientes.md) y [checkpoint](etapa-10-progreso-clientes.md) |
 | **11** | Integración, pruebas y entrega | Por iniciar | Validación extremo a extremo y demostración académica |
 
 La elaboración de una etapa no equivale a su aprobación, ni una casilla de documentación a una prueba técnica ejecutada. **No iniciar trabajo dependiente de decisiones pendientes sin resolver su impacto primero.**
@@ -167,7 +167,7 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 
 **Objetivo:** transformar el diseño aprobado en las dos aplicaciones Flutter conectadas al backend.
 
-**Preparación actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). El primer trabajo de implementación será **exclusivamente la aplicación de clientes**, una vez aprobadas la ETAPA 08 y las pantallas/prototipos de Figma de ETAPA 09; esta preparación no inicia el desarrollo ni autoriza adelantar `staff_app`.
+**Ejecución actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). Los bloques 10.00–10.03 están implementados y verificados, pendientes de aprobación expresa del usuario. El alcance autorizado continúa siendo **exclusivamente la aplicación de clientes**; este avance no aprueba por inferencia las ETAPAS 08–10 ni autoriza adelantar `staff_app`.
 
 - Implementar **customer_app** y **staff_app**, reutilizando paquetes justificados y respetando los slices definidos.
 - Construir pantallas, estado, navegación por permisos, formularios, tratamiento de errores y persistencia segura de sesión.
@@ -201,4 +201,4 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 6. **Validación honesta:** distinguir documento revisado, archivo verificado, compilación, ejecución de pruebas y aprobación; nunca marcar como hecha una comprobación no ejecutada.
 7. **Control de cambios:** cambios de alcance, roles, políticas o simulaciones regresan a los documentos afectados y actualizan trazabilidad. No introducir funcionalidades extra como solución a una etapa técnica.
 
-**Próximo hito:** revisión y aprobación final expresa de la ETAPA 08 por el usuario; después, ETAPA 09/Figma. El [contexto de `customer_app`](etapa-10.md) queda preparado para planificar ETAPA 10, sin comenzar Flutter ni suponer aprobado el diseño visual.
+**Próximo hito de `customer_app`:** revisión y aprobación expresa de 10.03; mantener 10.04 y posteriores pendientes hasta nueva autorización. Siguen pendientes las aprobaciones formales de las ETAPAS 08, 09 y de los bloques implementados de ETAPA 10; ninguna verificación técnica las sustituye.

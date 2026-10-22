@@ -8,6 +8,9 @@ import '../features/m01_access/shared/application/auth_contracts.dart';
 import '../features/m01_access/shared/application/auth_session_controller.dart';
 import '../features/m01_access/shared/infrastructure/auth_rest_repository.dart';
 import '../features/m01_access/shared/infrastructure/flutter_secure_session_store.dart';
+import '../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
+import '../features/m02_catalog/shared/application/catalog_contracts.dart';
+import '../features/m02_catalog/shared/infrastructure/catalog_rest_repository.dart';
 import 'navigation/customer_router.dart';
 import 'theme/theme_mode_controller.dart';
 
@@ -17,6 +20,7 @@ class CustomerApp extends StatefulWidget {
     this.initialThemeMode = ThemeMode.light,
     this.authRepository,
     this.sessionStore,
+    this.catalogRepository,
     super.key,
   });
 
@@ -24,6 +28,7 @@ class CustomerApp extends StatefulWidget {
   final ThemeMode initialThemeMode;
   final AuthRepository? authRepository;
   final AuthSessionStore? sessionStore;
+  final CatalogRepository? catalogRepository;
 
   @override
   State<CustomerApp> createState() => _CustomerAppState();
@@ -32,6 +37,8 @@ class CustomerApp extends StatefulWidget {
 class _CustomerAppState extends State<CustomerApp> {
   late final ThemeModeController _themeModeController;
   late final AuthSessionController _authController;
+  late final CatalogController _catalogController;
+  late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
 
@@ -41,24 +48,40 @@ class _CustomerAppState extends State<CustomerApp> {
     _themeModeController = ThemeModeController(
       initialMode: widget.initialThemeMode,
     );
-    final AuthRepository repository;
-    if (widget.authRepository case final AuthRepository injected) {
-      repository = injected;
+    final http.Client? sharedClient;
+    if (widget.authRepository == null || widget.catalogRepository == null) {
+      sharedClient = http.Client();
+      _ownedHttpClient = sharedClient;
     } else {
-      final http.Client client = http.Client();
-      _ownedHttpClient = client;
-      repository = AuthRestRepository(
+      sharedClient = null;
+    }
+
+    final AuthRepository authRepository;
+    if (widget.authRepository case final AuthRepository injected) {
+      authRepository = injected;
+    } else {
+      authRepository = AuthRestRepository(
         baseUri: widget.environment.baseUri,
-        client: client,
+        client: sharedClient!,
       );
     }
     _authController = AuthSessionController(
-      repository: repository,
+      repository: authRepository,
       sessionStore: widget.sessionStore ?? FlutterSecureSessionStore(),
     );
+
+    _catalogRepository =
+        widget.catalogRepository ??
+        CatalogRestRepository(
+          baseUri: widget.environment.baseUri,
+          client: sharedClient!,
+        );
+    _catalogController = CatalogController(repository: _catalogRepository);
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
+      catalogController: _catalogController,
+      catalogRepository: _catalogRepository,
     );
     _authController.restore();
   }
@@ -66,6 +89,7 @@ class _CustomerAppState extends State<CustomerApp> {
   @override
   void dispose() {
     _router.dispose();
+    _catalogController.dispose();
     _authController.dispose();
     _themeModeController.dispose();
     _ownedHttpClient?.close();

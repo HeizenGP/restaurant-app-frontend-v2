@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/auth_fakes.dart';
+import '../../helpers/catalog_fakes.dart';
 
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
@@ -326,6 +327,7 @@ CustomerApp _app({
     environment: environment,
     authRepository: repository,
     sessionStore: store ?? MemoryAuthSessionStore(),
+    catalogRepository: FakeCatalogRepository(),
   );
 }
 

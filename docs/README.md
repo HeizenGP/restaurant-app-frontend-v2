@@ -1,6 +1,6 @@
 # Documentación — Restaurant App V2
 
-**ETAPAS 00–07 aprobadas por el usuario; ETAPA 08 (backend) con 08.00–08.10 verificados técnicamente y pendiente de aprobación final. ETAPA 09 con diseño de clientes existente en Figma (pendiente de aprobación formal); ETAPAS 10–11 sin implementación.** La cobertura backend de 40 RF / 48 CA no certifica aún pantallas Flutter ni decide pendientes de negocio.
+**ETAPAS 00–07 aprobadas por el usuario; ETAPA 08 (backend) con 08.00–08.10 verificados técnicamente y pendiente de aprobación final. ETAPA 09 con diseño de clientes existente en Figma (pendiente de aprobación formal); ETAPA 10 con 10.00–10.03 implementados y verificados en `customer_app`, pendientes de aprobación expresa; ETAPA 11 sin implementación.** La cobertura backend de 40 RF / 48 CA no certifica por sí sola pantallas Flutter ni decide pendientes de negocio.
 
 - [Plan maestro de etapas 00–11](etapas/README.md)
 - [ETAPA 00 — aprobada](etapas/etapa-00.md)
@@ -14,7 +14,7 @@
 - [ETAPA 05 — arquitectura de software](etapas/etapa-05.md)
 - [ETAPA 06 — diseño de base de datos](etapas/etapa-06.md)
 - [ETAPA 07 — configuración técnica aprobada](etapas/etapa-07.md)
-- [ETAPA 10 — contexto preparatorio de `customer_app`](etapas/etapa-10.md)
+- [ETAPA 10 — contexto y ejecución de `customer_app`](etapas/etapa-10.md)
 - [ETAPA 10 — hoja de ruta por bloques de la app de clientes](etapas/etapa-10-hoja-ruta-clientes.md)
 - [ETAPA 10 — checkpoint de ejecución para ahorrar tokens](etapas/etapa-10-progreso-clientes.md)
 - [Guía operativa de Codex y AGY](agentes/README.md)

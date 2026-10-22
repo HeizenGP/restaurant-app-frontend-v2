@@ -7,6 +7,11 @@ import '../../features/m01_access/manage_session/presentation/account_page.dart'
 import '../../features/m01_access/register_account/presentation/registration_page.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
 import '../../features/m01_access/sign_in/presentation/sign_in_page.dart';
+import '../../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
+import '../../features/m02_catalog/browse_catalog/presentation/catalog_home_page.dart';
+import '../../features/m02_catalog/browse_catalog/presentation/catalog_page.dart';
+import '../../features/m02_catalog/shared/application/catalog_contracts.dart';
+import '../../features/m02_catalog/view_product/presentation/product_detail_page.dart';
 import '../../features/ui_foundation/presentation/foundation_pages.dart';
 import '../theme/theme_mode_controller.dart';
 import 'customer_shell.dart';
@@ -20,11 +25,14 @@ abstract final class CustomerRoutes {
   static const String registration = 'registration';
   static const String guest = 'guest';
   static const String splash = 'splash';
+  static const String productDetail = 'product-detail';
 }
 
 GoRouter createCustomerRouter({
   required ThemeModeController themeModeController,
   required AuthSessionController authController,
+  required CatalogController catalogController,
+  required CatalogRepository catalogRepository,
 }) {
   return GoRouter(
     initialLocation: '/splash',
@@ -87,6 +95,20 @@ GoRouter createCustomerRouter({
           );
         },
       ),
+      GoRoute(
+        path: '/menu/categoria/:categoryId/producto/:productId',
+        name: CustomerRoutes.productDetail,
+        builder: (BuildContext context, GoRouterState state) {
+          return Scaffold(
+            body: ProductDetailPage(
+              repository: catalogRepository,
+              categoryId: state.pathParameters['categoryId']!,
+              productId: state.pathParameters['productId']!,
+              themeModeController: themeModeController,
+            ),
+          );
+        },
+      ),
       StatefulShellRoute.indexedStack(
         builder:
             (
@@ -103,8 +125,11 @@ GoRouter createCustomerRouter({
                 path: '/',
                 name: CustomerRoutes.home,
                 builder: (BuildContext context, GoRouterState state) {
-                  return FoundationHomePage(
+                  return CatalogHomePage(
+                    catalogController: catalogController,
                     themeModeController: themeModeController,
+                    onOpenCatalog: () => context.go('/menu'),
+                    onCategorySelected: (_) => context.go('/menu'),
                   );
                 },
               ),
@@ -116,8 +141,18 @@ GoRouter createCustomerRouter({
                 path: '/menu',
                 name: CustomerRoutes.menu,
                 builder: (BuildContext context, GoRouterState state) {
-                  return FoundationMenuPage(
+                  return CatalogPage(
+                    catalogController: catalogController,
                     themeModeController: themeModeController,
+                    onProductSelected: (category, product) {
+                      context.pushNamed(
+                        CustomerRoutes.productDetail,
+                        pathParameters: <String, String>{
+                          'categoryId': category.id,
+                          'productId': product.id,
+                        },
+                      );
+                    },
                   );
                 },
               ),

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/auth_fakes.dart';
+import '../helpers/catalog_fakes.dart';
 
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
@@ -111,6 +112,7 @@ CustomerApp _authenticatedApp(ApiEnvironment environment) {
     environment: environment,
     authRepository: FakeAuthRepository(),
     sessionStore: MemoryAuthSessionStore(session: guestSession()),
+    catalogRepository: FakeCatalogRepository(),
   );
 }
 
