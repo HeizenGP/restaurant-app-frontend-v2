@@ -11,7 +11,7 @@ Activar para una **funcionalidad Flutter** o su revisión técnica cuando la eta
 
 ## Contexto mínimo
 
-Lee `AGENTS.md`, `docs/etapas/README.md` y las secciones Flutter/REST pertinentes de `docs/etapas/etapa-05.md`. Abre únicamente los RF/CA del módulo afectado. Los CU de ETAPA 04 están aprobados documentalmente; sus decisiones de permisos pendientes siguen abiertas.
+Lee `AGENTS.md`, `docs/etapas/README.md`, el contexto de `docs/etapas/etapa-10.md` y las secciones Flutter/REST pertinentes de `docs/etapas/etapa-05.md`. Abre únicamente los RF/CA del módulo afectado. Los CU de ETAPA 04 están aprobados documentalmente; consulta las decisiones M07 aprobadas en 08.09 sin atribuirlas a la aprobación original de esos diagramas.
 
 ## Procedimiento
 
@@ -21,7 +21,7 @@ Lee `AGENTS.md`, `docs/etapas/README.md` y las secciones Flutter/REST pertinente
 4. Modela estado unidireccional e inmutable y navegación declarativa por sesión/capacidad. Ocultar UI mejora experiencia, pero nunca sustituye autorización del servidor.
 5. Trata el backend como fuente de verdad. Muestra éxito de una mutación solo tras confirmación; reutiliza `Idempotency-Key` en reintentos y traduce los códigos de error uniformes.
 6. No crees `packages/` ni paquetes compartidos desde el inicio. Extrae un paquete solo cuando `customer_app` y `staff_app` reutilicen código real; evita duplicar las reglas del backend.
-7. Conserva pendientes: no asignes actores de recojo/delivery/cierre ni agregues pasarelas, mapas, SUNAT o logística.
+7. Respeta los permisos M07 ya aprobados: Mozo registra servido; Administrador registra recojo, entrega y cierre; Super Administrador tiene acceso total. Son operaciones de `staff_app`, no de `customer_app`. Conserva pendientes RN-20/RN-21 (redacción), RNF-08 (umbral) y comprobantes sin RF/CA; no agregues pasarelas, mapas, SUNAT ni logística.
 8. Verifica controlador/caso de uso, mapeo REST, guardas y estados de error pertinentes. Reporta RF/RNF, aplicación elegida, archivos y pruebas reales.
 
 No inicialices Flutter ni elijas/instales paquetes si la etapa vigente no lo autoriza.

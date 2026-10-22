@@ -1,15 +1,15 @@
 # Plan maestro de desarrollo — Restaurant App V2
 
 **Proyecto:** Chifa ASIA — sistema académico para un solo restaurante.  
-**Actualización:** 2026-10-21. **Rama de trabajo:** develop.
+**Actualización:** 2026-10-22. **Rama de trabajo:** develop.
 
-**Estado:** ETAPAS 00–06 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPA 06: aprobación documental el 2026-10-21); ETAPA 07 **implementada y pendiente de revisión/aprobación**; ETAPAS 08–11 **por desarrollar**. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
+**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPAS 09–11 **por iniciar**. Este repositorio prepara solo el contexto documental de ETAPA 10 para `customer_app`. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
 
 ## 1. Propósito y reglas del plan
 
 Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y administración, conservando las decisiones aprobadas de negocio. Este archivo es la **hoja de ruta ejecutiva**: el detalle y la evidencia pertenecen al documento de cada etapa, no se duplican aquí.
 
-**Línea base:** seis actores (Cliente, Mozo, Cajero, Administrador, Personal de cocina y Super Administrador), roles acumulativos, modalidades **consumo en local, recojo y delivery**, siete módulos **M01–M07**, **40 RF** y **11 RNF** documentados en ETAPA 03.
+**Línea base:** seis actores (Cliente, Mozo, Cajero, Administrador, Personal de cocina y Super Administrador), roles acumulativos, modalidades **consumo en local, recojo y delivery**, siete módulos **M01–M07**, **40 RF, 48 CA** y **11 RNF** documentados en ETAPA 03.
 
 **Reglas transversales que no deben cambiarse por una decisión técnica:**
 
@@ -19,7 +19,7 @@ Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y a
 - **Stock:** comprobar antes de confirmar y descontar una sola vez al confirmar; las solicitudes pendientes no descuentan existencias.
 - **Cocina y cierre:** solo pedidos confirmados generan comandas; cocina registra preparación/listo, y la atención/cobro se registran según modalidad.
 - **Alcance académico:** pago/anticipo manual o simulado, sin pasarela bancaria; llamada/WhatsApp sin integración automática; delivery sin repartidores, rutas ni GPS. La facturación SUNAT no se incorpora sin RF y aprobación explícitos. No asumir nuevas funciones por analogía con versiones antiguas.
-- **Pendientes explícitos:** RN-20/RN-21, métrica RNF-08, responsables de operaciones M07 y exclusiones propuestas se conservan identificados hasta una decisión expresa.
+- **Pendientes explícitos:** ratificación de redacción de RN-20/RN-21, métrica RNF-08, comprobantes sin RF/CA y exclusiones propuestas. Los permisos operativos M07 **sí** fueron aprobados para 08.09: Mozo registra servido; Administrador registra recojo, entrega y cierre; Super Administrador conserva acceso total. Esto no otorga al Administrador permiso de Cajero.
 
 ## 2. Estado y secuencia
 
@@ -32,10 +32,10 @@ Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y a
 | **04** | Modelado del sistema | **Aprobada por el usuario (2026-10-20), con verificaciones técnicas pendientes** | [Casos de uso UML](etapa-04.md) y [8 diagramas CU](diagramas/etapa-04/) |
 | **05** | Arquitectura de software | **Aprobada (2026-10-20)** | [Arquitectura y tecnologías](etapa-05.md) y Skills técnicas |
 | **06** | Diseño de base de datos | **Aprobada (2026-10-21)** | [Modelo PostgreSQL y trazabilidad](etapa-06.md), [DER editable](diagramas/etapa-06/etapa-06-der.drawio) |
-| **07** | Configuración técnica | **Implementada; pendiente de revisión/aprobación** | [Implementación y evidencia](etapa-07.md), infraestructura y migraciones iniciales |
-| **08** | Desarrollo del backend | Por iniciar | API REST y pruebas de los siete módulos |
+| **07** | Configuración técnica | **Aprobada por el usuario (2026-10-21)** | [Implementación y evidencia](etapa-07.md), infraestructura y migraciones iniciales |
+| **08** | Desarrollo del backend | **08.00–08.10 verificados técnicamente; pendiente de aprobación final** | [Plan](../../../restaurant-app-backend-v2/docs/etapas/etapa-08.md), [bitácora](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-progreso.md) e [informe](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-informe-auditoria.md) en backend |
 | **09** | Diseño UX/UI en Figma | Por iniciar | Interfaces y prototipos aprobados |
-| **10** | Desarrollo del frontend | Por iniciar | Apps Flutter conectadas al backend |
+| **10** | Desarrollo del frontend | Por iniciar; [contexto documental de `customer_app`](etapa-10.md) preparado | Apps Flutter conectadas al backend |
 | **11** | Integración, pruebas y entrega | Por iniciar | Validación extremo a extremo y demostración académica |
 
 La elaboración de una etapa no equivale a su aprobación, ni una casilla de documentación a una prueba técnica ejecutada. **No iniciar trabajo dependiente de decisiones pendientes sin resolver su impacto primero.**
@@ -76,7 +76,7 @@ La elaboración de una etapa no equivale a su aprobación, ni una casilla de doc
 
 **Objetivo:** convertir el alcance y los flujos en una especificación verificable **por módulo**, no organizada artificialmente por pantallas.
 
-- Mantener **40 RF**, criterios de aceptación Dado–Cuando–Entonces, **11 RNF**, RN y prioridades MoSCoW.
+- Mantener **40 RF, 48 CA**, criterios de aceptación Dado–Cuando–Entonces, **11 RNF**, RN y prioridades MoSCoW.
 - Definir permisos, estados, condiciones y resultados observables; incluir casos negativos de stock, autorizaciones, anticipo y cierre.
 - Conservar identificadores estables y pendientes expresos sin inventar valores, integraciones ni nuevas reglas.
 
@@ -91,7 +91,7 @@ La elaboración de una etapa no equivale a su aprobación, ni una casilla de doc
 - Revisar asociaciones de roles y decisiones pendientes; **compilar y renderizar** realmente los diagramas.
 
 **Entregable:** [modelo y matriz de trazabilidad](etapa-04.md), [diagramas](diagramas/etapa-04/).  
-**Aprobación expresa:** registrada el 2026-10-20 para los 8 CU. **Verificaciones pendientes:** compilación/renderización de PlantUML, cotejo de la versión visual elegida de CU-00 y ratificación de responsables de M07; estos pendientes no implican su aprobación tácita.
+**Aprobación expresa:** registrada el 2026-10-20 para los 8 CU. **Verificaciones pendientes:** compilación/renderización de PlantUML y cotejo de la versión visual elegida de CU-00. Los responsables de M07, abiertos entonces, quedaron decididos expresamente para 08.09; esto no cambia retroactivamente la aprobación de los diagramas.
 
 ### ETAPA 05 — Arquitectura de software · APROBADA (2026-10-20)
 
@@ -119,7 +119,7 @@ La elaboración de una etapa no equivale a su aprobación, ni una casilla de doc
 **Entregable aprobado:** [diseño PostgreSQL y matriz RF 40/40](etapa-06.md), [DER editable](diagramas/etapa-06/etapa-06-der.drawio) y [vista SVG](diagramas/etapa-06/etapa-06-der.svg).  
 **Aprobación expresa:** registrada el 2026-10-21 para el diseño documental de 14 tablas; pendientes funcionales documentados se mantienen sin ratificación. Edición visual en diagrams.net y pruebas con PostgreSQL no ejecutadas.
 
-### ETAPA 07 — Configuración técnica · IMPLEMENTADA / PENDIENTE DE APROBACIÓN
+### ETAPA 07 — Configuración técnica · APROBADA (2026-10-21)
 
 **Objetivo:** convertir la arquitectura aprobada en proyectos ejecutables con infraestructura mínima reproducible.
 
@@ -134,9 +134,9 @@ La elaboración de una etapa no equivale a su aprobación, ni una casilla de doc
 **Verificación:** PostgreSQL 17.11 en Docker Compose con healthcheck sano,
 upgrade/downgrade Alembic hasta `20261021_0002`, API saludable, 26 pruebas backend,
 guardas destructivas verificadas, análisis/pruebas Flutter y builds Android/Web
-correctos. La aprobación de la etapa sigue siendo exclusiva del usuario.
+correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 07](etapa-07.md).
 
-### ETAPA 08 — Desarrollo del backend
+### ETAPA 08 — Desarrollo del backend · VERIFICADA TÉCNICAMENTE / PENDIENTE DE APROBACIÓN FINAL
 
 **Objetivo:** implementar los **40 RF** de M01–M07 como casos de uso y contratos REST, respetando el comportamiento aprobado.
 
@@ -149,8 +149,7 @@ correctos. La aprobación de la etapa sigue siendo exclusiva del usuario.
   desde una tercera transacción.
 - Mantener correspondencia **RF/CA → caso de uso → endpoint → prueba**.
 
-**Entregable:** API documentada y funcional, migraciones incrementales pertinentes, matriz de cobertura y resultados verificables.  
-**Cierre:** todos los RF del alcance implementados o señalados como pendientes aprobados; permisos, errores y flujos críticos pasan pruebas reproducibles.
+**Entregable técnico en backend `develop`:** API documentada, migraciones pertinentes, trazabilidad **40/40 RF y 48/48 CA como contratos backend** y pruebas reproducibles. El [informe de auditoría](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-informe-auditoria.md) registra 148 pruebas aprobadas con PostgreSQL aislado, Ruff, mypy, Alembic y OpenAPI. Esto **no** valida pantallas Flutter, despliegue público ni constituye aprobación final de la etapa. El plan, la bitácora y la auditoría permanecen en backend como fuente de verdad.
 
 ### ETAPA 09 — Diseño UX/UI en Figma
 
@@ -167,6 +166,8 @@ correctos. La aprobación de la etapa sigue siendo exclusiva del usuario.
 ### ETAPA 10 — Desarrollo del frontend
 
 **Objetivo:** transformar el diseño aprobado en las dos aplicaciones Flutter conectadas al backend.
+
+**Preparación actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). El primer trabajo de implementación será **exclusivamente la aplicación de clientes**, una vez aprobadas la ETAPA 08 y las pantallas/prototipos de Figma de ETAPA 09; esta preparación no inicia el desarrollo ni autoriza adelantar `staff_app`.
 
 - Implementar **customer_app** y **staff_app**, reutilizando paquetes justificados y respetando los slices definidos.
 - Construir pantallas, estado, navegación por permisos, formularios, tratamiento de errores y persistencia segura de sesión.
@@ -195,9 +196,9 @@ correctos. La aprobación de la etapa sigue siendo exclusiva del usuario.
 1. **Aprobación:** el usuario aprueba cada etapa; avanzar para redactar un borrador no supone aprobación. Antes de implementar decisiones de ETAPAS 04–05, revisar su estado y los pendientes que afectan el trabajo.
 2. **Trazabilidad:** conservar la cadena **RN/RF/CA → UML → arquitectura → BD → API → interfaz → prueba**, con referencias específicas y sin cambiar identificadores por estética.
 3. **Sin adelantar etapas:** ETAPA 06 diseña; ETAPA 07 inicializa y migra; ETAPA 08 implementa backend; ETAPA 09 diseña UI; ETAPA 10 implementa Flutter; ETAPA 11 integra y certifica el recorrido académico.
-4. **Documentación:** usar **docs/** de ambos repositorios como fuente compartida y mantener iguales los documentos comunes. Cada etapa añade su documento y artefactos solo cuando aportan valor; conservar los archivos previamente aprobados.
+4. **Documentación:** mantener iguales los documentos de línea base compartidos. ETAPA 08 conserva sus documentos exclusivos en backend; el contexto preparatorio de ETAPA 10 pertenece al frontend y enlaza la fuente, sin copiar la bitácora. Cada etapa añade artefactos solo cuando aportan valor; conservar los archivos previamente aprobados.
 5. **Agentes/tokens:** cargar **AGENTS.md + este índice + documento de la etapa**, y únicamente Skills, RF/diagramas o código pertinentes. Evitar lecturas completas repetidas, Skills duplicadas, MCP innecesarios y logs extensos.
 6. **Validación honesta:** distinguir documento revisado, archivo verificado, compilación, ejecución de pruebas y aprobación; nunca marcar como hecha una comprobación no ejecutada.
 7. **Control de cambios:** cambios de alcance, roles, políticas o simulaciones regresan a los documentos afectados y actualizan trazabilidad. No introducir funcionalidades extra como solución a una etapa técnica.
 
-**Próximo hito:** revisar y, si corresponde, aprobar expresamente la [ETAPA 07 — Configuración técnica](etapa-07.md). No iniciar ETAPA 08 antes de esa decisión.
+**Próximo hito:** revisión y aprobación final expresa de la ETAPA 08 por el usuario; después, ETAPA 09/Figma. El [contexto de `customer_app`](etapa-10.md) queda preparado para planificar ETAPA 10, sin comenzar Flutter ni suponer aprobado el diseño visual.

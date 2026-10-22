@@ -1,6 +1,6 @@
 # Guía operativa de agentes — Restaurant App V2
 
-**Aplica a ambos repositorios en `develop`.** `AGENTS.md` conserva reglas siempre activas; esta guía contiene el procedimiento compartido. No copiarla en prompts ni Skills.
+**Guía operativa del frontend en `develop`, alineada con la línea base del backend.** `AGENTS.md` conserva reglas siempre activas; esta guía contiene el procedimiento de consulta y sincronización. No copiarla en prompts ni Skills.
 
 ## Selección de contexto
 
@@ -9,7 +9,7 @@
 | Cualquier tarea | `AGENTS.md`, índice y etapa vigente | Nada más por defecto. |
 | Arquitectura/revisión transversal | Secciones afectadas de `etapa-05.md` | RF/RN/RNF concretos; casos de uso de ETAPA 04 aprobados documentalmente, con observaciones técnicas pendientes. |
 | Slice FastAPI | Skill `restaurant-fastapi-slice` y sección backend de ETAPA 05 | CA del módulo y flujo puntual. |
-| Slice Flutter | Skill `restaurant-flutter-slice` y sección Flutter/REST de ETAPA 05 | CA del módulo y pantalla/flujo puntual. |
+| Slice Flutter | Skill `restaurant-flutter-slice`, contexto preparatorio de ETAPA 10 y sección Flutter/REST de ETAPA 05 | CA del módulo, contrato REST vigente y diseño Figma aprobado de la pantalla/flujo puntual. |
 | Duda de negocio | ETAPA 03 primero | ETAPAS 01–02 solo si la duda no queda resuelta. |
 | Sincronización | Archivo ya editado y su homólogo | Hash/diff; no cargar ambos textos completos. |
 
@@ -18,8 +18,8 @@ Mantener en `docs/` las decisiones duraderas; el historial de conversación no e
 ## Coordinación Codex / AGY
 
 - Ambos usan `AGENTS.md` y descubren Skills locales desde `.agents/skills/`; no crear formatos o copias por herramienta.
-- Dividir trabajo paralelo por archivos y objetivos no superpuestos. Antes de editar, comprobar rama y árbol de trabajo.
-- Modificar el documento compartido en un repositorio, replicarlo de forma mecánica y verificar igualdad byte a byte. Los README raíz pueden diferir en encabezado y descripción específica de Backend/Frontend.
+- Coordinar un solo escritor por archivo. Antes de editar, comprobar rama y árbol de trabajo de ambos repositorios.
+- Mantener idéntica la línea base documental realmente compartida. ETAPA 08 conserva su plan, bitácora e informe de auditoría en backend como fuente de verdad; el contexto de ETAPA 10 es específico del frontend y enlaza esos documentos, sin duplicarlos.
 - Si una etapa o decisión sigue pendiente, conservar esa etiqueta aunque una solución técnica la contemple.
 - No hacer commit, push, merge ni acciones remotas salvo solicitud explícita.
 
@@ -44,7 +44,7 @@ Las Skills enlazan `etapa-05.md`; no duplican matrices, estructura completa ni r
 
 1. Confirmar ambos repositorios en `develop` y revisar cambios previos.
 2. Validar estructura de Skills (frontmatter `name`/`description`, coincidencia nombre/carpeta, restricciones de activación y referencias); ejecutar `quick_validate.py` si está disponible. Distinguir validación estática de prueba real de invocación en Codex/Antigravity.
-3. Comprobar que los 40 RF siguen asignados una vez a M01–M07 y que ningún pendiente se presenta como aprobado.
-4. Comparar archivos compartidos de `docs/` y reglas comunes entre repositorios.
+3. Comprobar que los 40 RF y 48 CA siguen trazados en M01–M07 y que ningún pendiente se presenta como aprobado.
+4. Comparar por hash/diff los documentos de línea base compartidos; revisar aparte los documentos específicos de cada repositorio y la trazabilidad API → futura interfaz.
 5. Registrar herramientas no disponibles (por ejemplo, render PlantUML) como pendientes; no simular el resultado.
 6. Dejar la etapa en revisión hasta la aprobación expresa del usuario.
