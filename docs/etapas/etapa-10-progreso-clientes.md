@@ -1,20 +1,21 @@
 # ETAPA 10 — Checkpoint de ejecución · App de clientes
 
-**Estado:** 10.01 — UI Foundation implementada y verificada; **pendiente de revisión/aprobación del usuario**. No iniciar 10.02.
-**Repo/rama:** `restaurant-app-frontend-v2` / `develop`, HEAD `8af9dbd11481b96f0f0fda8f6efdce85b9237dec`. **Alcance:** `apps/customer_app` y este checkpoint; cambios locales sin commit/push.
-**Guía:** [hoja de ruta](etapa-10-hoja-ruta-clientes.md) · [contratos cliente](etapa-10.md) · [Figma claro/oscuro](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
+**Estado:** 10.02 — Acceso M01 implementado y verificado; **listo para revisión y pendiente de aprobación expresa del usuario**. No iniciar 10.03.
+**Repo/rama:** `restaurant-app-frontend-v2` / `develop`; inicio limpio en `094145759fec34a17d9ae0f5a8385593eee0dd33`. **Alcance:** `apps/customer_app`, este checkpoint y la columna `Estado` de la hoja de ruta; cambios locales sin commit/push.
+**Guía:** [hoja de ruta con estado por bloque](etapa-10-hoja-ruta-clientes.md) · [contratos cliente](etapa-10.md) · [Figma claro/oscuro](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
 
-- **10.00 verificado (2026-10-22):** `develop = origin/develop`, árbol limpio al inicio y commit `8af9dbd` «10.00 — Línea base». Flutter 3.47.5/Dart 3.13.4; `flutter analyze` limpio y 2/2 pruebas base aprobadas antes de implementar.
-- **Figma leído, no modificado:** páginas claro `0:1` y oscuro `176:2`; contextos y capturas de 08 Inicio (`179:38`/`179:485`), 09 Menú (`179:67`/`179:514`), 15 Pedidos (`179:290`/`179:737`), 19 Cuenta (`179:390`/`179:837`) y 20 Estados (`179:418`/`179:865`).
-- **Design System:** paletas semánticas claro/oscuro, DM Sans + Cormorant Garamond locales, escalas tipográficas, espaciado, radios, bordes, controles y `ThemeData` Material 3 alineados con Figma; los tokens legibles derivados cumplen contraste WCAG AA ≥ 4.5:1.
-- **Componentes:** tarjeta e icon tile, botón primario/secundario con loading, campo de texto y estados loading/empty/error/success; Lucide real, tamaños táctiles y semántica accesible.
-- **Navegación:** `go_router` con `StatefulShellRoute.indexedStack`; barra inferior Inicio/Menú/Pedidos/Cuenta, pestaña activa persistente y rutas declarativas `/`, `/menu`, `/pedidos`, `/cuenta`.
-- **Estructura/UX:** `SafeArea`, shell modular, layout con ancho máximo, scroll vertical, gutter adaptable y corrección comprobada de overflow a 320×568 con escala de texto 1.4.
-- **Alcance funcional:** vistas neutras de fundación; sin autenticación, REST de negocio, catálogo, carrito ni funciones de 10.02+. `ApiEnvironment` de 10.00 se conserva sin consumo HTTP nuevo.
-- **Pruebas finales:** `flutter analyze` → **No issues found**; `flutter test` → **14/14 passed**: entorno API, tokens/temas, contraste, componentes, estados habilitado/deshabilitado, acciones semánticas, navegación, cambio de tema, pantalla estrecha y 2 golden tests 390×844 claro/oscuro. `flutter build apk --debug` → **APK generado correctamente**.
-- **Correcciones guiadas por pruebas:** campo expuesto como un único nodo editable; acciones TalkBack ejecutadas mediante eventos semánticos; botón, tarjeta, reintento, navegación y selector de tema conservan su acción/estado; navegación/header ajustados para crecimiento vertical con texto ampliado.
-- **Límites reales:** no existe AVD/dispositivo Android disponible; no se ejecutó `flutter run` físico/emulado. Las goldens verifican render Linux del widget, no certifican una captura Android nativa.
-- **Calificación técnica 10.01:** **9/10**. Implementación, análisis y pruebas cumplen el bloque; falta validación visual/táctil en Android real para aspirar a 10/10.
-- **Próxima acción única:** detenerse para revisión y aprobación del usuario; no iniciar 10.02.
+- **10.01 verificado antes de continuar:** `flutter analyze` limpio y 14/14 pruebas aprobadas; UI Foundation existente preservada.
+- **Figma leído, no modificado:** Login `172:4`/`172:70`, Registro `179:2`/`179:449`, Invitado `179:19`/`179:466` y Cuenta `179:390`/`179:837`, claro/oscuro. Se integraron sus SVG visibles y Lucide; 8 goldens M01 inspeccionadas a 390×844.
+- **Contratos backend reales:** `POST /auth/register` 201 sin login, `/auth/login` 200, `/auth/guest` 201, `/auth/refresh` 200 con rotación de token y `/auth/logout` 204 Bearer. Errores 401/409/422 mapeados sin exponer detalle interno.
+- **Registro y acceso:** formularios validados con límites M01, login solo por correo, mensajes inline de carga/error y confirmación de cuenta creada antes de volver a iniciar sesión. Recuperación de contraseña permanece no interactiva porque no existe API.
+- **Sesión:** JWT y metadatos persistidos con `flutter_secure_storage`; contraseña nunca persistida. Restauración, refresh de un solo vuelo, rotación segura, expiración automática del invitado, logout remoto y limpieza local con reintento; una falla del almacenamiento nunca conserva una sesión inválida en memoria. Backup Android deshabilitado.
+- **Invitado y rutas:** sesión temporal sin `refresh_token`, protección declarativa de rutas con splash de restauración y shell Inicio/Menú/Pedidos/Cuenta solo tras renovación confirmada o con JWT local aún no expirado.
+- **Cuenta/UX:** variante registrada e invitada, logout, tema claro/oscuro, `SafeArea`, scroll, objetivos táctiles y adaptación comprobada a 320×568 hasta texto 2.0; Atrás del sistema queda bloqueado mientras Registro o Invitado esperan respuesta. Editar perfil, preferencias y notificaciones quedan deshabilitados/sin API.
+- **Arquitectura:** `features/m01_access/<caso_de_uso>/` con dominio puro, estado inmutable unidireccional, puertos de repositorio/almacenamiento, adaptador REST y presentación separada.
+- **Pruebas finales:** `flutter analyze` → **No issues found**; `flutter test` → **61/61 passed** (47 específicas M01: validadores, REST, almacenamiento seguro, controlador, carreras de sesión/navegación, formularios/rutas, adaptación y 8 goldens M01; más 14 de regresión 10.01).
+- **Build:** `flutter build apk --debug` → **correcto**, `build/app/outputs/flutter-apk/app-debug.apk` (202 862 578 bytes).
+- **Límites reales:** sin AVD/teléfono disponible y sin prueba contra un backend vivo; contratos contrastados con OpenAPI/código/pruebas de integración reales del backend y adaptador Flutter probado con respuestas contractuales. Goldens verifican render Linux, no captura Android nativa.
+- **Calificación técnica 10.02:** **9/10**. Cumple alcance, contratos, seguridad, fidelidad y pruebas; falta validación táctil Android y recorrido contra backend desplegado para 10/10.
+- **Próxima acción única:** revisión y aprobación expresa del usuario; mantener 10.03 pendiente.
 
-> Mantener este estado vivo y breve. La aprobación expresa del bloque corresponde al usuario.
+> La hoja de ruta ahora muestra `Estado`; “implementado y verificado” no equivale a “aprobado”.

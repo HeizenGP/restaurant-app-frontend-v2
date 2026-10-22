@@ -16,6 +16,10 @@ class ChifaTextField extends StatelessWidget {
     this.enabled = true,
     this.validator,
     this.onChanged,
+    this.onFieldSubmitted,
+    this.autovalidateMode,
+    this.autofillHints,
+    this.focusNode,
     super.key,
   });
 
@@ -30,6 +34,10 @@ class ChifaTextField extends StatelessWidget {
   final bool enabled;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
+  final AutovalidateMode? autovalidateMode;
+  final Iterable<String>? autofillHints;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +64,10 @@ class ChifaTextField extends StatelessWidget {
             enabled: enabled,
             validator: validator,
             onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+            autovalidateMode: autovalidateMode,
+            autofillHints: autofillHints,
+            focusNode: focusNode,
             style: Theme.of(context).textTheme.bodyLarge,
             decoration: InputDecoration(
               hintText: hintText,

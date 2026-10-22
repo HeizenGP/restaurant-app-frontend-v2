@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/auth_fakes.dart';
+
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
     baseUrl: 'https://api.example.test/api/v1',
@@ -14,7 +16,7 @@ void main() {
   ) async {
     final semantics = tester.ensureSemantics();
     await _configurePhoneSurface(tester, const Size(390, 844));
-    await tester.pumpWidget(CustomerApp(environment: environment));
+    await tester.pumpWidget(_authenticatedApp(environment));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('page-inicio')), findsOneWidget);
@@ -59,7 +61,7 @@ void main() {
   ) async {
     final semantics = tester.ensureSemantics();
     await _configurePhoneSurface(tester, const Size(390, 844));
-    await tester.pumpWidget(CustomerApp(environment: environment));
+    await tester.pumpWidget(_authenticatedApp(environment));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('nav-pedidos')));
@@ -93,7 +95,7 @@ void main() {
     tester.platformDispatcher.textScaleFactorTestValue = 1.4;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
-    await tester.pumpWidget(CustomerApp(environment: environment));
+    await tester.pumpWidget(_authenticatedApp(environment));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
@@ -102,6 +104,14 @@ void main() {
     expect(find.byKey(const Key('page-menu')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+}
+
+CustomerApp _authenticatedApp(ApiEnvironment environment) {
+  return CustomerApp(
+    environment: environment,
+    authRepository: FakeAuthRepository(),
+    sessionStore: MemoryAuthSessionStore(session: guestSession()),
+  );
 }
 
 Future<void> _configurePhoneSurface(

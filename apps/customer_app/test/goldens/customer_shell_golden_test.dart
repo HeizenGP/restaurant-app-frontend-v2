@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/auth_fakes.dart';
+
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
     baseUrl: 'https://api.example.test/api/v1',
@@ -26,7 +28,12 @@ void main() {
       await tester.pumpWidget(
         RepaintBoundary(
           key: goldenBoundary,
-          child: CustomerApp(environment: environment, initialThemeMode: mode),
+          child: CustomerApp(
+            environment: environment,
+            initialThemeMode: mode,
+            authRepository: FakeAuthRepository(),
+            sessionStore: MemoryAuthSessionStore(session: guestSession()),
+          ),
         ),
       );
       await tester.pumpAndSettle();

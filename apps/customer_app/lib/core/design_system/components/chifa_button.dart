@@ -9,6 +9,7 @@ class ChifaButton extends StatelessWidget {
     this.variant = ChifaButtonVariant.primary,
     this.isLoading = false,
     this.leading,
+    this.trailing,
     this.fullWidth = true,
     super.key,
   });
@@ -18,6 +19,7 @@ class ChifaButton extends StatelessWidget {
   final ChifaButtonVariant variant;
   final bool isLoading;
   final IconData? leading;
+  final IconData? trailing;
   final bool fullWidth;
 
   @override
@@ -36,6 +38,8 @@ class ChifaButton extends StatelessWidget {
           Icon(leading, size: 19),
         if (isLoading || leading != null) const SizedBox(width: 10),
         Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        if (!isLoading && trailing != null) const SizedBox(width: 10),
+        if (!isLoading && trailing != null) Icon(trailing, size: 19),
       ],
     );
 
