@@ -82,6 +82,46 @@ void main() {
     expect(store.writeCount, 1);
   });
 
+  test('does not persist a guest session returned by login', () async {
+    final FakeAuthRepository repository = FakeAuthRepository(
+      loginResult: guestSession(),
+    );
+    final MemoryAuthSessionStore store = MemoryAuthSessionStore();
+    final AuthSessionController controller = AuthSessionController(
+      repository: repository,
+      sessionStore: store,
+    );
+    await controller.restore();
+
+    final bool result = await controller.login(
+      const LoginInput(email: 'ana@example.com', password: 'secret'),
+    );
+
+    expect(result, isFalse);
+    expect(controller.state.status, AuthStatus.signedOut);
+    expect(controller.state.errorMessage, contains('no válida'));
+    expect(store.writeCount, 0);
+  });
+
+  test('does not persist a user session returned by guest access', () async {
+    final FakeAuthRepository repository = FakeAuthRepository(
+      guestResult: registeredSession(),
+    );
+    final MemoryAuthSessionStore store = MemoryAuthSessionStore();
+    final AuthSessionController controller = AuthSessionController(
+      repository: repository,
+      sessionStore: store,
+    );
+    await controller.restore();
+
+    final bool result = await controller.continueAsGuest();
+
+    expect(result, isFalse);
+    expect(controller.state.status, AuthStatus.signedOut);
+    expect(controller.state.errorMessage, contains('no válida'));
+    expect(store.writeCount, 0);
+  });
+
   test(
     'restore rotates a registered refresh token and saves the result',
     () async {

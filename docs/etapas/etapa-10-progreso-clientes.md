@@ -1,12 +1,15 @@
 # ETAPA 10 — Checkpoint · App de clientes
 
-**Estado:** **10.00 y 10.01 APROBADOS expresamente por el usuario (2026-10-23)**; 10.02 y posteriores pendientes, sin autorización para avanzar.
-**Repositorio:** `restaurant-app-frontend-v2` · rama `develop` · implementación 10.01 auditada en `acd85f1`.
+**Estado:** 10.00 y 10.01 aprobados; **10.02 — Acceso M01 implementado y listo para revisión**, aún sin aprobación; 10.03+ sin iniciar.
+**Repositorio:** `restaurant-app-frontend-v2` · rama `develop` · base `2360f4304bf63355c9c16dafd3d6a45f5dc5d925` · cambios locales sin commit/push.
 
-- **10.01 implementado:** tokens de UI, temas claro/oscuro, Lucide, componentes compartidos, estados loading/empty/error, navegación por cuatro pestañas y Perfil adaptable; arquitectura Hexagonal + Vertical Slicing conservada. `staff_app` sin cambios.
-- **Correcciones verificadas en código:** Inicio/Catálogo/Pedidos operativos sin datos ficticios; datos de referencia solo en fixtures de pruebas. Perfil con `SafeArea`, scroll y restricciones flexibles; sesiones registrada e invitada diferenciadas mediante estado de sesión.
-- **Figma:** referencia oficial de 20 pantallas por tema; para 10.01, capturas 08/09/15/19/20 en claro y oscuro (390×844). Comparador con 10 fixtures: similitud mínima reportada 0.9736, acuerdo tolerante mínimo 0.9444; estimación de fidelidad de referencia **9.6/10**. Los estados operativos vacíos no tienen comparativa directa equivalente en Figma.
-- **Pruebas de Codex:** `flutter analyze --no-pub` sin incidencias, **94/94** pruebas reportadas, APK debug compilado; pruebas responsive documentadas a 320×568 (140 %), 390×844 (200 %) y 600×960. Sin CI GitHub independiente para este commit.
-- **Observaciones sin bloquear la aprobación:** mensajes de estados vacíos deben evitar insinuar consulta de backend inexistente; alinear cualquier README pendiente; validar 10.01 con `flutter run` en el Motorola Edge 60 Fusion. El arranque Android confirmado anteriormente corresponde a 10.00, no a esta versión.
-- **Red:** conectividad real Motorola→FastAPI aún sin comprobar; `10.0.2.2` corresponde al emulador, no al teléfono físico.
-- **Próxima acción:** esperar autorización expresa para **10.02 — Acceso M01**, usando Figma como fuente visual. No iniciar 10.03+, `staff_app`, ni cambiar requisitos o contratos sin autorización.
+- **Alcance 10.02:** pantallas 01 Login, 02 Registro, 03 Invitado y 19 Cuenta; claro/oscuro; responsive con `SafeArea`/scroll; `staff_app` intacta.
+- **Contratos exclusivos:** `POST /auth/register`, `/auth/login`, `/auth/guest`, `/auth/refresh` y `/auth/logout`; sin endpoints ni datos inventados.
+- **Sesión:** almacenamiento seguro, validación estricta USER/GUEST, renovación, cierre local aun si falla la confirmación remota, expiración y guardas declarativas de rutas.
+- **Cuenta:** identidad registrada/invitada diferenciada. El avatar abre la confirmación de cierre sin alterar la composición base de Figma.
+- **Figma verificado:** nodos claro/oscuro 01 `172:4/70`, 02 `179:2/449`, 03 `179:19/466`, 19 `179:390/837`; viewport 390×844.
+- **Comparación M01:** 8/8 aprobadas; similitud media por canal `0.973619–0.988852` (umbral `0.97`) y acuerdo tolerante `0.944387–0.973098` (umbral `0.94`); estimación **9.7/10**.
+- **Pruebas:** `flutter analyze --no-pub` sin incidencias; `flutter test --no-pub` **121/121**; flujos de formularios, errores, registro, login, invitado, logout, expiración, guardas y responsive 320×568 al 140 %.
+- **Android:** `flutter build apk --debug --no-pub` completado; no se detectó dispositivo Android ni AVD, por lo que no se afirmó arranque físico/emulado.
+- **Límites verificados:** login muestra «Correo electrónico» porque el contrato acepta email, no celular; recuperación de contraseña permanece informativa y sin acción al no existir endpoint; el chrome del sistema no se duplica como widget.
+- **Siguiente acción única:** revisión del usuario de 10.02. No avanzar a 10.03 ni realizar commit/push sin autorización expresa.

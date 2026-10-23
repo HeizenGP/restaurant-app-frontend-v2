@@ -50,7 +50,7 @@ class AuthRestRepository implements AuthRepository {
     if (response.statusCode != 200) {
       throw _failureFor(response, request: _AuthRequest.login);
     }
-    return AuthJsonMapper.decodeSession(_decodeJson(response));
+    return _decodeSession(response, expectedKind: AuthSessionKind.user);
   }
 
   @override
@@ -59,7 +59,7 @@ class AuthRestRepository implements AuthRepository {
     if (response.statusCode != 201) {
       throw _failureFor(response, request: _AuthRequest.guest);
     }
-    return AuthJsonMapper.decodeSession(_decodeJson(response));
+    return _decodeSession(response, expectedKind: AuthSessionKind.guest);
   }
 
   @override
@@ -71,7 +71,7 @@ class AuthRestRepository implements AuthRepository {
     if (response.statusCode != 200) {
       throw _failureFor(response, request: _AuthRequest.refresh);
     }
-    return AuthJsonMapper.decodeSession(_decodeJson(response));
+    return _decodeSession(response, expectedKind: AuthSessionKind.user);
   }
 
   @override
@@ -132,6 +132,22 @@ class AuthRestRepository implements AuthRepository {
         'El servidor devolvió una respuesta no válida.',
       );
     }
+  }
+
+  AuthSession _decodeSession(
+    http.Response response, {
+    required AuthSessionKind expectedKind,
+  }) {
+    final AuthSession session = AuthJsonMapper.decodeSession(
+      _decodeJson(response),
+    );
+    if (session.kind != expectedKind) {
+      throw const AuthFailure(
+        AuthFailureKind.malformedResponse,
+        'El servidor devolvió una respuesta no válida.',
+      );
+    }
+    return session;
   }
 
   AuthFailure _failureFor(

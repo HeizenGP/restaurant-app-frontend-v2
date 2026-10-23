@@ -13,6 +13,8 @@ void main() {
       expect(AccessValidators.displayName('  '), isNotNull);
       expect(AccessValidators.email('ana@@example.com'), isNotNull);
       expect(AccessValidators.email('ana example.com'), isNotNull);
+      expect(AccessValidators.email('ana\texample.com'), isNotNull);
+      expect(AccessValidators.email('ana\n@example.com'), isNotNull);
       expect(AccessValidators.registrationPassword('1234567'), isNotNull);
     });
 

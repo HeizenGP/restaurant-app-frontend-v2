@@ -198,6 +198,48 @@ void main() {
       );
     },
   );
+
+  test('rejects a guest-shaped login response', () async {
+    final AuthRestRepository repository = AuthRestRepository(
+      baseUri: Uri.parse(baseUrl),
+      client: MockClient(
+        (_) async => http.Response(jsonEncode(_guestSessionJson), 200),
+      ),
+    );
+
+    await expectLater(
+      repository.login(
+        const LoginInput(email: 'ana@example.com', password: 'secreto'),
+      ),
+      throwsA(
+        isA<AuthFailure>().having(
+          (AuthFailure value) => value.kind,
+          'kind',
+          AuthFailureKind.malformedResponse,
+        ),
+      ),
+    );
+  });
+
+  test('rejects a user-shaped guest response', () async {
+    final AuthRestRepository repository = AuthRestRepository(
+      baseUri: Uri.parse(baseUrl),
+      client: MockClient(
+        (_) async => http.Response(jsonEncode(_userSessionJson), 201),
+      ),
+    );
+
+    await expectLater(
+      repository.createGuestSession(),
+      throwsA(
+        isA<AuthFailure>().having(
+          (AuthFailure value) => value.kind,
+          'kind',
+          AuthFailureKind.malformedResponse,
+        ),
+      ),
+    );
+  });
 }
 
 const Map<String, Object?> _userJson = <String, Object?>{

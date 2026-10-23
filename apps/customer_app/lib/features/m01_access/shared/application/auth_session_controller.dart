@@ -68,11 +68,16 @@ class AuthSessionController extends ChangeNotifier {
   final AuthRepository _repository;
   final AuthSessionStore _sessionStore;
   final DateTime Function() _now;
+  final ValueNotifier<AuthStatus> _navigationStatus = ValueNotifier<AuthStatus>(
+    AuthStatus.restoring,
+  );
   Timer? _sessionTimer;
 
   AuthState _state = const AuthState.restoring();
 
   AuthState get state => _state;
+
+  Listenable get navigationRefresh => _navigationStatus;
 
   Future<void> restore() async {
     _setState(const AuthState.restoring());
@@ -105,7 +110,10 @@ class AuthSessionController extends ChangeNotifier {
       }
 
       try {
-        final AuthSession refreshed = await _repository.refresh(refreshToken);
+        final AuthSession refreshed = _requireSessionKind(
+          await _repository.refresh(refreshToken),
+          AuthSessionKind.user,
+        );
         await _sessionStore.write(refreshed);
         _setState(AuthState(status: AuthStatus.signedIn, session: refreshed));
         _scheduleSessionMaintenance(refreshed);
@@ -192,7 +200,10 @@ class AuthSessionController extends ChangeNotifier {
       ),
     );
     try {
-      final AuthSession session = await _repository.login(input);
+      final AuthSession session = _requireSessionKind(
+        await _repository.login(input),
+        AuthSessionKind.user,
+      );
       await _sessionStore.write(session);
       _setState(AuthState(status: AuthStatus.signedIn, session: session));
       _scheduleSessionMaintenance(session);
@@ -216,7 +227,10 @@ class AuthSessionController extends ChangeNotifier {
       ),
     );
     try {
-      final AuthSession session = await _repository.createGuestSession();
+      final AuthSession session = _requireSessionKind(
+        await _repository.createGuestSession(),
+        AuthSessionKind.guest,
+      );
       await _sessionStore.write(session);
       _setState(AuthState(status: AuthStatus.signedIn, session: session));
       _scheduleSessionMaintenance(session);
@@ -248,7 +262,10 @@ class AuthSessionController extends ChangeNotifier {
       ),
     );
     try {
-      final AuthSession refreshed = await _repository.refresh(refreshToken);
+      final AuthSession refreshed = _requireSessionKind(
+        await _repository.refresh(refreshToken),
+        AuthSessionKind.user,
+      );
       await _sessionStore.write(refreshed);
       _setState(AuthState(status: AuthStatus.signedIn, session: refreshed));
       _scheduleSessionMaintenance(refreshed);
@@ -313,6 +330,19 @@ class AuthSessionController extends ChangeNotifier {
     _setState(_state.copyWith(clearError: true, clearNotice: true));
   }
 
+  AuthSession _requireSessionKind(
+    AuthSession session,
+    AuthSessionKind expectedKind,
+  ) {
+    if (session.kind != expectedKind) {
+      throw const AuthFailure(
+        AuthFailureKind.malformedResponse,
+        'El servidor devolvió una respuesta no válida.',
+      );
+    }
+    return session;
+  }
+
   void _finishWithFailure(AuthFailure failure) {
     _setState(
       _state.copyWith(
@@ -335,6 +365,9 @@ class AuthSessionController extends ChangeNotifier {
 
   void _setState(AuthState value) {
     _state = value;
+    if (_navigationStatus.value != value.status) {
+      _navigationStatus.value = value.status;
+    }
     notifyListeners();
   }
 
@@ -446,6 +479,7 @@ class AuthSessionController extends ChangeNotifier {
   @override
   void dispose() {
     _sessionTimer?.cancel();
+    _navigationStatus.dispose();
     super.dispose();
   }
 }

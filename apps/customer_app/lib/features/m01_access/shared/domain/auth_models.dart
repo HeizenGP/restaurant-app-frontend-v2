@@ -73,7 +73,7 @@ abstract final class AccessValidators {
       return 'Ingresa tu correo electrónico.';
     }
     if (email.length > 254 ||
-        email.contains(' ') ||
+        RegExp(r'\s', unicode: true).hasMatch(email) ||
         '@'.allMatches(email).length != 1) {
       return 'Ingresa un correo electrónico válido.';
     }

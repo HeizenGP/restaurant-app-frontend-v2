@@ -20,6 +20,13 @@ class ChifaTextField extends StatelessWidget {
     this.autovalidateMode,
     this.autofillHints,
     this.focusNode,
+    this.labelGap = AppSpacing.sm,
+    this.labelHeight,
+    this.borderRadius,
+    this.contentPadding,
+    this.hintStyle,
+    this.inputStyle,
+    this.fieldHeight,
     super.key,
   });
 
@@ -38,6 +45,13 @@ class ChifaTextField extends StatelessWidget {
   final AutovalidateMode? autovalidateMode;
   final Iterable<String>? autofillHints;
   final FocusNode? focusNode;
+  final double labelGap;
+  final double? labelHeight;
+  final double? borderRadius;
+  final EdgeInsetsGeometry? contentPadding;
+  final TextStyle? hintStyle;
+  final TextStyle? inputStyle;
+  final double? fieldHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -47,34 +61,80 @@ class ChifaTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ExcludeSemantics(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleSmall
-                ?.copyWith(color: palette.textPrimary),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: labelHeight ?? 0),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(color: palette.textPrimary),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: labelGap),
         Semantics(
           label: label,
-          child: TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            textInputAction: textInputAction,
-            obscureText: obscureText,
-            enabled: enabled,
-            validator: validator,
-            onChanged: onChanged,
-            onFieldSubmitted: onFieldSubmitted,
-            autovalidateMode: autovalidateMode,
-            autofillHints: autofillHints,
-            focusNode: focusNode,
-            style: Theme.of(context).textTheme.bodyLarge,
-            decoration: InputDecoration(
-              hintText: hintText,
-              prefixIcon: leadingIcon == null
-                  ? null
-                  : Icon(leadingIcon, color: palette.textSecondary, size: 20),
-              suffixIcon: trailing,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: fieldHeight ?? 0),
+            child: TextFormField(
+              controller: controller,
+              keyboardType: keyboardType,
+              textInputAction: textInputAction,
+              obscureText: obscureText,
+              enabled: enabled,
+              validator: validator,
+              onChanged: onChanged,
+              onFieldSubmitted: onFieldSubmitted,
+              autovalidateMode: autovalidateMode,
+              autofillHints: autofillHints,
+              focusNode: focusNode,
+              style: inputStyle ?? Theme.of(context).textTheme.bodyLarge,
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: hintStyle,
+                contentPadding: contentPadding,
+                constraints: fieldHeight == null
+                    ? null
+                    : BoxConstraints(minHeight: fieldHeight!),
+                enabledBorder: borderRadius == null
+                    ? null
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(borderRadius!),
+                        borderSide: BorderSide(color: palette.controlBorder),
+                      ),
+                focusedBorder: borderRadius == null
+                    ? null
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(borderRadius!),
+                        borderSide: BorderSide(
+                          color: palette.brandRed,
+                          width: 1.4,
+                        ),
+                      ),
+                errorBorder: borderRadius == null
+                    ? null
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(borderRadius!),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                focusedErrorBorder: borderRadius == null
+                    ? null
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(borderRadius!),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                          width: 1.4,
+                        ),
+                      ),
+                prefixIcon: leadingIcon == null
+                    ? null
+                    : Icon(leadingIcon, color: palette.textSecondary, size: 20),
+                suffixIcon: trailing,
+              ),
             ),
           ),
         ),

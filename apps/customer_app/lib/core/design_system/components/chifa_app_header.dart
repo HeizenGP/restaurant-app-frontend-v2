@@ -10,12 +10,14 @@ class ChifaAppHeader extends StatelessWidget {
     required this.isDarkMode,
     required this.onToggleTheme,
     this.initials = 'C',
+    this.onAvatarPressed,
     super.key,
   });
 
   final bool isDarkMode;
   final VoidCallback onToggleTheme;
   final String initials;
+  final VoidCallback? onAvatarPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -93,19 +95,28 @@ class ChifaAppHeader extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Semantics(
-              image: true,
-              label: 'Avatar de cliente $initials',
+              image: onAvatarPressed == null,
+              button: onAvatarPressed != null,
+              label: onAvatarPressed == null
+                  ? 'Avatar de cliente $initials'
+                  : 'Opciones de la cuenta de $initials',
+              onTap: onAvatarPressed,
               excludeSemantics: true,
-              child: CircleAvatar(
-                radius: 21,
-                backgroundColor: palette.brandSurface,
-                foregroundColor: palette.onBrand,
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+              child: GestureDetector(
+                key: const Key('account-actions'),
+                onTap: onAvatarPressed,
+                behavior: HitTestBehavior.opaque,
+                child: CircleAvatar(
+                  radius: 21,
+                  backgroundColor: palette.brandSurface,
+                  foregroundColor: palette.onBrand,
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),

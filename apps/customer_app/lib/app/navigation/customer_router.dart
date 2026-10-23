@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/m01_access/continue_as_guest/presentation/guest_access_page.dart';
+import '../../features/m01_access/register_account/presentation/registration_page.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
+import '../../features/m01_access/sign_in/presentation/sign_in_page.dart';
 import '../../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../../features/m02_catalog/shared/application/catalog_contracts.dart';
 import '../../features/ui_foundation/presentation/foundation_pages.dart';
@@ -28,7 +31,7 @@ GoRouter createCustomerRouter({
 }) {
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: authController,
+    refreshListenable: authController.navigationRefresh,
     redirect: (BuildContext context, GoRouterState state) {
       final AuthStatus status = authController.state.status;
       final String location = state.matchedLocation;
@@ -51,9 +54,27 @@ GoRouter createCustomerRouter({
     },
     routes: <RouteBase>[
       _resetRoute(path: '/splash', name: CustomerRoutes.splash),
-      _resetRoute(path: '/acceso', name: CustomerRoutes.access),
-      _resetRoute(path: '/registro', name: CustomerRoutes.registration),
-      _resetRoute(path: '/invitado', name: CustomerRoutes.guest),
+      GoRoute(
+        path: '/acceso',
+        name: CustomerRoutes.access,
+        builder: (BuildContext context, GoRouterState state) {
+          return SignInPage(authController: authController);
+        },
+      ),
+      GoRoute(
+        path: '/registro',
+        name: CustomerRoutes.registration,
+        builder: (BuildContext context, GoRouterState state) {
+          return RegistrationPage(authController: authController);
+        },
+      ),
+      GoRoute(
+        path: '/invitado',
+        name: CustomerRoutes.guest,
+        builder: (BuildContext context, GoRouterState state) {
+          return GuestAccessPage(authController: authController);
+        },
+      ),
       StatefulShellRoute.indexedStack(
         builder:
             (
@@ -117,6 +138,7 @@ GoRouter createCustomerRouter({
                     displayName: user?.displayName,
                     email: user?.email,
                     onOpenOrders: () => context.go('/pedidos'),
+                    onLogout: authController.logout,
                   );
                 },
               ),

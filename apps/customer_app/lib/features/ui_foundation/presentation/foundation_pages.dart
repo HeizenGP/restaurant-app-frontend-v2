@@ -164,6 +164,7 @@ class FoundationAccountPage extends StatelessWidget {
     this.accountCardName,
     this.accountCardEmail,
     this.onOpenOrders,
+    this.onLogout,
     super.key,
   }) : assert(
          isGuest || (displayName != null && email != null),
@@ -178,6 +179,7 @@ class FoundationAccountPage extends StatelessWidget {
   final String? accountCardName;
   final String? accountCardEmail;
   final VoidCallback? onOpenOrders;
+  final Future<void> Function()? onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +211,9 @@ class FoundationAccountPage extends StatelessWidget {
                   isDarkMode: isDark,
                   onToggleTheme: themeModeController.toggle,
                   initials: initials,
+                  onAvatarPressed: onLogout == null
+                      ? null
+                      : () => _confirmLogout(context),
                 ),
                 const SizedBox(height: 22),
                 _ProfileVisual(
@@ -312,6 +317,30 @@ class FoundationAccountPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Cerrar sesión'),
+          content: const Text('¿Quieres cerrar tu sesión en este dispositivo?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              key: const Key('logout-confirm'),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Cerrar sesión'),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed == true) await onLogout?.call();
   }
 }
 
