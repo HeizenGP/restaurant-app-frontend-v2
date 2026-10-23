@@ -3,7 +3,7 @@
 **Proyecto:** Chifa ASIA — sistema académico para un solo restaurante.  
 **Actualización:** 2026-10-23. **Rama de trabajo:** develop.
 
-**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPA 09 con diseño de clientes existente en Figma y pendiente de aprobación formal; ETAPA 10 conserva **10.00 verificado**, mientras las pantallas de 10.01–10.03 fueron retiradas por decisión del usuario el 2026-10-23 y deben reconstruirse desde 10.01; ETAPA 11 por iniciar. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
+**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPA 09 con diseño de clientes existente en Figma y pendiente de aprobación formal; ETAPA 10 tiene **10.00 revalidado y listo para revisión**, mientras las pantallas de 10.01–10.03 fueron retiradas por decisión del usuario el 2026-10-23; ETAPA 11 por iniciar. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
 
 ## 1. Propósito y reglas del plan
 
@@ -35,7 +35,7 @@ Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y a
 | **07** | Configuración técnica | **Aprobada por el usuario (2026-10-21)** | [Implementación y evidencia](etapa-07.md), infraestructura y migraciones iniciales |
 | **08** | Desarrollo del backend | **08.00–08.10 verificados técnicamente; pendiente de aprobación final** | [Plan](../../../restaurant-app-backend-v2/docs/etapas/etapa-08.md), [bitácora](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-progreso.md) e [informe](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-informe-auditoria.md) en backend |
 | **09** | Diseño UX/UI en Figma | Diseño de clientes existente; pendiente de aprobación formal | Interfaces y prototipos aprobados |
-| **10** | Desarrollo del frontend | 10.00 conservado; pantallas 10.01–10.03 retiradas; reinicio pendiente desde 10.01 | [Contexto](etapa-10.md), [hoja de ruta](etapa-10-hoja-ruta-clientes.md) y [checkpoint](etapa-10-progreso-clientes.md) |
+| **10** | Desarrollo del frontend | 10.00 revalidado y listo para revisión; pantallas 10.01–10.03 retiradas | [Contexto](etapa-10.md), [hoja de ruta](etapa-10-hoja-ruta-clientes.md) y [checkpoint](etapa-10-progreso-clientes.md) |
 | **11** | Integración, pruebas y entrega | Por iniciar | Validación extremo a extremo y demostración académica |
 
 La elaboración de una etapa no equivale a su aprobación, ni una casilla de documentación a una prueba técnica ejecutada. **No iniciar trabajo dependiente de decisiones pendientes sin resolver su impacto primero.**
@@ -167,7 +167,7 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 
 **Objetivo:** transformar el diseño aprobado en las dos aplicaciones Flutter conectadas al backend.
 
-**Ejecución actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). Se conserva la línea base técnica 10.00; las pantallas y pruebas visuales de 10.01–10.03 fueron retiradas para rehacerlas y ya no constituyen implementación vigente. El alcance continúa siendo **exclusivamente la aplicación de clientes**; este reinicio no aprueba por inferencia las ETAPAS 08–10 ni autoriza adelantar `staff_app`.
+**Ejecución actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). La línea base técnica 10.00 fue revalidada con las limitaciones del [checkpoint](etapa-10-progreso-clientes.md); las pantallas y pruebas visuales de 10.01–10.03 fueron retiradas y ya no constituyen implementación vigente. El alcance continúa siendo **exclusivamente la aplicación de clientes**; este reinicio no aprueba por inferencia las ETAPAS 08–10 ni autoriza adelantar `staff_app`.
 
 - Implementar **customer_app** y **staff_app**, reutilizando paquetes justificados y respetando los slices definidos.
 - Construir pantallas, estado, navegación por permisos, formularios, tratamiento de errores y persistencia segura de sesión.
@@ -201,4 +201,4 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 6. **Validación honesta:** distinguir documento revisado, archivo verificado, compilación, ejecución de pruebas y aprobación; nunca marcar como hecha una comprobación no ejecutada.
 7. **Control de cambios:** cambios de alcance, roles, políticas o simulaciones regresan a los documentos afectados y actualizan trazabilidad. No introducir funcionalidades extra como solución a una etapa técnica.
 
-**Próximo hito de `customer_app`:** revisar el estado limpio y autorizar la reconstrucción de 10.01 contra las referencias Figma verificadas; mantener 10.02 y posteriores pendientes hasta avanzar bloque a bloque. Siguen pendientes las aprobaciones formales de las ETAPAS 08, 09 y 10; ninguna verificación técnica las sustituye.
+**Próximo hito de `customer_app`:** revisión y decisión expresa sobre 10.00. Mantener 10.01 y posteriores pendientes; si se autoriza después, reconstruir 10.01 contra las referencias Figma verificadas y avanzar bloque a bloque. Siguen pendientes las aprobaciones formales de las ETAPAS 08, 09 y 10; ninguna verificación técnica las sustituye.

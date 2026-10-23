@@ -1,7 +1,9 @@
 # Restaurant App V2 — Frontend
 
-Base técnica Flutter de Chifa ASIA para la ETAPA 07. No contiene funcionalidades
-de negocio ni navegación por roles.
+Monorepo Flutter de Chifa ASIA. `customer_app` conserva la línea base técnica,
+el design system y las capas no visuales de M01/M02; la UI de 10.01–10.03 fue
+retirada y queda pendiente de reconstrucción. `staff_app` permanece en la línea
+base de ETAPA 07.
 
 - `apps/customer_app`: Cliente e Invitado en Android.
 - `apps/staff_app`: personal en Android y panel administrativo en Flutter Web.
@@ -39,6 +41,7 @@ debug; los builds release conservan la política segura de Android y deben usar 
 - [ETAPA 10 — contexto preparatorio de `customer_app`](docs/etapas/etapa-10.md)
 - [ETAPA 10 — hoja de ruta de la app de clientes](docs/etapas/etapa-10-hoja-ruta-clientes.md)
 - [Checkpoint compacto para Codex/AGY](docs/etapas/etapa-10-progreso-clientes.md)
+- [Inventario Figma 01–20, claro y oscuro](docs/referencias-visuales/etapa-10-00-figma.md)
 - [Guía para Codex y AGY](docs/agentes/README.md)
 
-**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09 tiene diseños de clientes existentes en Figma (pendientes de aprobación formal); ETAPA 10 tiene hoja de ruta preparada y código de negocio aún sin iniciar.
+**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09 tiene diseños de clientes existentes en Figma (pendientes de aprobación formal); ETAPA 10 tiene 10.00 revalidado y listo para revisión, sin UI vigente de 10.01–10.03. No avanzar sin autorización.
