@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('light and dark themes preserve the Figma semantic palette', () {
+  test('light and dark themes preserve the configured semantic palette', () {
     final AppPalette light = AppTheme.light.extension<AppPalette>()!;
     final AppPalette dark = AppTheme.dark.extension<AppPalette>()!;
 

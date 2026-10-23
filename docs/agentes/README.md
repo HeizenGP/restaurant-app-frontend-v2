@@ -1,50 +1,34 @@
 # Guía operativa de agentes — Restaurant App V2
 
-**Guía operativa del frontend en `develop`, alineada con la línea base del backend.** `AGENTS.md` conserva reglas siempre activas; esta guía contiene el procedimiento de consulta y sincronización. No copiarla en prompts ni Skills.
+`AGENTS.md` contiene las reglas permanentes; el checkpoint contiene el estado mutable. Esta guía solo resuelve consultas y coordinación excepcionales.
 
-## Selección de contexto
+## Contexto bajo demanda
 
-| Tipo de tarea | Leer | Añadir solo si hace falta |
-|---|---|---|
-| Cualquier tarea | `AGENTS.md`, índice y etapa vigente | Nada más por defecto. |
-| Arquitectura/revisión transversal | Secciones afectadas de `etapa-05.md` | RF/RN/RNF concretos; casos de uso de ETAPA 04 aprobados documentalmente, con observaciones técnicas pendientes. |
-| Slice FastAPI | Skill `restaurant-fastapi-slice` y sección backend de ETAPA 05 | CA del módulo y flujo puntual. |
-| Slice Flutter | Skill `restaurant-flutter-slice`, contexto preparatorio de ETAPA 10 y sección Flutter/REST de ETAPA 05 | CA del módulo, contrato REST vigente y diseño Figma aprobado de la pantalla/flujo puntual. |
-| Duda de negocio | ETAPA 03 primero | ETAPAS 01–02 solo si la duda no queda resuelta. |
-| Sincronización | Archivo ya editado y su homólogo | Hash/diff; no cargar ambos textos completos. |
+| Tarea | Contexto adicional |
+|---|---|
+| Slice Flutter | Skill local, RF/CA, contrato REST y referencia visual local de las pantallas afectadas. |
+| Arquitectura transversal | Solo las secciones implicadas de `etapa-05.md` y los módulos tocados. |
+| Duda de negocio | RF/RN/RNF puntual de ETAPA 03; ampliar a 01–02 solo si no basta. |
+| Documento compartido | Archivo editado y su homólogo; comparar por hash/diff sin cargar ambas copias completas. |
 
-Mantener en `docs/` las decisiones duraderas; el historial de conversación no es fuente. Una solicitud debe indicar objetivo, etapa, restricciones y evidencia esperada. La salida debe limitarse a decisiones, archivos, verificaciones, riesgos y pendientes.
+## Flujo
 
-## Coordinación Codex / AGY
+1. Confirmar checkout, `develop`, cambios previos y bloque autorizado.
+2. Formar una matriz mínima: pantalla o flujo → RF/CA → contrato → archivo → prueba.
+3. Inspeccionar y modificar únicamente los archivos de esa matriz.
+4. Ejecutar pruebas focales; reservar análisis y suite completa para el cierre del bloque.
+5. Actualizar el checkpoint con estado, evidencia, resultados y próxima acción, sin bitácora extensa.
 
-- Ambos usan `AGENTS.md` y descubren Skills locales desde `.agents/skills/`; no crear formatos o copias por herramienta.
-- Coordinar un solo escritor por archivo. Antes de editar, comprobar rama y árbol de trabajo de ambos repositorios.
-- Mantener idéntica la línea base documental realmente compartida. ETAPA 08 conserva su plan, bitácora e informe de auditoría en backend como fuente de verdad; el contexto de ETAPA 10 es específico del frontend y enlaza esos documentos, sin duplicarlos.
-- Si una etapa o decisión sigue pendiente, conservar esa etiqueta aunque una solución técnica la contemple.
-- No hacer commit, push, merge ni acciones remotas salvo solicitud explícita.
+## Auditoría visual
 
-## Skills vigentes
+- Guardar en `docs/referencias-visuales/` solo capturas o especificaciones verificadas proporcionadas por el usuario, indicando pantalla, tema, tamaño y procedencia.
+- Capturar Flutter con el mismo viewport y comparar pantalla por pantalla en claro y oscuro.
+- Registrar diferencias de espaciado, tipografía, tamaños, colores y componentes. Corregir únicamente las verificadas y autorizadas.
+- Si falta el original, marcar la comparación como bloqueada. Un golden generado por Flutter no sustituye la referencia.
 
-| Repositorio | Skill | Propósito |
-|---|---|---|
-| Backend | `.agents/skills/restaurant-fastapi-slice/SKILL.md` | Caso de uso M01–M07 con hexagonal, Vertical Slicing, permisos, consistencia y simulaciones. |
-| Frontend | `.agents/skills/restaurant-flutter-slice/SKILL.md` | Feature de `customer_app` o `staff_app`, estado, navegación, REST y permisos. |
+## Coordinación excepcional
 
-Las Skills enlazan `etapa-05.md`; no duplican matrices, estructura completa ni requisitos. Añadir otra Skill solo si existe un procedimiento repetido, especializado y no cubierto por estas reglas.
-
-## Uso de MCP
-
-1. Leer y editar repositorios con herramientas locales.
-2. Usar GitHub solo para PR, issue u operación remota solicitada; no para releer archivos locales.
-3. Usar Figma cuando ETAPA 09 o una tarea visual aprobada lo requiera.
-4. Conectar otro servicio solo con una necesidad funcional vigente y permisos mínimos.
-5. No cargar servidores, esquemas o manuales “por si acaso”; documentar una prueba MCP únicamente si se ejecutó.
-
-## Protocolo de validación
-
-1. Confirmar ambos repositorios en `develop` y revisar cambios previos.
-2. Validar estructura de Skills (frontmatter `name`/`description`, coincidencia nombre/carpeta, restricciones de activación y referencias); ejecutar `quick_validate.py` si está disponible. Distinguir validación estática de prueba real de invocación en Codex/Antigravity.
-3. Comprobar que los 40 RF y 48 CA siguen trazados en M01–M07 y que ningún pendiente se presenta como aprobado.
-4. Comparar por hash/diff los documentos de línea base compartidos; revisar aparte los documentos específicos de cada repositorio y la trazabilidad API → futura interfaz.
-5. Registrar herramientas no disponibles (por ejemplo, render PlantUML) como pendientes; no simular el resultado.
-6. Dejar la etapa en revisión hasta la aprobación expresa del usuario.
+- Mantener un escritor por archivo. Revisar ambos repositorios solo en tareas transversales.
+- Sincronizar por hash únicamente la línea base compartida que cambió; no duplicar planes o bitácoras específicos.
+- Validar una Skill solo cuando cambie; revisar la trazabilidad global solo al cerrar una etapa o una auditoría global.
+- Usar archivos y Git locales primero; recurrir a servicios externos solo cuando la tarea y la evidencia lo exijan.

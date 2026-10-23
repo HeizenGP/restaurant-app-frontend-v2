@@ -5,13 +5,9 @@ description: Usar al diseñar, implementar o revisar un slice Flutter/Dart de cu
 
 # Slice Flutter de Restaurant App V2
 
-## Cuándo usarla
-
-Activar para una **funcionalidad Flutter** o su revisión técnica cuando la etapa lo permita (implementación en ETAPA 10). No activar para diseño de base de datos en ETAPA 06, trabajo exclusivo FastAPI ni para crear pantallas no respaldadas por RF y CU. Si la etapa solo admite diseño, no crear código Flutter.
-
 ## Contexto mínimo
 
-Lee `AGENTS.md`, `docs/etapas/README.md`, el contexto de `docs/etapas/etapa-10.md` y las secciones Flutter/REST pertinentes de `docs/etapas/etapa-05.md`. Abre únicamente los RF/CA del módulo afectado. Los CU de ETAPA 04 están aprobados documentalmente; consulta las decisiones M07 aprobadas en 08.09 sin atribuirlas a la aprobación original de esos diagramas.
+Sigue la carga selectiva de `AGENTS.md`: checkpoint, bloque activo, RF/CA y contrato REST implicados, más los archivos afectados. Abre arquitectura o etapas completas solo si falta una decisión necesaria.
 
 ## Procedimiento
 
@@ -20,8 +16,10 @@ Lee `AGENTS.md`, `docs/etapas/README.md`, el contexto de `docs/etapas/etapa-10.m
 3. No uses DTO en widgets ni importes infraestructura de otro slice. La composición de la app conecta puertos y adaptadores.
 4. Modela estado unidireccional e inmutable y navegación declarativa por sesión/capacidad. Ocultar UI mejora experiencia, pero nunca sustituye autorización del servidor.
 5. Trata el backend como fuente de verdad. Muestra éxito de una mutación solo tras confirmación; reutiliza `Idempotency-Key` en reintentos y traduce los códigos de error uniformes.
-6. No crees `packages/` ni paquetes compartidos desde el inicio. Extrae un paquete solo cuando `customer_app` y `staff_app` reutilicen código real; evita duplicar las reglas del backend.
-7. Respeta los permisos M07 ya aprobados: Mozo registra servido; Administrador registra recojo, entrega y cierre; Super Administrador tiene acceso total. Son operaciones de `staff_app`, no de `customer_app`. Conserva pendientes RN-20/RN-21 (redacción), RNF-08 (umbral) y comprobantes sin RF/CA; no agregues pasarelas, mapas, SUNAT ni logística.
-8. Verifica controlador/caso de uso, mapeo REST, guardas y estados de error pertinentes. Reporta RF/RNF, aplicación elegida, archivos y pruebas reales.
+6. Reutiliza temas, componentes y recursos vigentes. Extrae código compartido solo cuando ambas apps lo reutilicen realmente; no dupliques reglas del backend.
 
-No inicialices Flutter ni elijas/instales paquetes si la etapa vigente no lo autoriza.
+## Verificación
+
+- Ejecuta pruebas focales del controlador/caso de uso, adaptador REST, guardas, errores y widgets modificados. Corre análisis y suite completa al cerrar el bloque.
+- Para UI, compara claro y oscuro contra referencias verificadas de `docs/referencias-visuales/`; los goldens propios solo detectan regresiones. Registra diferencias antes de corregirlas.
+- No inicialices Flutter, reinstales dependencias ni agregues paquetes sin autorización.
