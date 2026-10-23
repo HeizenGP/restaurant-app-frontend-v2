@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
 import '../../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../../features/m02_catalog/shared/application/catalog_contracts.dart';
+import '../../features/ui_foundation/presentation/foundation_pages.dart';
 import '../theme/theme_mode_controller.dart';
+import 'customer_shell.dart';
 
 abstract final class CustomerRoutes {
   static const String home = 'home';
@@ -52,10 +54,82 @@ GoRouter createCustomerRouter({
       _resetRoute(path: '/acceso', name: CustomerRoutes.access),
       _resetRoute(path: '/registro', name: CustomerRoutes.registration),
       _resetRoute(path: '/invitado', name: CustomerRoutes.guest),
-      _resetRoute(path: '/', name: CustomerRoutes.home),
-      _resetRoute(path: '/menu', name: CustomerRoutes.menu),
-      _resetRoute(path: '/pedidos', name: CustomerRoutes.orders),
-      _resetRoute(path: '/cuenta', name: CustomerRoutes.account),
+      StatefulShellRoute.indexedStack(
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              return CustomerShell(navigationShell: navigationShell);
+            },
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/',
+                name: CustomerRoutes.home,
+                builder: (BuildContext context, GoRouterState state) {
+                  return FoundationHomePage(
+                    themeModeController: themeModeController,
+                    onOpenMenu: () => context.go('/menu'),
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/menu',
+                name: CustomerRoutes.menu,
+                builder: (BuildContext context, GoRouterState state) {
+                  return FoundationCatalogPage(
+                    themeModeController: themeModeController,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/pedidos',
+                name: CustomerRoutes.orders,
+                builder: (BuildContext context, GoRouterState state) {
+                  return FoundationOrdersPage(
+                    themeModeController: themeModeController,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/cuenta',
+                name: CustomerRoutes.account,
+                builder: (BuildContext context, GoRouterState state) {
+                  final user = authController.state.session?.user;
+                  final String displayName =
+                      user?.displayName ?? 'Nombre del cliente';
+                  final String email = user?.email ?? 'correo@ejemplo.com';
+                  final String initials = displayName.trim().isEmpty
+                      ? 'C'
+                      : displayName.trimLeft()[0].toUpperCase();
+                  return FoundationAccountPage(
+                    themeModeController: themeModeController,
+                    displayName: displayName,
+                    email: email,
+                    initials: initials,
+                    onOpenOrders: () => context.go('/pedidos'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
       _resetRoute(
         path: '/menu/categoria/:categoryId/producto/:productId',
         name: CustomerRoutes.productDetail,

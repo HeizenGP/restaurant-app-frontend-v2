@@ -14,7 +14,7 @@ abstract final class AppTypography {
         fontFamily: displayFontFamily,
         fontSize: 31,
         fontWeight: FontWeight.w600,
-        height: 1.1,
+        height: 42 / 31,
       ),
       displayMedium: TextStyle(
         color: primary,
@@ -28,7 +28,7 @@ abstract final class AppTypography {
         fontFamily: displayFontFamily,
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        height: 1.1,
+        height: 27 / 24,
       ),
       headlineMedium: TextStyle(
         color: primary,

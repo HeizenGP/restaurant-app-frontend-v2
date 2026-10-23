@@ -11,6 +11,8 @@ class ChifaPageScaffold extends StatelessWidget {
     required this.child,
     required this.themeModeController,
     this.pageKey,
+    this.contentGap = 14,
+    this.initials = 'C',
     this.safeBottom = false,
     super.key,
   });
@@ -20,6 +22,8 @@ class ChifaPageScaffold extends StatelessWidget {
   final Widget child;
   final ThemeModeController themeModeController;
   final Key? pageKey;
+  final double contentGap;
+  final String initials;
   final bool safeBottom;
 
   @override
@@ -28,50 +32,71 @@ class ChifaPageScaffold extends StatelessWidget {
 
     return SafeArea(
       bottom: safeBottom,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return SingleChildScrollView(
-            key: pageKey,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenGutter,
-              10,
-              AppSpacing.screenGutter,
-              AppSpacing.xl,
-            ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppSpacing.contentMaxWidth,
+      child: SingleChildScrollView(
+        key: pageKey,
+        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 390),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+                  child: ChifaAppHeader(
+                    isDarkMode: isDarkMode,
+                    onToggleTheme: themeModeController.toggle,
+                    initials: initials,
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    ChifaAppHeader(
-                      isDarkMode: isDarkMode,
-                      onToggleTheme: themeModeController.toggle,
-                    ),
-                    const SizedBox(height: 20),
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.displayLarge,
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenGutter,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 42),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 1),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Semantics(
+                              header: true,
+                              child: Text(
+                                title,
+                                style: Theme.of(context).textTheme.displayLarge,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    child,
-                  ],
+                      const SizedBox(height: 6),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 37),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 1),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              subtitle,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: contentGap),
+                      child,
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

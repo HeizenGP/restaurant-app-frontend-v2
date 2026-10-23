@@ -36,10 +36,7 @@ class ChifaCard extends StatelessWidget {
     final Widget content = ConstrainedBox(
       constraints: BoxConstraints(minHeight: minimumHeight),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: AppSpacing.md,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         child: Row(
           children: <Widget>[
             if (icon != null) ...<Widget>[
@@ -51,9 +48,21 @@ class ChifaCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(color: palette.cardTextPrimary),
+                  ),
                   const SizedBox(height: 3),
-                  Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: palette.cardTextSecondary),
+                  ),
                 ],
               ),
             ),

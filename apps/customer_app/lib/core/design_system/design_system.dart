@@ -1,6 +1,7 @@
 export 'components/chifa_app_header.dart';
 export 'components/chifa_button.dart';
 export 'components/chifa_card.dart';
+export 'components/chifa_chip.dart';
 export 'components/chifa_icon_tile.dart';
 export 'components/chifa_page_scaffold.dart';
 export 'components/chifa_state_view.dart';

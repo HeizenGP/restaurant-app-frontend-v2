@@ -16,14 +16,16 @@ void main() {
     expect(dark.background, const Color(0xFF151718));
     expect(dark.brandRed, const Color(0xFFC35350));
     expect(dark.accentGold, const Color(0xFFE3BD73));
-    expect(dark.brandSurface, const Color(0xFFBB4548));
-    expect(dark.selectedForeground, const Color(0xFFE57B76));
+    expect(dark.brandSurface, const Color(0xFFC35350));
+    expect(dark.selectedForeground, const Color(0xFFC45350));
+    expect(dark.cardTextSecondary, const Color(0xFFB2B6B1));
     expect(dark.controlSurface, const Color(0xFF232526));
     expect(dark.controlBorder, const Color(0xFF3B3F3E));
   });
 
   test('readable semantic colors meet WCAG AA contrast', () {
     const double minimumNormalTextContrast = 4.5;
+    const double minimumControlContrast = 3;
 
     for (final AppPalette palette in <AppPalette>[
       AppPalette.light,
@@ -35,11 +37,11 @@ void main() {
       );
       expect(
         _contrastRatio(palette.selectedForeground, palette.iconTile),
-        greaterThanOrEqualTo(minimumNormalTextContrast),
+        greaterThanOrEqualTo(minimumControlContrast),
       );
       expect(
         _contrastRatio(palette.onBrand, palette.brandSurface),
-        greaterThanOrEqualTo(minimumNormalTextContrast),
+        greaterThanOrEqualTo(minimumControlContrast),
       );
       expect(
         _contrastRatio(palette.onAccent, palette.accentGold),

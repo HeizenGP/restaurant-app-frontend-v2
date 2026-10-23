@@ -8,9 +8,13 @@ abstract final class AppColors {
   static const Color lightBorder = Color(0xFFE7DDD2);
   static const Color lightTextPrimary = Color(0xFF242120);
   static const Color lightTextSecondary = Color(0xFF746F6A);
+  static const Color lightCardTextPrimary = Color(0xFF292422);
+  static const Color lightCardTextSecondary = Color(0xFF77716B);
   static const Color lightBrandRed = Color(0xFF8E292E);
+  static const Color lightSelectedForeground = Color(0xFF8E2930);
   static const Color lightAccentGold = Color(0xFFC3934F);
   static const Color lightTextAccent = Color(0xFF95692A);
+  static const Color lightProfileCover = Color(0xFF902B33);
 
   static const Color darkBackground = Color(0xFF151718);
   static const Color darkSurface = Color(0xFF222426);
@@ -19,10 +23,12 @@ abstract final class AppColors {
   static const Color darkBorder = Color(0xFF393E3C);
   static const Color darkTextPrimary = Color(0xFFF5F1EA);
   static const Color darkTextSecondary = Color(0xFFADB0AD);
+  static const Color darkCardTextSecondary = Color(0xFFB2B6B1);
   static const Color darkBrandRed = Color(0xFFC35350);
   static const Color darkAccentGold = Color(0xFFE3BD73);
-  static const Color darkBrandSurface = Color(0xFFBB4548);
-  static const Color darkSelectedForeground = Color(0xFFE57B76);
+  static const Color darkBrandSurface = Color(0xFFC35350);
+  static const Color darkSelectedForeground = Color(0xFFC45350);
+  static const Color darkProfileCover = Color(0xFF48252A);
 
   static const Color onBrand = Colors.white;
   static const Color lightSuccess = Color(0xFF278063);
@@ -42,6 +48,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.controlBorder,
     required this.textPrimary,
     required this.textSecondary,
+    required this.cardTextPrimary,
+    required this.cardTextSecondary,
     required this.brandRed,
     required this.brandSurface,
     required this.accentGold,
@@ -51,6 +59,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.onBrand,
     required this.success,
     required this.disabled,
+    required this.profileCover,
   });
 
   static const AppPalette light = AppPalette(
@@ -64,15 +73,18 @@ class AppPalette extends ThemeExtension<AppPalette> {
     controlBorder: Color(0xFFE4DFD7),
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
+    cardTextPrimary: AppColors.lightCardTextPrimary,
+    cardTextSecondary: AppColors.lightCardTextSecondary,
     brandRed: AppColors.lightBrandRed,
     brandSurface: AppColors.lightBrandRed,
     accentGold: AppColors.lightAccentGold,
     onAccent: AppColors.lightTextPrimary,
     textAccent: AppColors.lightTextAccent,
-    selectedForeground: AppColors.lightBrandRed,
+    selectedForeground: AppColors.lightSelectedForeground,
     onBrand: AppColors.onBrand,
     success: AppColors.lightSuccess,
     disabled: Color(0xFFE4DFD7),
+    profileCover: AppColors.lightProfileCover,
   );
 
   static const AppPalette dark = AppPalette(
@@ -86,6 +98,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     controlBorder: Color(0xFF3B3F3E),
     textPrimary: AppColors.darkTextPrimary,
     textSecondary: AppColors.darkTextSecondary,
+    cardTextPrimary: AppColors.darkTextPrimary,
+    cardTextSecondary: AppColors.darkCardTextSecondary,
     brandRed: AppColors.darkBrandRed,
     brandSurface: AppColors.darkBrandSurface,
     accentGold: AppColors.darkAccentGold,
@@ -95,6 +109,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     onBrand: AppColors.onBrand,
     success: AppColors.darkSuccess,
     disabled: Color(0xFF3B3F3E),
+    profileCover: AppColors.darkProfileCover,
   );
 
   final Color background;
@@ -107,6 +122,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color controlBorder;
   final Color textPrimary;
   final Color textSecondary;
+  final Color cardTextPrimary;
+  final Color cardTextSecondary;
   final Color brandRed;
   final Color brandSurface;
   final Color accentGold;
@@ -116,6 +133,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color onBrand;
   final Color success;
   final Color disabled;
+  final Color profileCover;
 
   @override
   AppPalette copyWith({
@@ -129,6 +147,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? controlBorder,
     Color? textPrimary,
     Color? textSecondary,
+    Color? cardTextPrimary,
+    Color? cardTextSecondary,
     Color? brandRed,
     Color? brandSurface,
     Color? accentGold,
@@ -138,6 +158,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? onBrand,
     Color? success,
     Color? disabled,
+    Color? profileCover,
   }) {
     return AppPalette(
       background: background ?? this.background,
@@ -150,6 +171,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       controlBorder: controlBorder ?? this.controlBorder,
       textPrimary: textPrimary ?? this.textPrimary,
       textSecondary: textSecondary ?? this.textSecondary,
+      cardTextPrimary: cardTextPrimary ?? this.cardTextPrimary,
+      cardTextSecondary: cardTextSecondary ?? this.cardTextSecondary,
       brandRed: brandRed ?? this.brandRed,
       brandSurface: brandSurface ?? this.brandSurface,
       accentGold: accentGold ?? this.accentGold,
@@ -159,6 +182,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       onBrand: onBrand ?? this.onBrand,
       success: success ?? this.success,
       disabled: disabled ?? this.disabled,
+      profileCover: profileCover ?? this.profileCover,
     );
   }
 
@@ -182,6 +206,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
       controlBorder: Color.lerp(controlBorder, other.controlBorder, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      cardTextPrimary: Color.lerp(cardTextPrimary, other.cardTextPrimary, t)!,
+      cardTextSecondary: Color.lerp(
+        cardTextSecondary,
+        other.cardTextSecondary,
+        t,
+      )!,
       brandRed: Color.lerp(brandRed, other.brandRed, t)!,
       brandSurface: Color.lerp(brandSurface, other.brandSurface, t)!,
       accentGold: Color.lerp(accentGold, other.accentGold, t)!,
@@ -195,6 +225,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       onBrand: Color.lerp(onBrand, other.onBrand, t)!,
       success: Color.lerp(success, other.success, t)!,
       disabled: Color.lerp(disabled, other.disabled, t)!,
+      profileCover: Color.lerp(profileCover, other.profileCover, t)!,
     );
   }
 }

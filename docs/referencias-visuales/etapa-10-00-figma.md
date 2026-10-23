@@ -5,6 +5,7 @@
 - Tema claro: página `0:1`, «01 · APP CLIENTES — MODO CLARO».
 - Tema oscuro: página `176:2`, «02 · APP CLIENTES — MODO OSCURO».
 - Resultado: **20/20 pantallas por tema**, numeración completa, nombres equivalentes, visibles y de **390×844**; sin faltantes, duplicados ni tamaños inválidos.
+- Evidencia local: **18 PNG** verificables; incluye ambas variantes de 01, 02, 03, 08, 09, 10, 15, 19 y 20.
 - Alcance: comprobación estructural de existencia, correspondencia y dimensiones. No acredita paridad visual píxel a píxel de una implementación Flutter.
 
 | # | Pantalla | Nodo claro | Nodo oscuro | Evidencia local |
@@ -23,11 +24,11 @@
 | 12 | Revisar solicitud | `179:226` | `179:673` | Nodos verificados; captura no exportada |
 | 13 | Solicitud pendiente | `179:249` | `179:696` | Nodos verificados; captura no exportada |
 | 14 | Anticipo del 50 % | `179:267` | `179:714` | Nodos verificados; captura no exportada |
-| 15 | Pedidos e historial | `179:290` | `179:737` | Nodos verificados; captura no exportada |
+| 15 | Pedidos e historial | `179:290` | `179:737` | `figma/10.01-10.03/15-orders-{light,dark}.png` |
 | 16 | Detalle y seguimiento | `179:319` | `179:766` | Nodos verificados; captura no exportada |
 | 17 | Estado de pago | `179:343` | `179:790` | Nodos verificados; captura no exportada |
 | 18 | Rechazo y excepciones | `179:367` | `179:814` | Nodos verificados; captura no exportada |
 | 19 | Perfil del cliente · estilo social | `179:390` | `179:837` | `figma/10.01-10.03/19-account-{light,dark}.png` |
-| 20 | Estados de interfaz | `179:418` | `179:865` | Nodos verificados; captura no exportada |
+| 20 | Estados de interfaz | `179:418` | `179:865` | `figma/10.01-10.03/20-states-{light,dark}.png` |
 
 No se modificó el archivo Figma. Las capturas existentes se conservan sin alteraciones; las restantes se exportarán únicamente cuando el bloque que las use esté autorizado.
