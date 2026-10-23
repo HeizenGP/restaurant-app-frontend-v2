@@ -19,9 +19,14 @@ class CustomerBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
+    final double heightGrowth = math.max(
+      0,
+      MediaQuery.textScalerOf(context).scale(12) - 12,
+    );
+    final double itemHeight = 57 + heightGrowth;
 
     return SizedBox(
-      height: 84,
+      height: 84 + heightGrowth,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: palette.surface,
@@ -41,7 +46,7 @@ class CustomerBottomNavigation extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: SizedBox(
                   width: rowWidth,
-                  height: 57,
+                  height: itemHeight,
                   child: Row(
                     children: List<Widget>.generate(
                       customerDestinations.length * 2 - 1,
@@ -59,7 +64,7 @@ class CustomerBottomNavigation extends StatelessWidget {
 
                         return SizedBox(
                           width: itemWidth,
-                          height: 57,
+                          height: itemHeight,
                           child: Semantics(
                             button: true,
                             selected: selected,

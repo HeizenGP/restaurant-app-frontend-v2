@@ -72,7 +72,6 @@ GoRouter createCustomerRouter({
                 builder: (BuildContext context, GoRouterState state) {
                   return FoundationHomePage(
                     themeModeController: themeModeController,
-                    onOpenMenu: () => context.go('/menu'),
                   );
                 },
               ),
@@ -110,18 +109,13 @@ GoRouter createCustomerRouter({
                 path: '/cuenta',
                 name: CustomerRoutes.account,
                 builder: (BuildContext context, GoRouterState state) {
-                  final user = authController.state.session?.user;
-                  final String displayName =
-                      user?.displayName ?? 'Nombre del cliente';
-                  final String email = user?.email ?? 'correo@ejemplo.com';
-                  final String initials = displayName.trim().isEmpty
-                      ? 'C'
-                      : displayName.trimLeft()[0].toUpperCase();
+                  final session = authController.state.session;
+                  final user = session?.user;
                   return FoundationAccountPage(
                     themeModeController: themeModeController,
-                    displayName: displayName,
-                    email: email,
-                    initials: initials,
+                    isGuest: session?.isGuest ?? true,
+                    displayName: user?.displayName,
+                    email: user?.email,
                     onOpenOrders: () => context.go('/pedidos'),
                   );
                 },

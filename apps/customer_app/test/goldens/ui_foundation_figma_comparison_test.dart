@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  // These files render test-only Figma sample content. Operational empty and
+  // session variants have separate regression goldens.
   final List<_ComparisonCase> cases = <_ComparisonCase>[
     const _ComparisonCase('08_home_light', '08-home-light.png'),
     const _ComparisonCase('08_home_dark', '08-home-dark.png'),
@@ -21,41 +23,44 @@ void main() {
   ];
 
   for (final _ComparisonCase visualCase in cases) {
-    test('${visualCase.name} keeps high visual agreement with Figma', () async {
-      final _DecodedImage actual = await _decode(
-        File('test/goldens/ui_foundation_${visualCase.name}.png'),
-      );
-      final _DecodedImage expected = await _decode(
-        File(
-          '../../docs/referencias-visuales/figma/10.01-10.03/'
-          '${visualCase.referenceName}',
-        ),
-      );
+    test(
+      '${visualCase.name} reference fixture keeps high agreement with Figma',
+      () async {
+        final _DecodedImage actual = await _decode(
+          File('test/goldens/ui_foundation_${visualCase.name}.png'),
+        );
+        final _DecodedImage expected = await _decode(
+          File(
+            '../../docs/referencias-visuales/figma/10.01-10.03/'
+            '${visualCase.referenceName}',
+          ),
+        );
 
-      expect(actual.width, 390);
-      expect(actual.height, 844);
-      expect(expected.width, actual.width);
-      expect(expected.height, actual.height);
+        expect(actual.width, 390);
+        expect(actual.height, 844);
+        expect(expected.width, actual.width);
+        expect(expected.height, actual.height);
 
-      final _Similarity result = _compare(actual, expected);
-      expect(
-        result.meanChannelSimilarity,
-        greaterThanOrEqualTo(0.97),
-        reason:
-            '${visualCase.name}: similitud media '
-            '${result.meanChannelSimilarity.toStringAsFixed(4)}, '
-            'píxeles dentro de tolerancia '
-            '${result.tolerantPixelAgreement.toStringAsFixed(4)}',
-      );
-      expect(
-        result.tolerantPixelAgreement,
-        greaterThanOrEqualTo(0.94),
-        reason:
-            '${visualCase.name}: solo '
-            '${result.tolerantPixelAgreement.toStringAsFixed(4)} '
-            'de los píxeles difiere como máximo 32/255 por canal',
-      );
-    });
+        final _Similarity result = _compare(actual, expected);
+        expect(
+          result.meanChannelSimilarity,
+          greaterThanOrEqualTo(0.97),
+          reason:
+              '${visualCase.name}: similitud media '
+              '${result.meanChannelSimilarity.toStringAsFixed(4)}, '
+              'píxeles dentro de tolerancia '
+              '${result.tolerantPixelAgreement.toStringAsFixed(4)}',
+        );
+        expect(
+          result.tolerantPixelAgreement,
+          greaterThanOrEqualTo(0.94),
+          reason:
+              '${visualCase.name}: solo '
+              '${result.tolerantPixelAgreement.toStringAsFixed(4)} '
+              'de los píxeles difiere como máximo 32/255 por canal',
+        );
+      },
+    );
   }
 }
 

@@ -24,113 +24,94 @@ class ChifaAppHeader extends StatelessWidget {
         ? palette.accentGold
         : palette.brandRed;
 
-    return SizedBox(
-      height: 51,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double avatarLeft = constraints.maxWidth - 55;
-          final double themeLeft = avatarLeft - 51;
-          final double notificationLeft = themeLeft - 47;
-
-          return Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              Positioned(
-                left: 4,
-                top: 6,
-                width: notificationLeft - 37,
-                height: 27,
-                child: Text(
-                  'CHIFA ASIA',
-                  maxLines: 1,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-              ),
-              Positioned(
-                left: 5,
-                top: 34,
-                width: notificationLeft - 38,
-                height: 12,
-                child: Text(
-                  'EL SABOR NOS UNE',
-                  maxLines: 1,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: palette.textAccent,
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: notificationLeft,
-                top: 5,
-                child: Semantics(
-                  label: 'Notificaciones no disponibles',
-                  excludeSemantics: true,
-                  child: _HeaderTile(
-                    icon: LucideIcons.bell,
-                    color: utilityIconColor,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: themeLeft,
-                top: 5,
-                child: Semantics(
-                  button: true,
-                  label: isDarkMode
-                      ? 'Activar tema claro'
-                      : 'Activar tema oscuro',
-                  onTap: onToggleTheme,
-                  excludeSemantics: true,
-                  child: Tooltip(
-                    message: isDarkMode ? 'Tema claro' : 'Tema oscuro',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        key: const Key('theme-toggle'),
-                        onTap: onToggleTheme,
-                        borderRadius: BorderRadius.circular(AppRadii.control),
-                        child: _HeaderTile(
-                          icon: isDarkMode ? LucideIcons.sun : LucideIcons.moon,
-                          color: utilityIconColor,
-                        ),
-                      ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 51),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 13),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'CHIFA ASIA',
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
+                      style: Theme.of(context).textTheme.headlineLarge,
                     ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: avatarLeft,
-                top: 5,
-                child: Semantics(
-                  image: true,
-                  label: 'Avatar de cliente $initials',
-                  excludeSemantics: true,
-                  child: CircleAvatar(
-                    radius: 21,
-                    backgroundColor: palette.brandSurface,
-                    foregroundColor: palette.onBrand,
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
+                    Text(
+                      'EL SABOR NOS UNE',
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
+                      style: TextStyle(
+                        color: palette.textAccent,
                         fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 17,
+                        fontSize: 8,
                         fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Semantics(
+              label: 'Notificaciones no disponibles',
+              excludeSemantics: true,
+              child: _HeaderTile(
+                icon: LucideIcons.bell,
+                color: utilityIconColor,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Semantics(
+              button: true,
+              label: isDarkMode ? 'Activar tema claro' : 'Activar tema oscuro',
+              onTap: onToggleTheme,
+              excludeSemantics: true,
+              child: Tooltip(
+                message: isDarkMode ? 'Tema claro' : 'Tema oscuro',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    key: const Key('theme-toggle'),
+                    onTap: onToggleTheme,
+                    borderRadius: BorderRadius.circular(AppRadii.control),
+                    child: _HeaderTile(
+                      icon: isDarkMode ? LucideIcons.sun : LucideIcons.moon,
+                      color: utilityIconColor,
                     ),
                   ),
                 ),
               ),
-            ],
-          );
-        },
+            ),
+            const SizedBox(width: 10),
+            Semantics(
+              image: true,
+              label: 'Avatar de cliente $initials',
+              excludeSemantics: true,
+              child: CircleAvatar(
+                radius: 21,
+                backgroundColor: palette.brandSurface,
+                foregroundColor: palette.onBrand,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

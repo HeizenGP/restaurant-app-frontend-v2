@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/design_system/design_system.dart';
@@ -8,12 +7,12 @@ import '../../../core/design_system/design_system.dart';
 class FoundationHomePage extends StatelessWidget {
   const FoundationHomePage({
     required this.themeModeController,
-    this.onOpenMenu,
+    this.content,
     super.key,
   });
 
   final ThemeModeController themeModeController;
-  final VoidCallback? onOpenMenu;
+  final Widget? content;
 
   @override
   Widget build(BuildContext context) {
@@ -28,44 +27,13 @@ class FoundationHomePage extends StatelessWidget {
         children: <Widget>[
           const _BrandHero(),
           const SizedBox(height: 23),
-          SizedBox(
-            height: 30,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'Explora nuestras categorías',
-                style: Theme.of(context).textTheme.titleLarge,
+          content ??
+              const ChifaStateView(
+                key: Key('home-empty-catalog'),
+                kind: ChifaStateKind.empty,
+                title: 'Sin categorías disponibles',
+                message: 'No hay datos del catálogo para mostrar por ahora',
               ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          const _FixedChipRow(
-            children: <Widget>[
-              ChifaChip(label: 'Arroces', width: 103),
-              SizedBox(width: 11),
-              ChifaChip(label: 'Tallarines', width: 103),
-              SizedBox(width: 10),
-              ChifaChip(label: 'Especiales', width: 115),
-            ],
-          ),
-          const SizedBox(height: 30),
-          ChifaCard(
-            icon: LucideIcons.utensilsCrossed,
-            title: 'Nuestro menú',
-            subtitle: 'Platos y precios desde el catálogo.',
-            onTap: onOpenMenu,
-            trailing: Icon(
-              LucideIcons.chevronRight,
-              color: context.appPalette.cardTextSecondary,
-              size: 17,
-            ),
-          ),
-          const SizedBox(height: 10),
-          const ChifaCard(
-            icon: LucideIcons.info,
-            title: 'Disponibilidad',
-            subtitle: 'Productos habilitados para venta.',
-          ),
         ],
       ),
     );
@@ -73,136 +41,61 @@ class FoundationHomePage extends StatelessWidget {
 }
 
 class FoundationCatalogPage extends StatelessWidget {
-  const FoundationCatalogPage({required this.themeModeController, super.key});
+  const FoundationCatalogPage({
+    required this.themeModeController,
+    this.content,
+    super.key,
+  });
 
   final ThemeModeController themeModeController;
+  final Widget? content;
 
   @override
   Widget build(BuildContext context) {
-    final Widget chevron = Icon(
-      LucideIcons.chevronRight,
-      color: context.appPalette.cardTextSecondary,
-      size: 17,
-    );
-
     return ChifaPageScaffold(
       pageKey: const Key('page-menu'),
       title: 'Nuestro menú',
       subtitle: 'Elige una categoría y descubre los platos.',
       contentGap: 14,
       themeModeController: themeModeController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          const _FixedChipRow(
-            children: <Widget>[
-              ChifaChip(label: 'Arroces', width: 99),
-              SizedBox(width: 11),
-              ChifaChip(label: 'Tallarines', width: 111),
-              SizedBox(width: 11),
-              ChifaChip(label: 'Especiales', width: 110),
-            ],
+      child:
+          content ??
+          const ChifaStateView(
+            key: Key('catalog-empty-state'),
+            kind: ChifaStateKind.empty,
+            title: 'Sin productos disponibles',
+            message: 'No hay datos reales del catálogo para mostrar',
           ),
-          const SizedBox(height: 23),
-          ChifaCard(
-            icon: LucideIcons.utensilsCrossed,
-            title: 'Plato del catálogo',
-            subtitle: 'Nombre · precio desde API · disponible',
-            minimumHeight: 98,
-            trailing: chevron,
-          ),
-          const SizedBox(height: 10),
-          ChifaCard(
-            icon: LucideIcons.info,
-            title: 'Otra opción disponible',
-            subtitle: 'Nombre · precio desde API · disponible',
-            minimumHeight: 98,
-            trailing: chevron,
-          ),
-          const SizedBox(height: 10),
-          const ChifaCard(
-            icon: LucideIcons.utensilsCrossed,
-            title: 'Producto agotado',
-            subtitle: 'No disponible para incorporar',
-            minimumHeight: 98,
-          ),
-          const SizedBox(height: 10),
-          ChifaCard(
-            icon: LucideIcons.utensilsCrossed,
-            title: 'Otra categoría',
-            subtitle: 'Se actualiza al seleccionar categoría',
-            minimumHeight: 98,
-            trailing: chevron,
-          ),
-          const SizedBox(height: 29),
-          Text(
-            'Fotos y descripciones: API no disponible',
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(fontSize: 11),
-          ),
-        ],
-      ),
     );
   }
 }
 
 class FoundationOrdersPage extends StatelessWidget {
-  const FoundationOrdersPage({required this.themeModeController, super.key});
+  const FoundationOrdersPage({
+    required this.themeModeController,
+    this.content,
+    super.key,
+  });
 
   final ThemeModeController themeModeController;
+  final Widget? content;
 
   @override
   Widget build(BuildContext context) {
-    final Widget chevron = Icon(
-      LucideIcons.chevronRight,
-      color: context.appPalette.cardTextSecondary,
-      size: 17,
-    );
-
     return ChifaPageScaffold(
       pageKey: const Key('page-pedidos'),
       title: 'Mis pedidos',
       subtitle: 'Solicitudes e historial de esta cuenta.',
       contentGap: 13,
       themeModeController: themeModeController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          const _FixedChipRow(
-            children: <Widget>[
-              ChifaChip(label: 'Todos', width: 98),
-              SizedBox(width: 14),
-              ChifaChip(label: 'Pendientes', width: 113),
-              SizedBox(width: 10),
-              ChifaChip(label: 'Confirmados', width: 107),
-            ],
+      child:
+          content ??
+          const ChifaStateView(
+            key: Key('orders-empty-state'),
+            kind: ChifaStateKind.empty,
+            title: 'Sin pedidos',
+            message: 'Aún no hay pedidos reales para mostrar',
           ),
-          const SizedBox(height: 24),
-          ChifaCard(
-            icon: LucideIcons.receiptText,
-            title: 'Pedido # · reciente',
-            subtitle: 'REQUESTED · pendiente de aprobación',
-            minimumHeight: 119,
-            trailing: chevron,
-          ),
-          const SizedBox(height: 10),
-          ChifaCard(
-            icon: LucideIcons.receiptText,
-            title: 'Pedido # · confirmado',
-            subtitle: 'CONFIRMED · ver detalle',
-            minimumHeight: 119,
-            trailing: chevron,
-          ),
-          const SizedBox(height: 10),
-          ChifaCard(
-            icon: LucideIcons.receiptText,
-            title: 'Pedido # · rechazado',
-            subtitle: 'REJECTED · consultar motivo/estado',
-            minimumHeight: 119,
-            trailing: chevron,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -264,257 +157,159 @@ class FoundationInterfaceStatesPage extends StatelessWidget {
 class FoundationAccountPage extends StatelessWidget {
   const FoundationAccountPage({
     required this.themeModeController,
-    this.displayName = 'Nombre del cliente',
-    this.email = 'correo@ejemplo.com',
-    this.initials = 'C',
+    required this.isGuest,
+    required this.displayName,
+    required this.email,
+    this.avatarInitials,
+    this.accountCardName,
+    this.accountCardEmail,
     this.onOpenOrders,
     super.key,
-  });
+  }) : assert(
+         isGuest || (displayName != null && email != null),
+         'A registered profile requires its real name and email.',
+       );
 
   final ThemeModeController themeModeController;
-  final String displayName;
-  final String email;
-  final String initials;
+  final bool isGuest;
+  final String? displayName;
+  final String? email;
+  final String? avatarInitials;
+  final String? accountCardName;
+  final String? accountCardEmail;
   final VoidCallback? onOpenOrders;
 
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final String identityName = isGuest ? 'Invitado' : displayName!.trim();
+    final String identityDetail = isGuest
+        ? 'Sesión temporal sin cuenta registrada'
+        : email!.trim();
+    final String initials = switch (avatarInitials?.trim()) {
+      final String value when value.isNotEmpty =>
+        value.characters.first.toUpperCase(),
+      _ when identityName.isEmpty => isGuest ? 'I' : 'C',
+      _ => identityName.characters.first.toUpperCase(),
+    };
 
     return SafeArea(
       bottom: false,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double scale = constraints.maxWidth < 390
-              ? constraints.maxWidth / 390
-              : 1;
-          return SingleChildScrollView(
-            key: const Key('page-cuenta'),
-            child: SizedBox(
-              width: constraints.maxWidth,
-              height: 736 * scale,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: 390 * scale,
-                  height: 736 * scale,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      width: 390,
-                      height: 736,
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned(
-                            left: 18,
-                            top: 10,
-                            width: 354,
-                            height: 51,
-                            child: ChifaAppHeader(
-                              isDarkMode: isDark,
-                              onToggleTheme: themeModeController.toggle,
-                              initials: initials,
-                            ),
-                          ),
-                          Positioned(
-                            left: 18,
-                            top: 83,
-                            width: 354,
-                            height: 196,
-                            child: _ProfileCover(palette: palette),
-                          ),
-                          Positioned(
-                            left: 30,
-                            top: 222,
-                            width: 112,
-                            height: 112,
-                            child: SvgPicture.asset(
-                              isDark
-                                  ? 'assets/images/m01/account_avatar_ring_dark.svg'
-                                  : 'assets/images/m01/account_avatar_ring_light.svg',
-                            ),
-                          ),
-                          Positioned(
-                            left: 36.5,
-                            top: 228.5,
-                            width: 99,
-                            height: 99,
-                            child: SvgPicture.asset(
-                              isDark
-                                  ? 'assets/images/m01/account_avatar_dark.svg'
-                                  : 'assets/images/m01/account_avatar_light.svg',
-                            ),
-                          ),
-                          Positioned(
-                            left: 36.5,
-                            top: 248,
-                            width: 99,
-                            height: 60,
-                            child: Center(
-                              child: Text(
-                                initials,
-                                style: const TextStyle(
-                                  color: AppColors.onBrand,
-                                  fontFamily: AppTypography.displayFontFamily,
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.25,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 25,
-                            top: 342,
-                            width: 338,
-                            height: 41,
-                            child: Text(
-                              displayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: palette.textPrimary,
-                                fontFamily: AppTypography.displayFontFamily,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w600,
-                                height: 41 / 32,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 27,
-                            top: 382,
-                            width: 330,
-                            height: 23,
-                            child: Text(
-                              email,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: palette.textSecondary,
-                                    fontSize: 13,
-                                  ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 24,
-                            top: 408,
-                            width: 157,
-                            height: 22,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: palette.surfaceTint,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadii.chip,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 11),
-                                child: Row(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 7,
-                                      height: 7,
-                                      decoration: BoxDecoration(
-                                        color: palette.success,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 9),
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          'CUENTA REGISTRADA',
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                            color: palette.success,
-                                            fontFamily:
-                                                AppTypography.bodyFontFamily,
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 22,
-                            top: 445,
-                            width: 168,
-                            height: 47,
-                            child: _AccountAction(
-                              label: 'Ver mis pedidos',
-                              onPressed: onOpenOrders,
-                            ),
-                          ),
-                          const Positioned(
-                            left: 200,
-                            top: 445,
-                            width: 168,
-                            height: 47,
-                            child: _DisabledAccountAction(),
-                          ),
-                          Positioned(
-                            left: 20,
-                            top: 504,
-                            width: 350,
-                            height: 45,
-                            child: _ProfileTabs(palette: palette),
-                          ),
-                          Positioned(
-                            left: 23,
-                            top: 562,
-                            width: 333,
-                            height: 29,
-                            child: Text(
-                              'Datos personales',
-                              style: TextStyle(
-                                color: palette.textPrimary,
-                                fontFamily: AppTypography.bodyFontFamily,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 20,
-                            top: 596,
-                            width: 350,
-                            height: 120,
-                            child: _AccountDataCard(palette: palette),
-                          ),
-                          Positioned(
-                            left: 25,
-                            top: 719,
-                            width: 340,
-                            height: 17,
-                            child: Text(
-                              'Fotos, teléfonos y edición: sin API actual',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: palette.textSecondary,
-                                    fontSize: 10,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
+      child: SingleChildScrollView(
+        key: const Key('page-cuenta'),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 354),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ChifaAppHeader(
+                  isDarkMode: isDark,
+                  onToggleTheme: themeModeController.toggle,
+                  initials: initials,
+                ),
+                const SizedBox(height: 22),
+                _ProfileVisual(
+                  palette: palette,
+                  isDark: isDark,
+                  initials: initials,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                  child: Text(
+                    identityName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontFamily: AppTypography.displayFontFamily,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      height: 41 / 32,
                     ),
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 9),
+                  child: Text(
+                    identityDetail,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                      fontSize: 13,
+                      height: 23 / 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: _AccountStatusBadge(
+                      isGuest: isGuest,
+                      palette: palette,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _AccountActions(
+                    isGuest: isGuest,
+                    onOpenOrders: onOpenOrders,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2),
+                  child: _ProfileTabs(),
+                ),
+                const SizedBox(height: 13),
+                Padding(
+                  padding: const EdgeInsets.only(left: 5),
+                  child: Text(
+                    isGuest ? 'Información de la sesión' : 'Datos personales',
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: isGuest
+                      ? const ChifaStateView(
+                          key: Key('guest-account-empty-state'),
+                          kind: ChifaStateKind.empty,
+                          title: 'Sin datos personales',
+                          message:
+                              'La sesión de invitado no guarda datos de cuenta',
+                        )
+                      : _AccountDataCard(
+                          key: const Key('account-data-card'),
+                          displayName: accountCardName ?? identityName,
+                          email: accountCardEmail ?? identityDetail,
+                        ),
+                ),
+                const SizedBox(height: 3),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                  child: Text(
+                    isGuest
+                        ? 'La sesión de invitado no almacena un perfil.'
+                        : 'Fotos, teléfonos y edición: sin API actual',
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: palette.textSecondary, fontSize: 10),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -578,6 +373,114 @@ class _BrandHero extends StatelessWidget {
   }
 }
 
+class _ProfileVisual extends StatelessWidget {
+  const _ProfileVisual({
+    required this.palette,
+    required this.isDark,
+    required this.initials,
+  });
+
+  final AppPalette palette;
+  final bool isDark;
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double avatarSize = (constraints.maxWidth * 112 / 354).clamp(
+          88.0,
+          112.0,
+        );
+        final double avatarInset = constraints.maxWidth * 12 / 354;
+
+        return Column(
+          children: <Widget>[
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomLeft,
+              children: <Widget>[
+                _ProfileCover(palette: palette),
+                Padding(
+                  padding: EdgeInsets.only(left: avatarInset),
+                  child: Transform.translate(
+                    offset: Offset(0, avatarSize * 0.49),
+                    child: _ProfileAvatar(
+                      dimension: avatarSize,
+                      isDark: isDark,
+                      initials: initials,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: avatarSize * 0.56),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({
+    required this.dimension,
+    required this.isDark,
+    required this.initials,
+  });
+
+  final double dimension;
+  final bool isDark;
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      image: true,
+      label: 'Avatar de cliente $initials',
+      excludeSemantics: true,
+      child: SizedBox.square(
+        dimension: dimension,
+        child: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: <Widget>[
+            SvgPicture.asset(
+              isDark
+                  ? 'assets/images/m01/account_avatar_ring_dark.svg'
+                  : 'assets/images/m01/account_avatar_ring_light.svg',
+            ),
+            Align(
+              child: FractionallySizedBox(
+                widthFactor: 99 / 112,
+                heightFactor: 99 / 112,
+                child: SvgPicture.asset(
+                  isDark
+                      ? 'assets/images/m01/account_avatar_dark.svg'
+                      : 'assets/images/m01/account_avatar_light.svg',
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                initials,
+                textScaler: TextScaler.noScaling,
+                style: TextStyle(
+                  color: AppColors.onBrand,
+                  fontFamily: AppTypography.displayFontFamily,
+                  fontSize: dimension * 48 / 112,
+                  fontWeight: FontWeight.w600,
+                  height: 1.25,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfileCover extends StatelessWidget {
   const _ProfileCover({required this.palette});
 
@@ -585,86 +488,109 @@ class _ProfileCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: ColoredBox(
-        color: palette.profileCover,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 207,
-              top: -63,
-              width: 255,
-              height: 255,
-              child: SvgPicture.asset('assets/images/m01/account_orbit.svg'),
-            ),
-            Positioned(
-              left: 258,
-              top: -10,
-              width: 151,
-              height: 151,
-              child: SvgPicture.asset(
-                'assets/images/m01/account_orbit_inner.svg',
+    return AspectRatio(
+      aspectRatio: 354 / 196,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double factor = (constraints.maxWidth / 354).clamp(0.78, 1);
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(20 * factor),
+            child: ColoredBox(
+              color: palette.profileCover,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Align(
+                    alignment: const Alignment(3.18, 1.14),
+                    child: FractionallySizedBox(
+                      widthFactor: 255 / 354,
+                      heightFactor: 255 / 196,
+                      child: SvgPicture.asset(
+                        'assets/images/m01/account_orbit.svg',
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(1.54, -1.44),
+                    child: FractionallySizedBox(
+                      widthFactor: 151 / 354,
+                      heightFactor: 151 / 196,
+                      child: SvgPicture.asset(
+                        'assets/images/m01/account_orbit_inner.svg',
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(0.83, -0.17),
+                    child: FractionallySizedBox(
+                      widthFactor: 70 / 354,
+                      heightFactor: 70 / 196,
+                      child: SvgPicture.asset(
+                        'assets/images/m01/account_sun.svg',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      21 * factor,
+                      29 * factor,
+                      20 * factor,
+                      17 * factor,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: 42 * factor,
+                          height: 2,
+                          decoration: BoxDecoration(
+                            color: palette.accentGold,
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                        SizedBox(height: 12 * factor),
+                        Text(
+                          'CHIFA ASIA  ·  DESDE EL CORAZÓN',
+                          maxLines: 1,
+                          textScaler: TextScaler.noScaling,
+                          style: TextStyle(
+                            color: AppColors.onBrand,
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 10 * factor,
+                            fontWeight: FontWeight.w700,
+                            height: 1.9,
+                          ),
+                        ),
+                        SizedBox(height: 29 * factor),
+                        Text(
+                          'Tu lugar especial',
+                          maxLines: 1,
+                          textScaler: TextScaler.noScaling,
+                          style: TextStyle(
+                            color: AppColors.onBrand,
+                            fontFamily: AppTypography.displayFontFamily,
+                            fontSize: 33 * factor,
+                            fontWeight: FontWeight.w600,
+                            height: 1.1,
+                          ),
+                        ),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: SizedBox(
+                            width: 107 * factor,
+                            height: 23 * factor,
+                            child: const _DiamondPattern(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            Positioned(
-              left: 260,
-              top: 52,
-              width: 70,
-              height: 70,
-              child: SvgPicture.asset('assets/images/m01/account_sun.svg'),
-            ),
-            Positioned(
-              left: 21,
-              top: 29,
-              child: Container(
-                width: 42,
-                height: 2,
-                decoration: BoxDecoration(
-                  color: palette.accentGold,
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-            ),
-            const Positioned(
-              left: 21,
-              top: 43,
-              width: 306,
-              height: 19,
-              child: Text(
-                'CHIFA ASIA  ·  DESDE EL CORAZÓN',
-                style: TextStyle(
-                  color: AppColors.onBrand,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const Positioned(
-              left: 21,
-              top: 91,
-              width: 290,
-              height: 54,
-              child: Text(
-                'Tu lugar especial',
-                style: TextStyle(
-                  color: AppColors.onBrand,
-                  fontFamily: AppTypography.displayFontFamily,
-                  fontSize: 33,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const Positioned(
-              left: 227,
-              top: 153,
-              width: 107,
-              height: 23,
-              child: _DiamondPattern(),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -696,22 +622,126 @@ class _DiamondPattern extends StatelessWidget {
   }
 }
 
+class _AccountStatusBadge extends StatelessWidget {
+  const _AccountStatusBadge({required this.isGuest, required this.palette});
+
+  final bool isGuest;
+  final AppPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color statusColor = isGuest ? palette.textAccent : palette.success;
+    final String label = isGuest ? 'SESIÓN DE INVITADO' : 'CUENTA REGISTRADA';
+
+    return Semantics(
+      label: label,
+      excludeSemantics: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 157, minHeight: 22),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: palette.surfaceTint,
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 9),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountActions extends StatelessWidget {
+  const _AccountActions({required this.isGuest, this.onOpenOrders});
+
+  final bool isGuest;
+  final VoidCallback? onOpenOrders;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Widget primary = _AccountAction(
+          key: const Key('account-orders-action'),
+          label: 'Ver mis pedidos',
+          onPressed: onOpenOrders,
+        );
+        final Widget secondary = _DisabledAccountAction(
+          label: isGuest ? 'Perfil no disponible' : 'Editar perfil',
+          detail: isGuest ? 'Sesión de invitado' : 'API pendiente',
+        );
+
+        if (constraints.maxWidth < 330) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[primary, const SizedBox(height: 10), secondary],
+          );
+        }
+
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(child: primary),
+              const SizedBox(width: 10),
+              Expanded(child: secondary),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _AccountAction extends StatelessWidget {
-  const _AccountAction({required this.label, this.onPressed});
+  const _AccountAction({required this.label, this.onPressed, super.key});
 
   final String label;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final Widget content = Center(
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.onBrand,
-          fontFamily: AppTypography.bodyFontFamily,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+    final Widget content = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 47),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.onBrand,
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ),
     );
@@ -732,7 +762,10 @@ class _AccountAction extends StatelessWidget {
 }
 
 class _DisabledAccountAction extends StatelessWidget {
-  const _DisabledAccountAction();
+  const _DisabledAccountAction({required this.label, required this.detail});
+
+  final String label;
+  final String detail;
 
   @override
   Widget build(BuildContext context) {
@@ -740,158 +773,144 @@ class _DisabledAccountAction extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: false,
-      label: 'Editar perfil. API pendiente',
+      label: '$label. $detail',
       excludeSemantics: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: palette.surfaceTint,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: palette.controlBorder, width: 1.2),
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 6,
-              top: 7,
-              width: 155,
-              height: 19,
-              child: Text(
-                'Editar perfil',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: palette.textSecondary,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 47),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: palette.surfaceTint,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: palette.controlBorder, width: 1.2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: palette.textSecondary,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.1,
+                  ),
                 ),
-              ),
-            ),
-            Positioned(
-              left: 6,
-              top: 26,
-              width: 155,
-              height: 14,
-              child: Text(
-                'API pendiente',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: palette.textSecondary,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 9,
-                  height: 1.1,
+                Text(
+                  detail,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: palette.textSecondary,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 9,
+                    height: 1.1,
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _FixedChipRow extends StatelessWidget {
-  const _FixedChipRow({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 35,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: SizedBox(width: 342, height: 35, child: Row(children: children)),
       ),
     );
   }
 }
 
 class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs({required this.palette});
-
-  final AppPalette palette;
+  const _ProfileTabs();
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            left: 4,
-            top: 5,
-            width: 116,
-            height: 35,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: palette.surfaceTint,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Text(
-                  'Información',
-                  style: TextStyle(
-                    color: palette.brandRed,
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+    final AppPalette palette = context.appPalette;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 45),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(4, 5, 4, 5),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                flex: 116,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: palette.surfaceTint,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 9,
+                    ),
+                    child: Text(
+                      'Información',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: palette.brandRed,
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              const Expanded(flex: 105, child: _ProfileTabLabel('Pedidos')),
+              const Expanded(
+                flex: 113,
+                child: _ProfileTabLabel('Preferencias'),
+              ),
+            ],
           ),
-          Positioned(
-            left: 125,
-            top: 5,
-            width: 105,
-            height: 35,
-            child: Center(child: _ProfileTabLabel('Pedidos', palette)),
-          ),
-          Positioned(
-            left: 231,
-            top: 5,
-            width: 113,
-            height: 35,
-            child: Center(child: _ProfileTabLabel('Preferencias', palette)),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class _ProfileTabLabel extends StatelessWidget {
-  const _ProfileTabLabel(this.label, this.palette);
+  const _ProfileTabLabel(this.label);
 
   final String label;
-  final AppPalette palette;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: TextStyle(
-        color: palette.textSecondary,
-        fontFamily: AppTypography.bodyFontFamily,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 9),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: context.appPalette.textSecondary,
+            fontFamily: AppTypography.bodyFontFamily,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
 }
 
 class _AccountDataCard extends StatelessWidget {
-  const _AccountDataCard({required this.palette});
+  const _AccountDataCard({
+    required this.displayName,
+    required this.email,
+    super.key,
+  });
 
-  final AppPalette palette;
+  final String displayName;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
     final TextStyle labelStyle = TextStyle(
       color: palette.textSecondary,
       fontFamily: AppTypography.bodyFontFamily,
@@ -905,44 +924,29 @@ class _AccountDataCard extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.controlBorder),
-      ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            left: 16,
-            top: 10,
-            child: Text('Nombre', style: labelStyle),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 120),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: palette.controlBorder),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text('Nombre', style: labelStyle),
+              const SizedBox(height: 3),
+              Text(displayName, style: valueStyle),
+              Divider(height: 20, color: palette.controlBorder),
+              Text('Correo electrónico', style: labelStyle),
+              const SizedBox(height: 3),
+              Text(email, style: valueStyle),
+            ],
           ),
-          Positioned(
-            left: 16,
-            top: 29,
-            child: Text('Nombre desde tu cuenta', style: valueStyle),
-          ),
-          Positioned(
-            left: 17,
-            top: 59,
-            child: Container(
-              width: 314,
-              height: 1,
-              color: palette.controlBorder,
-            ),
-          ),
-          Positioned(
-            left: 16,
-            top: 68,
-            child: Text('Correo electrónico', style: labelStyle),
-          ),
-          Positioned(
-            left: 16,
-            top: 87,
-            child: Text('Correo desde tu cuenta', style: valueStyle),
-          ),
-        ],
+        ),
       ),
     );
   }
