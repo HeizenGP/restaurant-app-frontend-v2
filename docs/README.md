@@ -1,6 +1,6 @@
 # Documentación — Restaurant App V2
 
-**ETAPAS 00–07 aprobadas por el usuario; ETAPA 08 (backend) con 08.00–08.10 verificados técnicamente y pendiente de aprobación final. ETAPA 09 con diseño de clientes existente en Figma (pendiente de aprobación formal); ETAPA 10 tiene 10.00 revalidado y listo para revisión, con las pantallas 10.01–10.03 retiradas; ETAPA 11 sin implementación.** La cobertura backend de 40 RF / 48 CA no certifica por sí sola pantallas Flutter ni decide pendientes de negocio.
+**ETAPAS 00–07 aprobadas por el usuario; ETAPA 08 (backend) con 08.00–08.10 verificados técnicamente y pendiente de aprobación final. ETAPA 09 con diseño de clientes existente en Figma (pendiente de aprobación formal); ETAPA 10 tiene el bloque 10.00 aprobado expresamente el 2026-10-23 (conectividad móvil–API pendiente), con las pantallas 10.01–10.03 retiradas; ETAPA 11 sin implementación.** La cobertura backend de 40 RF / 48 CA no certifica por sí sola pantallas Flutter ni decide pendientes de negocio.
 
 - [Plan maestro de etapas 00–11](etapas/README.md)
 - [ETAPA 00 — aprobada](etapas/etapa-00.md)

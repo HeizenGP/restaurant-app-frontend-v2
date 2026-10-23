@@ -5,7 +5,7 @@
 - El usuario aprueba etapas y cambios funcionales. No inferir aprobaciones ni alterar reglas de negocio.
 - Fuentes: `docs/etapas/README.md` para el índice y `docs/etapas/etapa-10-progreso-clientes.md` para el estado mutable.
 - Antes de actuar: confirmar repositorio, rama `develop` y cambios existentes. Leer solo este archivo, el checkpoint, el bloque activo, sus RF/CA y los archivos afectados. Ampliar contexto únicamente ante una contradicción o un dato faltante.
-- Para trabajo Flutter, cargar `.agents/skills/restaurant-flutter-slice/SKILL.md`. No releer documentos completos, código ajeno al cambio ni logs extensos.
+- Para trabajo Flutter, cargar `.agents/skills/restaurant-flutter-slice/SKILL.md` una vez por sesión. Consultar solo RF/CA, endpoint, archivos y referencia Figma de la pantalla activa; no cargar etapas completas, pantallas ajenas ni logs.
 
 ## Alcance seguro
 
@@ -19,6 +19,6 @@
 1. Ejecutar pruebas focales durante el bloque; ejecutar análisis y suite completa únicamente al cerrarlo.
 2. Comparar cada pantalla autorizada, en tema claro y oscuro, con su referencia local; registrar diferencias de espaciado, tipografía, tamaños, colores y componentes.
 3. Corregir solo diferencias verificadas y autorizadas. Sin referencia original, declarar la comparación bloqueada y no afirmar fidelidad.
-4. Mantener el checkpoint compacto con estado, evidencia, pruebas y siguiente acción. Responder brevemente con archivos, resultados, riesgos y pendientes.
+4. Mantener el checkpoint compacto con estado, evidencia, pruebas y siguiente acción. Responder brevemente, sin repetir contexto ni transcribir archivos o logs.
 
 Procedimiento excepcional de coordinación: `docs/agentes/README.md`.

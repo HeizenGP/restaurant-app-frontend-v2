@@ -44,4 +44,4 @@ debug; los builds release conservan la política segura de Android y deben usar 
 - [Inventario Figma 01–20, claro y oscuro](docs/referencias-visuales/etapa-10-00-figma.md)
 - [Guía para Codex y AGY](docs/agentes/README.md)
 
-**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09 tiene diseños de clientes existentes en Figma (pendientes de aprobación formal); ETAPA 10 tiene 10.00 revalidado y listo para revisión, sin UI vigente de 10.01–10.03. No avanzar sin autorización.
+**Estado:** ETAPA 07 aprobada. ETAPA 08 verificada técnicamente en el backend y pendiente de aprobación final del usuario; ETAPA 09 tiene diseños de clientes existentes en Figma (pendientes de aprobación formal); ETAPA 10 tiene **10.00 aprobado expresamente por el usuario (2026-10-23)**, con ejecución Android real comprobada. La UI de 10.01–10.03 permanece retirada; 10.01 y siguientes requieren autorización específica.
