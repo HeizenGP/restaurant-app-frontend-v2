@@ -47,82 +47,70 @@ class _SignInPageState extends State<SignInPage> {
       ),
       child: Scaffold(
         key: const Key('page-acceso'),
-        body: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return SingleChildScrollView(
-              key: const Key('login-scroll'),
-              child: Center(
+        body: SingleChildScrollView(
+          key: const Key('login-scroll'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const LoginBrandHero(),
+              Transform.translate(
+                offset: const Offset(0, -20),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 390),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      const LoginBrandHero(),
-                      Transform.translate(
-                        offset: const Offset(0, -20),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 556),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: palette.background,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(28),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                28,
-                                25,
-                                28,
-                                22,
-                              ),
-                              child: AutofillGroup(
-                                child: Form(
-                                  key: _formKey,
-                                  child: AnimatedBuilder(
-                                    animation: widget.authController,
-                                    builder:
-                                        (BuildContext context, Widget? child) {
-                                          final AuthState state =
-                                              widget.authController.state;
-                                          final bool loading =
-                                              state.operation ==
-                                              AuthOperation.signIn;
-                                          return _LoginFormContent(
-                                            state: state,
-                                            loading: loading,
-                                            emailController: _emailController,
-                                            passwordController:
-                                                _passwordController,
-                                            obscurePassword: _obscurePassword,
-                                            autovalidateMode: _showValidation
-                                                ? AutovalidateMode
-                                                      .onUserInteraction
-                                                : AutovalidateMode.disabled,
-                                            onTogglePassword: () {
-                                              setState(() {
-                                                _obscurePassword =
-                                                    !_obscurePassword;
-                                              });
-                                            },
-                                            onSubmit: _submit,
-                                            onGuest: _openGuest,
-                                            onRegister: _openRegistration,
-                                          );
-                                        },
-                                  ),
-                                ),
+                  constraints: const BoxConstraints(minHeight: 556),
+                  child: DecoratedBox(
+                    key: const Key('login-sheet'),
+                    decoration: BoxDecoration(
+                      color: palette.background,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 432),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(28, 25, 28, 22),
+                          child: AutofillGroup(
+                            child: Form(
+                              key: _formKey,
+                              child: AnimatedBuilder(
+                                animation: widget.authController,
+                                builder: (BuildContext context, Widget? child) {
+                                  final AuthState state =
+                                      widget.authController.state;
+                                  final bool loading =
+                                      state.operation == AuthOperation.signIn;
+                                  return _LoginFormContent(
+                                    state: state,
+                                    loading: loading,
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    obscurePassword: _obscurePassword,
+                                    autovalidateMode: _showValidation
+                                        ? AutovalidateMode.onUserInteraction
+                                        : AutovalidateMode.disabled,
+                                    onTogglePassword: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                    onSubmit: _submit,
+                                    onGuest: _openGuest,
+                                    onRegister: _openRegistration,
+                                  );
+                                },
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );

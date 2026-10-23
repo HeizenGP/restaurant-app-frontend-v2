@@ -2,6 +2,7 @@ import 'package:customer_app/app/customer_app.dart';
 import 'package:customer_app/core/api_environment.dart';
 import 'package:customer_app/features/m01_access/shared/application/auth_contracts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -214,6 +215,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('page-invitado')), findsOneWidget);
     await tester.ensureVisible(find.byKey(const Key('guest-submit')));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('access background reaches both edges on a wide phone', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(432, 900));
+    await tester.pumpWidget(_app(environment, FakeAuthRepository()));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byKey(const Key('login-hero'))).dx, 0);
+    expect(tester.getSize(find.byKey(const Key('login-hero'))).width, 432);
+    expect(tester.getTopLeft(find.byKey(const Key('login-sheet'))).dx, 0);
+    expect(tester.getSize(find.byKey(const Key('login-sheet'))).width, 432);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('login-artwork-canvas'))).dx,
+      21,
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('go-guest')));
+    await tester.tap(find.byKey(const Key('go-guest')));
+    await tester.pumpAndSettle();
+    final Finder overlay = find.ancestor(
+      of: find.byKey(const Key('page-invitado')),
+      matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+    );
+    expect(overlay, findsOneWidget);
+    expect(
+      tester
+          .widget<AnnotatedRegion<SystemUiOverlayStyle>>(overlay)
+          .value
+          .statusBarIconBrightness,
+      Brightness.dark,
+    );
     expect(tester.takeException(), isNull);
   });
 }
