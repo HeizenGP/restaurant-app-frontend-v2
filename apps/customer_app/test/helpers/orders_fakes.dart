@@ -12,6 +12,8 @@ final class FakeOrdersRepository implements OrdersRepository {
   final List<String> idempotencyKeys = <String>[];
   final List<String> detailIds = <String>[];
   final List<String> detailTokens = <String>[];
+  Object? createError;
+  Object? getError;
 
   @override
   Future<OrderSnapshot> createOrder(
@@ -22,6 +24,7 @@ final class FakeOrdersRepository implements OrdersRepository {
     createCommands.add(command);
     createTokens.add(accessToken);
     idempotencyKeys.add(idempotencyKey);
+    if (createError != null) throw createError!;
     return response;
   }
 
@@ -32,6 +35,7 @@ final class FakeOrdersRepository implements OrdersRepository {
   }) async {
     detailIds.add(orderId);
     detailTokens.add(accessToken);
+    if (getError != null) throw getError!;
     return response;
   }
 }

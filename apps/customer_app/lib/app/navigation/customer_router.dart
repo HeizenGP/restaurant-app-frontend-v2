@@ -18,10 +18,16 @@ import '../../features/m04_orders/choose_fulfillment/presentation/fulfillment_pa
 import '../../features/m04_orders/manage_cart/application/cart_controller.dart';
 import '../../features/m04_orders/manage_cart/domain/cart_models.dart';
 import '../../features/m04_orders/manage_cart/presentation/cart_page.dart';
+import '../../features/m04_orders/order_tracking/application/order_history_controller.dart';
+import '../../features/m04_orders/order_tracking/application/order_tracking_controller.dart';
+import '../../features/m04_orders/order_tracking/presentation/order_detail_tracking_page.dart';
+import '../../features/m04_orders/order_tracking/presentation/orders_history_page.dart';
 import '../../features/m04_orders/submit_order/application/order_contracts.dart';
 import '../../features/m04_orders/submit_order/application/submit_order_controller.dart';
 import '../../features/m04_orders/submit_order/domain/order_models.dart';
 import '../../features/m04_orders/submit_order/presentation/order_submission_pages.dart';
+import '../../features/m06_payments/view_payment_status/application/payment_status_controller.dart';
+import '../../features/m06_payments/view_payment_status/presentation/payment_status_pages.dart';
 import '../../features/ui_foundation/presentation/foundation_pages.dart';
 import '../theme/theme_mode_controller.dart';
 import 'customer_shell.dart';
@@ -44,6 +50,9 @@ abstract final class CustomerRoutes {
   static const String orderReview = 'order-review';
   static const String orderSubmitted = 'order-submitted';
   static const String orderException = 'order-exception';
+  static const String orderAdvance = 'order-advance';
+  static const String orderPayments = 'order-payments';
+  static const String orderTracking = 'order-tracking';
 }
 
 GoRouter createCustomerRouter({
@@ -53,6 +62,9 @@ GoRouter createCustomerRouter({
   required CartController cartController,
   required FulfillmentController fulfillmentController,
   required SubmitOrderController submitOrderController,
+  PaymentStatusController? paymentStatusController,
+  OrderHistoryController? orderHistoryController,
+  OrderTrackingController? orderTrackingController,
 }) {
   bool prepareOrderReview(FulfillmentDraft draft) {
     if (cartController.state.isEmpty) return false;
@@ -210,6 +222,18 @@ GoRouter createCustomerRouter({
                 path: '/pedidos',
                 name: CustomerRoutes.orders,
                 builder: (BuildContext context, GoRouterState state) {
+                  if (orderHistoryController != null) {
+                    return OrdersHistoryPage(
+                      themeModeController: themeModeController,
+                      controller: orderHistoryController,
+                      onOpenOrderDetail: (String orderId) {
+                        context.pushNamed(
+                          CustomerRoutes.orderTracking,
+                          pathParameters: <String, String>{'orderId': orderId},
+                        );
+                      },
+                    );
+                  }
                   return FoundationOrdersPage(
                     themeModeController: themeModeController,
                   );
@@ -368,6 +392,71 @@ GoRouter createCustomerRouter({
           );
         },
       ),
+      if (paymentStatusController != null) ...<RouteBase>[
+        GoRoute(
+          path: '/pedido/solicitud/:orderId/anticipo',
+          name: CustomerRoutes.orderAdvance,
+          builder: (BuildContext context, GoRouterState state) {
+            final String orderId = state.pathParameters['orderId'] ?? '';
+            return AdvanceStatusPage(
+              themeModeController: themeModeController,
+              controller: paymentStatusController,
+              orderId: orderId,
+              onViewOrder: () {
+                context.goNamed(
+                  CustomerRoutes.orderSubmitted,
+                  pathParameters: <String, String>{'orderId': orderId},
+                );
+              },
+            );
+          },
+        ),
+        GoRoute(
+          path: '/pedido/solicitud/:orderId/pagos',
+          name: CustomerRoutes.orderPayments,
+          builder: (BuildContext context, GoRouterState state) {
+            final String orderId = state.pathParameters['orderId'] ?? '';
+            return OrderPaymentStatusPage(
+              themeModeController: themeModeController,
+              controller: paymentStatusController,
+              orderId: orderId,
+              onBackToOrder: () {
+                context.goNamed(
+                  CustomerRoutes.orderSubmitted,
+                  pathParameters: <String, String>{'orderId': orderId},
+                );
+              },
+            );
+          },
+        ),
+      ],
+      if (orderTrackingController != null) ...<RouteBase>[
+        GoRoute(
+          path: '/pedidos/:orderId',
+          name: CustomerRoutes.orderTracking,
+          builder: (BuildContext context, GoRouterState state) {
+            final String orderId = state.pathParameters['orderId'] ?? '';
+            return OrderDetailTrackingPage(
+              themeModeController: themeModeController,
+              controller: orderTrackingController,
+              orderId: orderId,
+              onBackToOrders: () => context.goNamed(CustomerRoutes.orders),
+              onViewAdvance: (String id) {
+                context.pushNamed(
+                  CustomerRoutes.orderAdvance,
+                  pathParameters: <String, String>{'orderId': id},
+                );
+              },
+              onViewPayments: (String id) {
+                context.pushNamed(
+                  CustomerRoutes.orderPayments,
+                  pathParameters: <String, String>{'orderId': id},
+                );
+              },
+            );
+          },
+        ),
+      ],
       GoRoute(
         path: '/menu/categoria/:categoryId/producto/:productId',
         name: CustomerRoutes.productDetail,

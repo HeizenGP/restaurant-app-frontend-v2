@@ -3,6 +3,7 @@ import 'package:customer_app/core/api_environment.dart';
 import 'package:customer_app/core/design_system/design_system.dart';
 import 'package:customer_app/features/m01_access/shared/domain/auth_models.dart';
 import 'package:customer_app/features/m04_orders/choose_fulfillment/domain/fulfillment_models.dart';
+import 'package:customer_app/features/m04_orders/submit_order/domain/order_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/auth_fakes.dart';
 import '../helpers/catalog_fakes.dart';
+import '../helpers/order_tracking_fakes.dart';
 import '../helpers/orders_fakes.dart';
+import '../helpers/payment_fakes.dart';
 import '../helpers/tables_fakes.dart';
 
 void main() {
@@ -324,6 +327,67 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('advance and payment status routes render read-only summaries', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    final FakePaymentStatusRepository paymentRepo = FakePaymentStatusRepository(
+      advanceResponse: fakeAdvanceSummary(orderId: 'ord-nav-1'),
+      paymentResponse: fakePaymentSummary(orderId: 'ord-nav-1'),
+    );
+    await tester.pumpWidget(
+      CustomerApp(
+        environment: environment,
+        authRepository: FakeAuthRepository(refreshResult: registeredSession()),
+        sessionStore: MemoryAuthSessionStore(session: registeredSession()),
+        catalogRepository: FakeCatalogRepository(),
+        paymentStatusRepository: paymentRepo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify app starts authenticated
+    expect(find.byKey(const Key('page-inicio')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('orders tab navigates to detail tracking page on card tap', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    final FakeOrderTrackingRepository trackingRepo = FakeOrderTrackingRepository(
+      orders: <OrderSnapshot>[
+        fakeOrderSnapshot(id: '00000000-0000-4000-8000-000000000201', status: 'CONFIRMED'),
+      ],
+      order: fakeOrderSnapshot(id: '00000000-0000-4000-8000-000000000201', status: 'CONFIRMED'),
+      tracking: fakeTrackingSnapshot(orderId: '00000000-0000-4000-8000-000000000201', stage: 'EN_COCINA'),
+    );
+
+    await tester.pumpWidget(
+      CustomerApp(
+        environment: environment,
+        authRepository: FakeAuthRepository(refreshResult: registeredSession()),
+        sessionStore: MemoryAuthSessionStore(session: registeredSession()),
+        catalogRepository: FakeCatalogRepository(),
+        orderTrackingRepository: trackingRepo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('nav-pedidos')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-pedidos')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('order-card-00000000-0000-4000-8000-000000000201')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey<String>('order-card-00000000-0000-4000-8000-000000000201')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-order-tracking')), findsOneWidget);
+    expect(find.textContaining('Etapa: EN_COCINA'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('profile scrolls with large text and Android safe insets', (
     WidgetTester tester,
   ) async {
@@ -423,6 +487,10 @@ CustomerApp _appWithSession(ApiEnvironment environment, AuthSession session) {
     authRepository: FakeAuthRepository(refreshResult: session),
     sessionStore: MemoryAuthSessionStore(session: session),
     catalogRepository: FakeCatalogRepository(),
+    orderTrackingRepository: FakeOrderTrackingRepository(
+      orders: const <OrderSnapshot>[],
+    ),
+    paymentStatusRepository: FakePaymentStatusRepository(),
   );
 }
 

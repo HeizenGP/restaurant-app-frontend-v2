@@ -6,6 +6,7 @@ import '../core/api_environment.dart';
 import '../core/design_system/theme/app_theme.dart';
 import '../features/m01_access/shared/application/auth_contracts.dart';
 import '../features/m01_access/shared/application/auth_session_controller.dart';
+import '../features/m01_access/shared/domain/auth_models.dart';
 import '../features/m01_access/shared/infrastructure/auth_rest_repository.dart';
 import '../features/m01_access/shared/infrastructure/flutter_secure_session_store.dart';
 import '../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
@@ -15,9 +16,16 @@ import '../features/m04_orders/choose_fulfillment/application/fulfillment_contra
 import '../features/m04_orders/choose_fulfillment/application/fulfillment_controller.dart';
 import '../features/m04_orders/choose_fulfillment/infrastructure/tables_rest_repository.dart';
 import '../features/m04_orders/manage_cart/application/cart_controller.dart';
+import '../features/m04_orders/order_tracking/application/order_history_controller.dart';
+import '../features/m04_orders/order_tracking/application/order_tracking_contracts.dart';
+import '../features/m04_orders/order_tracking/application/order_tracking_controller.dart';
+import '../features/m04_orders/order_tracking/infrastructure/order_tracking_rest_repository.dart';
 import '../features/m04_orders/submit_order/application/order_contracts.dart';
 import '../features/m04_orders/submit_order/application/submit_order_controller.dart';
 import '../features/m04_orders/submit_order/infrastructure/orders_rest_repository.dart';
+import '../features/m06_payments/view_payment_status/application/payment_status_contracts.dart';
+import '../features/m06_payments/view_payment_status/application/payment_status_controller.dart';
+import '../features/m06_payments/view_payment_status/infrastructure/payment_status_rest_repository.dart';
 import 'navigation/customer_router.dart';
 import 'theme/theme_mode_controller.dart';
 
@@ -30,6 +38,8 @@ class CustomerApp extends StatefulWidget {
     this.catalogRepository,
     this.tablesRepository,
     this.ordersRepository,
+    this.paymentStatusRepository,
+    this.orderTrackingRepository,
     super.key,
   });
 
@@ -40,6 +50,8 @@ class CustomerApp extends StatefulWidget {
   final CatalogRepository? catalogRepository;
   final TablesRepository? tablesRepository;
   final OrdersRepository? ordersRepository;
+  final PaymentStatusRepository? paymentStatusRepository;
+  final OrderTrackingRepository? orderTrackingRepository;
 
   @override
   State<CustomerApp> createState() => _CustomerAppState();
@@ -52,9 +64,32 @@ class _CustomerAppState extends State<CustomerApp> {
   late final CartController _cartController;
   late final FulfillmentController _fulfillmentController;
   late final SubmitOrderController _submitOrderController;
+  late final PaymentStatusController _paymentStatusController;
+  late final OrderHistoryController _orderHistoryController;
+  late final OrderTrackingController _orderTrackingController;
   late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
+  String? _lastSessionUserId;
+  bool _lastSessionIsGuest = false;
+
+  void _onAuthStateChanged() {
+    final AuthState authState = _authController.state;
+    final AuthSession? session = authState.session;
+    final String? currentUserId = session?.user?.id;
+    final bool currentIsGuest = session?.isGuest ?? false;
+
+    if (authState.status == AuthStatus.signedOut ||
+        currentUserId != _lastSessionUserId ||
+        currentIsGuest != _lastSessionIsGuest) {
+      _lastSessionUserId = currentUserId;
+      _lastSessionIsGuest = currentIsGuest;
+      _cartController.clear();
+      _fulfillmentController.clear();
+      _orderHistoryController.clear();
+      _orderTrackingController.clear();
+    }
+  }
 
   @override
   void initState() {
@@ -66,7 +101,9 @@ class _CustomerAppState extends State<CustomerApp> {
     if (widget.authRepository == null ||
         widget.catalogRepository == null ||
         widget.tablesRepository == null ||
-        widget.ordersRepository == null) {
+        widget.ordersRepository == null ||
+        widget.paymentStatusRepository == null ||
+        widget.orderTrackingRepository == null) {
       sharedClient = http.Client();
       _ownedHttpClient = sharedClient;
     } else {
@@ -113,6 +150,32 @@ class _CustomerAppState extends State<CustomerApp> {
       accessTokenProvider: () => _authController.state.session?.accessToken,
       refreshAccessToken: _authController.refreshSession,
     );
+    _paymentStatusController = PaymentStatusController(
+      repository:
+          widget.paymentStatusRepository ??
+          PaymentStatusRestRepository(
+            baseUri: widget.environment.baseUri,
+            client: sharedClient!,
+          ),
+      accessTokenProvider: () => _authController.state.session?.accessToken,
+      refreshAccessToken: _authController.refreshSession,
+    );
+    final OrderTrackingRepository orderTrackingRepository =
+        widget.orderTrackingRepository ??
+        OrderTrackingRestRepository(
+          baseUri: widget.environment.baseUri,
+          client: sharedClient!,
+        );
+    _orderHistoryController = OrderHistoryController(
+      repository: orderTrackingRepository,
+      accessTokenProvider: () => _authController.state.session?.accessToken,
+      refreshAccessToken: _authController.refreshSession,
+    );
+    _orderTrackingController = OrderTrackingController(
+      repository: orderTrackingRepository,
+      accessTokenProvider: () => _authController.state.session?.accessToken,
+      refreshAccessToken: _authController.refreshSession,
+    );
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
@@ -120,17 +183,25 @@ class _CustomerAppState extends State<CustomerApp> {
       cartController: _cartController,
       fulfillmentController: _fulfillmentController,
       submitOrderController: _submitOrderController,
+      paymentStatusController: _paymentStatusController,
+      orderHistoryController: _orderHistoryController,
+      orderTrackingController: _orderTrackingController,
     );
+    _authController.addListener(_onAuthStateChanged);
     _authController.restore();
   }
 
   @override
   void dispose() {
+    _authController.removeListener(_onAuthStateChanged);
     _router.dispose();
     _catalogController.dispose();
     _cartController.dispose();
     _fulfillmentController.dispose();
     _submitOrderController.dispose();
+    _paymentStatusController.dispose();
+    _orderHistoryController.dispose();
+    _orderTrackingController.dispose();
     _authController.dispose();
     _themeModeController.dispose();
     _ownedHttpClient?.close();
