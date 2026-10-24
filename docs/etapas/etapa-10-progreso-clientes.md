@@ -1,7 +1,7 @@
 # ETAPA 10 — Checkpoint · App de clientes
 
-**Estado:** 10.00 y 10.01 aprobados; **10.02 — Acceso M01**, **10.03 — Catálogo M02** y **10.04 — Carrito** implementados y listos para revisión, aún sin aprobación; 10.05 no iniciado.
-**Repositorio:** `restaurant-app-frontend-v2` · rama `develop` · base `a4329f1add3d62f961a44edef52118aff66c519b` · cambios locales sin commit/push.
+**Estado:** **10.00–10.02 APROBADOS expresamente (2026-10-23); 10.03 — Catálogo M02 y 10.04 — Carrito APROBADOS expresamente (2026-10-24)**, con observaciones abiertas. 10.05 y posteriores pendientes.
+**Repositorio:** `restaurant-app-frontend-v2` · rama `develop` · implementación 10.02–10.04 revisada en `6efc326`; conexión local registrada en `b5becd4`. Aprobación documental, sin modificaciones al código.
 
 - **Alcance 10.02:** pantallas 01 Login, 02 Registro, 03 Invitado y 19 Cuenta; claro/oscuro; responsive con `SafeArea`/scroll; `staff_app` intacta.
 - **Contratos exclusivos:** `POST /auth/register`, `/auth/login`, `/auth/guest`, `/auth/refresh` y `/auth/logout`; sin endpoints ni datos inventados.
@@ -21,7 +21,7 @@
 - **Figma verificado:** nodos 08 `179:38/485`, 09 `179:67/514` y 10 `179:101/548`; seis referencias 390×844. Se incorporó el glifo `食` exportado del nodo oficial, con color ligado al tema.
 - **Validación:** `flutter analyze --no-pub` sin incidencias; pruebas focales **31/31**; suite completa **138/138**; comparaciones Figma **6/6** por encima de similitud media `0.97` y acuerdo tolerante `0.94`; estimación **9.6/10**.
 - **Android:** `flutter devices` solo detectó Linux/WSL; no hubo teléfono ni AVD disponible para validar este cierre en hardware real.
-- **Estado del bloque:** listo para revisión, no aprobado automáticamente.
+- **Estado del bloque:** **APROBADO expresamente por el usuario (2026-10-24)**; la validación Android de este bloque sigue pendiente.
 
 ## 10.04 — Carrito · cierre independiente
 
@@ -32,7 +32,7 @@
 - **Validación:** pruebas focales **39/39**; `flutter analyze --no-pub` sin incidencias; suite completa **150/150**; `flutter build apk --debug --no-pub` exitoso (`build/app/outputs/flutter-apk/app-debug.apk`). El build emitió una advertencia no bloqueante: el lector del SDK admite XML hasta v3 y encontró XML v4.
 - **Android:** `flutter devices` solo detectó Linux/WSL; no hubo teléfono ni AVD disponible para validar gestos, barras del sistema o captura en hardware real.
 - **Pendiente de producto:** no existe una regla aprobada sobre vaciar el carrito al cambiar de sesión; por ahora permanece solo en memoria durante la ejecución y no se inventó ese comportamiento.
-- **Estado del bloque:** listo para revisión, no aprobado automáticamente. **Siguiente acción única:** revisión del usuario; no avanzar a 10.05 ni realizar commit/push.
+- **Estado del bloque:** **APROBADO expresamente por el usuario (2026-10-24)**, con observaciones abiertas. **Siguiente acción única:** esperar autorización para 10.05.
 
 ## Ajuste responsive transversal · 2026-10-24
 
@@ -46,3 +46,11 @@
 - Backend local verificado en `http://127.0.0.1:8000`: `/health` **200**, `POST /api/v1/auth/guest` **201** y `GET /api/v1/catalog/categories` **200**.
 - APK debug recompilado e instalado en Motorola Edge 60 Fusion con `API_BASE_URL=http://localhost:8000/api/v1`, usando `adb reverse tcp:8000 tcp:8000`; no se cambió ningún contrato ni URL de producción.
 - La sesión ADB inalámbrica se desconectó después del arranque. Para continuar la prueba desde el teléfono se debe reconectar ADB y recrear el túnel; el procedimiento quedó en `apps/customer_app/README.md`.
+
+## Aprobación expresa y deuda abierta · 2026-10-24
+
+- **10.02 Acceso M01:** aprobación otorgada el 2026-10-23 y restituida tras el `push --force-with-lease`. Calificación revisada **9.1/10**; pendiente validar último ajuste responsive y autenticación completa en Motorola contra FastAPI.
+- **10.03 Catálogo M02:** aprobado expresamente el 2026-10-24, revisión **9.3/10**. Pendientes carga y cambio de categoría con API real desde Android y navegación de retorno desde Detalle.
+- **10.04 Carrito:** aprobado expresamente el 2026-10-24, revisión **8.4/10** con observaciones: acceso directo para reabrir el carrito, evitar exposición de su contenido al cambiar de sesión y diferenciar claramente el botón «Continuar con pedido» inactivo. Resolver antes de conectar 10.05–10.06; no inventar políticas de negocio.
+- **Validación transversal documentada:** última suite 151/151; goldens 34/34; 26/26 comparaciones Figma; APK debug compilado. Son resultados reportados por el desarrollo, no una nueva ejecución independiente. Se comprobó el backend local y la instalación con `adb reverse`, no un flujo integral en el teléfono.
+- **Alcance de aprobación:** no certifica ETAPA 10 completa, ni ETAPAS 08/09, ni autoriza 10.05 o `staff_app`.

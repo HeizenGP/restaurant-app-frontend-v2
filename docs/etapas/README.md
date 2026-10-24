@@ -1,9 +1,9 @@
 # Plan maestro de desarrollo — Restaurant App V2
 
 **Proyecto:** Chifa ASIA — sistema académico para un solo restaurante.  
-**Actualización:** 2026-10-23. **Rama de trabajo:** develop.
+**Actualización:** 2026-10-24. **Rama de trabajo:** develop.
 
-**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPA 09 con diseño de clientes existente en Figma y pendiente de aprobación formal; ETAPA 10 tiene **10.00 y 10.01 aprobados expresamente por el usuario (2026-10-23)**, con conexión Android–API y ejecución móvil de 10.01 pendientes; los módulos de 10.02–10.03 continúan sin reconstruir; ETAPA 11 por iniciar. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
+**Estado:** ETAPAS 00–07 **aprobadas expresamente por el usuario** (ETAPAS 04–05: aprobación documental el 2026-10-20; ETAPAS 06–07: aprobación el 2026-10-21); ETAPA 08 **con bloques 08.00–08.10 verificados técnicamente en backend y pendiente de aprobación final del usuario**; ETAPA 09 con diseño de clientes existente en Figma y pendiente de aprobación formal; ETAPA 10 tiene **10.00–10.02 aprobados expresamente (2026-10-23)** y **10.03–10.04 aprobados expresamente (2026-10-24)**, con validación Android y observaciones del carrito pendientes; 10.05 y siguientes por iniciar; ETAPA 11 por iniciar. La ETAPA 05 incluye dos Skills configuradas y verificadas estructuralmente (sin prueba de ejecución en IDE). No confundir implementación verificada con aprobación del usuario.
 
 ## 1. Propósito y reglas del plan
 
@@ -35,7 +35,7 @@ Desarrollar progresivamente un ecosistema para clientes, mozos, caja, cocina y a
 | **07** | Configuración técnica | **Aprobada por el usuario (2026-10-21)** | [Implementación y evidencia](etapa-07.md), infraestructura y migraciones iniciales |
 | **08** | Desarrollo del backend | **08.00–08.10 verificados técnicamente; pendiente de aprobación final** | [Plan](../../../restaurant-app-backend-v2/docs/etapas/etapa-08.md), [bitácora](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-progreso.md) e [informe](../../../restaurant-app-backend-v2/docs/etapas/etapa-08-informe-auditoria.md) en backend |
 | **09** | Diseño UX/UI en Figma | Diseño de clientes existente; pendiente de aprobación formal | Interfaces y prototipos aprobados |
-| **10** | Desarrollo del frontend | 10.00 y 10.01 aprobados (2026-10-23); 10.02–10.03 pendientes | [Contexto](etapa-10.md), [hoja de ruta](etapa-10-hoja-ruta-clientes.md) y [checkpoint](etapa-10-progreso-clientes.md) |
+| **10** | Desarrollo del frontend | 10.00–10.02 aprobados (2026-10-23); 10.03–10.04 aprobados (2026-10-24) con pendientes; 10.05+ por iniciar | [Contexto](etapa-10.md), [hoja de ruta](etapa-10-hoja-ruta-clientes.md) y [checkpoint](etapa-10-progreso-clientes.md) |
 | **11** | Integración, pruebas y entrega | Por iniciar | Validación extremo a extremo y demostración académica |
 
 La elaboración de una etapa no equivale a su aprobación, ni una casilla de documentación a una prueba técnica ejecutada. **No iniciar trabajo dependiente de decisiones pendientes sin resolver su impacto primero.**
@@ -167,7 +167,7 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 
 **Objetivo:** transformar el diseño aprobado en las dos aplicaciones Flutter conectadas al backend.
 
-**Ejecución actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). 10.00 y 10.01 fueron aprobados expresamente por el usuario el 2026-10-23, con observaciones registradas en el [checkpoint](etapa-10-progreso-clientes.md). La fundación visual de 10.01 está reconstruida; 10.02–10.03 permanecen sin implementación funcional vigente. El alcance continúa siendo **exclusivamente la aplicación de clientes**; este reinicio no aprueba por inferencia las ETAPAS 08–10 ni autoriza adelantar `staff_app`.
+**Ejecución actual:** [contexto de ETAPA 10 para `customer_app`](etapa-10.md). 10.00–10.02 fueron aprobados expresamente por el usuario el 2026-10-23, y 10.03–10.04 fueron aprobados expresamente el 2026-10-24, con observaciones registradas en el [checkpoint](etapa-10-progreso-clientes.md). Acceso M01, Catálogo M02 y Carrito local están implementados; 10.05 permanece pendiente. El alcance continúa siendo **exclusivamente la aplicación de clientes**; esto no aprueba por inferencia las ETAPAS 08–10 completas ni autoriza adelantar `staff_app`.
 
 - Implementar **customer_app** y **staff_app**, reutilizando paquetes justificados y respetando los slices definidos.
 - Construir pantallas, estado, navegación por permisos, formularios, tratamiento de errores y persistencia segura de sesión.
@@ -201,4 +201,4 @@ correctos. La aprobación expresa del usuario consta en la [evidencia de ETAPA 0
 6. **Validación honesta:** distinguir documento revisado, archivo verificado, compilación, ejecución de pruebas y aprobación; nunca marcar como hecha una comprobación no ejecutada.
 7. **Control de cambios:** cambios de alcance, roles, políticas o simulaciones regresan a los documentos afectados y actualizan trazabilidad. No introducir funcionalidades extra como solución a una etapa técnica.
 
-**Próximo hito de `customer_app`:** esperar autorización expresa para desarrollar 10.02 — Acceso M01 contra referencias Figma verificadas (claro/oscuro). 10.01 fue aprobado con observaciones; su ejecución Android real y la conectividad móvil–API siguen pendientes. Siguen pendientes las aprobaciones formales de las ETAPAS 08, 09 y 10; ninguna verificación técnica las sustituye.
+**Próximo hito de `customer_app`:** esperar autorización expresa para 10.05 — Modalidad y mesas. La aprobación de 10.02–10.04 no elimina las observaciones del carrito ni equivale a validación móvil integral o aprobación de las ETAPAS 08, 09 y 10 completas.
