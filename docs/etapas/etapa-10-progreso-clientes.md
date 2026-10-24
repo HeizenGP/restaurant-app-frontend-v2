@@ -40,3 +40,9 @@
 - **Fidelidad conservada:** no se modificaron los gutters oficiales ni los espacios internos: Login 28 dp, pantallas generales 24 dp y Cuenta 18 dp. A 390×844 el render permanece idéntico a las referencias de Figma.
 - **Validación:** `flutter analyze --no-pub` sin incidencias; pruebas responsive focales **21/21**; goldens **34/34**; comparaciones Figma **26/26**; suite completa **151/151**; APK debug regenerado correctamente.
 - **Alcance real:** 04–07 todavía no están implementadas y no se inventaron pantallas. La comprobación final en el teléfono físico queda para la revisión del usuario.
+
+## Conexión local frontend/backend · 2026-10-24
+
+- Backend local verificado en `http://127.0.0.1:8000`: `/health` **200**, `POST /api/v1/auth/guest` **201** y `GET /api/v1/catalog/categories` **200**.
+- APK debug recompilado e instalado en Motorola Edge 60 Fusion con `API_BASE_URL=http://localhost:8000/api/v1`, usando `adb reverse tcp:8000 tcp:8000`; no se cambió ningún contrato ni URL de producción.
+- La sesión ADB inalámbrica se desconectó después del arranque. Para continuar la prueba desde el teléfono se debe reconectar ADB y recrear el túnel; el procedimiento quedó en `apps/customer_app/README.md`.
