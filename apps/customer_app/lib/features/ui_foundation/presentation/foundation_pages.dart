@@ -203,7 +203,10 @@ class FoundationAccountPage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 354),
+            key: const Key('account-content-frame'),
+            constraints: const BoxConstraints(
+              maxWidth: AppSpacing.mobilePageMaxWidth - 36,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

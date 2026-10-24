@@ -9,6 +9,7 @@ abstract final class AppSpacing {
   static const double xxxl = 40;
 
   static const double screenGutter = 24;
+  static const double mobilePageMaxWidth = 432;
   static const double contentMaxWidth = 560;
   static const double minimumTouchTarget = 48;
 }

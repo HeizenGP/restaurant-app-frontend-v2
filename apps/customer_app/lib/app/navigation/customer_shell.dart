@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/design_system/foundations/app_colors.dart';
@@ -11,20 +12,33 @@ class CustomerShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: ColoredBox(
-        color: context.appPalette.background,
-        child: SafeArea(
-          top: false,
-          child: CustomerBottomNavigation(
-            currentIndex: navigationShell.currentIndex,
-            onDestinationSelected: (int index) {
-              navigationShell.goBranch(
-                index,
-                initialLocation: index == navigationShell.currentIndex,
-              );
-            },
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final AppPalette palette = context.appPalette;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: palette.background,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: ColoredBox(
+          color: palette.background,
+          child: SafeArea(
+            top: false,
+            child: CustomerBottomNavigation(
+              currentIndex: navigationShell.currentIndex,
+              onDestinationSelected: (int index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                );
+              },
+            ),
           ),
         ),
       ),

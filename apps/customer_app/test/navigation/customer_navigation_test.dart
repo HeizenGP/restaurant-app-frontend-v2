@@ -3,9 +3,11 @@ import 'package:customer_app/core/api_environment.dart';
 import 'package:customer_app/features/m01_access/shared/domain/auth_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/auth_fakes.dart';
+import '../helpers/catalog_fakes.dart';
 
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
@@ -21,8 +23,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('page-inicio')), findsOneWidget);
-    expect(find.byKey(const Key('home-empty-catalog')), findsOneWidget);
-    expect(find.text('Arroces'), findsNothing);
+    expect(find.byKey(const Key('home-empty-catalog')), findsNothing);
+    expect(find.text('Arroces'), findsOneWidget);
     expect(find.bySemanticsLabel('Menú'), findsOneWidget);
     expect(
       tester
@@ -35,8 +37,8 @@ void main() {
     await tester.tap(find.byKey(const Key('nav-menu')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('page-menu')), findsOneWidget);
-    expect(find.byKey(const Key('catalog-empty-state')), findsOneWidget);
-    expect(find.text('Plato del catálogo'), findsNothing);
+    expect(find.byKey(const Key('catalog-empty-state')), findsNothing);
+    expect(find.text(productOne.name), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('nav-pedidos')));
     await tester.pumpAndSettle();
@@ -136,6 +138,57 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('menu opens detail with the selected product and no extra GET', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    final FakeCatalogRepository repository = FakeCatalogRepository();
+    await tester.pumpWidget(
+      CustomerApp(
+        environment: environment,
+        authRepository: FakeAuthRepository(refreshResult: registeredSession()),
+        sessionStore: MemoryAuthSessionStore(session: registeredSession()),
+        catalogRepository: repository,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('nav-menu')));
+    await tester.pumpAndSettle();
+    final Finder shellOverlay = find.ancestor(
+      of: find.byKey(const Key('page-menu')),
+      matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+    );
+    expect(shellOverlay, findsOneWidget);
+    expect(
+      tester
+          .widget<AnnotatedRegion<SystemUiOverlayStyle>>(shellOverlay)
+          .value
+          .statusBarIconBrightness,
+      Brightness.dark,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('catalog-product-$productOneId')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-product-detail')), findsOneWidget);
+    expect(find.text(productOne.name), findsOneWidget);
+    expect(find.text('Precio · S/ 24.25'), findsOneWidget);
+    expect(repository.productCalls, <String>[categoryOneId]);
+
+    await tester.tap(find.byKey(const Key('product-add-to-cart')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-cart')), findsOneWidget);
+    expect(find.text(productOne.name), findsOneWidget);
+    expect(find.text('1 unidad · S/ 24.25'), findsOneWidget);
+    expect(find.byKey(const Key('nav-menu')), findsOneWidget);
+    expect(repository.productCalls, <String>[categoryOneId]);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('profile scrolls with large text and Android safe insets', (
     WidgetTester tester,
   ) async {
@@ -175,7 +228,7 @@ void main() {
   testWidgets('profile stays centered with a long identity on wide screens', (
     WidgetTester tester,
   ) async {
-    await _configurePhoneSurface(tester, const Size(600, 960));
+    await _configurePhoneSurface(tester, const Size(432, 960));
     final CustomerIdentity identity = CustomerIdentity(
       id: 'customer-wide-profile',
       displayName: 'Nombre de cliente registrado considerablemente largo',
@@ -202,8 +255,13 @@ void main() {
     final Rect accountCard = tester.getRect(
       find.byKey(const Key('account-data-card')),
     );
-    expect(accountCard.width, lessThanOrEqualTo(350));
-    expect(accountCard.center.dx, closeTo(300, 0.5));
+    final Rect accountFrame = tester.getRect(
+      find.byKey(const Key('account-content-frame')),
+    );
+    expect(accountFrame.left, 18);
+    expect(accountFrame.right, 414);
+    expect(accountCard.width, lessThanOrEqualTo(392));
+    expect(accountCard.center.dx, closeTo(216, 0.5));
     expect(tester.takeException(), isNull);
   });
 }
@@ -217,6 +275,7 @@ CustomerApp _appWithSession(ApiEnvironment environment, AuthSession session) {
     environment: environment,
     authRepository: FakeAuthRepository(refreshResult: session),
     sessionStore: MemoryAuthSessionStore(session: session),
+    catalogRepository: FakeCatalogRepository(),
   );
 }
 

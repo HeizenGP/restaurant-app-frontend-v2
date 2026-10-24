@@ -1,11 +1,11 @@
 # ETAPA 10.00 — Inventario Figma de clientes
 
-**Verificado:** 2026-10-23 mediante acceso autenticado y de solo lectura al [archivo Chifa ASIA](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
+**Verificado:** 2026-10-24 mediante acceso autenticado y de solo lectura al [archivo Chifa ASIA](https://www.figma.com/design/7ZiwUZOnUFwu1cz21rWOMs/Untitled?node-id=0-1).
 
 - Tema claro: página `0:1`, «01 · APP CLIENTES — MODO CLARO».
 - Tema oscuro: página `176:2`, «02 · APP CLIENTES — MODO OSCURO».
 - Resultado: **20/20 pantallas por tema**, numeración completa, nombres equivalentes, visibles y de **390×844**; sin faltantes, duplicados ni tamaños inválidos.
-- Evidencia local: **18 PNG** verificables; incluye ambas variantes de 01, 02, 03, 08, 09, 10, 15, 19 y 20.
+- Evidencia local: **20 PNG** verificables; incluye ambas variantes de 01, 02, 03, 08, 09, 10, 11, 15, 19 y 20.
 - Alcance: comprobación estructural de existencia, correspondencia y dimensiones. No acredita paridad visual píxel a píxel de una implementación Flutter.
 
 | # | Pantalla | Nodo claro | Nodo oscuro | Evidencia local |
@@ -20,7 +20,7 @@
 | 08 | Inicio y categorías | `179:38` | `179:485` | `figma/10.01-10.03/08-home-{light,dark}.png` |
 | 09 | Catálogo de platos | `179:67` | `179:514` | `figma/10.01-10.03/09-catalog-{light,dark}.png` |
 | 10 | Producto / opciones | `179:101` | `179:548` | `figma/10.01-10.03/10-product-{light,dark}.png` |
-| 11 | Carrito y cantidades | `179:117` | `179:564` | Nodos verificados; captura no exportada |
+| 11 | Carrito y cantidades | `179:117` | `179:564` | `figma/10.04/11-cart-{light,dark}.png` |
 | 12 | Revisar solicitud | `179:226` | `179:673` | Nodos verificados; captura no exportada |
 | 13 | Solicitud pendiente | `179:249` | `179:696` | Nodos verificados; captura no exportada |
 | 14 | Anticipo del 50 % | `179:267` | `179:714` | Nodos verificados; captura no exportada |

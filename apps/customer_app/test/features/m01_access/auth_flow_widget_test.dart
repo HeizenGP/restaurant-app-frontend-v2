@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../helpers/auth_fakes.dart';
+import '../../helpers/catalog_fakes.dart';
 
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
@@ -249,6 +250,11 @@ void main() {
           .statusBarIconBrightness,
       Brightness.dark,
     );
+    final Rect guestButton = tester.getRect(
+      find.byKey(const Key('guest-submit')),
+    );
+    expect(guestButton.left, 24);
+    expect(guestButton.right, 408);
     expect(tester.takeException(), isNull);
   });
 }
@@ -262,6 +268,7 @@ CustomerApp _app(
     environment: environment,
     authRepository: repository,
     sessionStore: store ?? MemoryAuthSessionStore(),
+    catalogRepository: FakeCatalogRepository(),
   );
 }
 

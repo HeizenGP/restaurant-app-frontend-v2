@@ -11,6 +11,7 @@ import '../features/m01_access/shared/infrastructure/flutter_secure_session_stor
 import '../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../features/m02_catalog/shared/application/catalog_contracts.dart';
 import '../features/m02_catalog/shared/infrastructure/catalog_rest_repository.dart';
+import '../features/m04_orders/manage_cart/application/cart_controller.dart';
 import 'navigation/customer_router.dart';
 import 'theme/theme_mode_controller.dart';
 
@@ -38,6 +39,7 @@ class _CustomerAppState extends State<CustomerApp> {
   late final ThemeModeController _themeModeController;
   late final AuthSessionController _authController;
   late final CatalogController _catalogController;
+  late final CartController _cartController;
   late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
@@ -77,11 +79,12 @@ class _CustomerAppState extends State<CustomerApp> {
           client: sharedClient!,
         );
     _catalogController = CatalogController(repository: _catalogRepository);
+    _cartController = CartController();
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
       catalogController: _catalogController,
-      catalogRepository: _catalogRepository,
+      cartController: _cartController,
     );
     _authController.restore();
   }
@@ -90,6 +93,7 @@ class _CustomerAppState extends State<CustomerApp> {
   void dispose() {
     _router.dispose();
     _catalogController.dispose();
+    _cartController.dispose();
     _authController.dispose();
     _themeModeController.dispose();
     _ownedHttpClient?.close();

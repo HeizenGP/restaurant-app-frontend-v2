@@ -1,5 +1,6 @@
 import 'dart:ui' show SemanticsActionEvent, Tristate;
 
+import 'package:customer_app/app/theme/theme_mode_controller.dart';
 import 'package:customer_app/core/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -187,5 +188,41 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Reintentar'));
     expect(retryPresses, 1);
     semantics.dispose();
+  });
+
+  testWidgets('page scaffold uses only its Figma gutter on a wide phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(432, 900);
+    addTearDown(tester.view.reset);
+    final ThemeModeController themeController = ThemeModeController();
+    addTearDown(themeController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: ChifaPageScaffold(
+            title: 'Pantalla adaptable',
+            subtitle: 'Sin margen lateral añadido',
+            themeModeController: themeController,
+            child: const SizedBox(
+              key: Key('wide-page-content'),
+              height: 40,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Rect content = tester.getRect(
+      find.byKey(const Key('wide-page-content')),
+    );
+    expect(content.left, 24);
+    expect(content.right, 408);
+    expect(tester.takeException(), isNull);
   });
 }

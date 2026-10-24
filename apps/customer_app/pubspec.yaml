@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/m01/
+    - assets/images/m02/
   fonts:
     - family: DM Sans
       fonts:

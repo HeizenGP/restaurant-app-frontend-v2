@@ -68,7 +68,9 @@ class _SignInPageState extends State<SignInPage> {
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 432),
+                        constraints: const BoxConstraints(
+                          maxWidth: AppSpacing.mobilePageMaxWidth,
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(28, 25, 28, 22),
                           child: AutofillGroup(

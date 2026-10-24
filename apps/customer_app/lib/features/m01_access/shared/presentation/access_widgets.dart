@@ -42,7 +42,9 @@ class AccessSimpleScaffold extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 390),
+                      constraints: const BoxConstraints(
+                        maxWidth: AppSpacing.mobilePageMaxWidth,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(24, 7, 24, 24),
                         child: child,
