@@ -11,6 +11,7 @@ class ChifaCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.icon,
+    this.iconColor,
     this.trailing,
     this.onTap,
     this.enabled = true,
@@ -22,6 +23,7 @@ class ChifaCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData? icon;
+  final Color? iconColor;
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool enabled;
@@ -40,7 +42,7 @@ class ChifaCard extends StatelessWidget {
         child: Row(
           children: <Widget>[
             if (icon != null) ...<Widget>[
-              ChifaIconTile(icon: icon!),
+              ChifaIconTile(icon: icon!, color: iconColor),
               const SizedBox(width: AppSpacing.md),
             ],
             Expanded(

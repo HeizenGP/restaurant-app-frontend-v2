@@ -1,6 +1,8 @@
 import 'package:customer_app/app/customer_app.dart';
 import 'package:customer_app/core/api_environment.dart';
+import 'package:customer_app/core/design_system/design_system.dart';
 import 'package:customer_app/features/m01_access/shared/domain/auth_models.dart';
+import 'package:customer_app/features/m04_orders/choose_fulfillment/domain/fulfillment_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/auth_fakes.dart';
 import '../helpers/catalog_fakes.dart';
+import '../helpers/orders_fakes.dart';
+import '../helpers/tables_fakes.dart';
 
 void main() {
   final ApiEnvironment environment = ApiEnvironment(
@@ -189,6 +193,137 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'cart submits local fulfillment once and consults the created order',
+    (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      await _configurePhoneSurface(tester, const Size(390, 844));
+      final FakeTablesRepository tablesRepository = FakeTablesRepository();
+      final FakeOrdersRepository ordersRepository = FakeOrdersRepository();
+      await tester.pumpWidget(
+        CustomerApp(
+          environment: environment,
+          authRepository: FakeAuthRepository(
+            refreshResult: registeredSession(),
+          ),
+          sessionStore: MemoryAuthSessionStore(session: registeredSession()),
+          catalogRepository: FakeCatalogRepository(),
+          tablesRepository: tablesRepository,
+          ordersRepository: ordersRepository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _openCartWithProduct(tester);
+      expect(
+        tester
+            .widget<ChifaButton>(find.byKey(const Key('cart-continue')))
+            .onPressed,
+        isNotNull,
+      );
+
+      await tester.tap(find.byKey(const Key('cart-continue')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('page-fulfillment-mode')), findsOneWidget);
+      expect(find.byKey(const Key('nav-menu')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('fulfillment-mode-local')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('page-table-selection')), findsOneWidget);
+      expect(tablesRepository.listCalls, 1);
+      expect(find.text('Mesa A-01'), findsOneWidget);
+      expect(find.text('Mesa A-02'), findsOneWidget);
+      expect(
+        tester
+            .getSemantics(find.byKey(const Key('table-table-2')))
+            .getSemanticsData()
+            .hasAction(SemanticsAction.tap),
+        isFalse,
+      );
+
+      await tester.tap(find.byKey(const Key('table-table-2')));
+      await tester.pump();
+      expect(
+        tester
+            .widget<ChifaButton>(find.byKey(const Key('table-finish')))
+            .onPressed,
+        isNull,
+      );
+
+      await tester.tap(find.byKey(const Key('table-table-1')));
+      await tester.pump();
+      expect(
+        tester
+            .widget<ChifaButton>(find.byKey(const Key('table-finish')))
+            .onPressed,
+        isNotNull,
+      );
+      await tester.tap(find.byKey(const Key('table-finish')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('page-order-review')), findsOneWidget);
+      expect(tablesRepository.listCalls, 1);
+      expect(find.text('1 producto · 1 unidad'), findsOneWidget);
+      expect(find.text('Consumo en local · A-01'), findsOneWidget);
+      expect(find.text('S/ 24.25 estimado por el carrito'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('order-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('page-order-submitted')), findsOneWidget);
+      expect(find.text('Estado: REQUESTED'), findsOneWidget);
+      expect(ordersRepository.createCommands, hasLength(1));
+      expect(ordersRepository.detailIds, <String>[
+        '00000000-0000-4000-8000-000000000201',
+      ]);
+      expect(ordersRepository.idempotencyKeys.single, isNotEmpty);
+      expect(
+        ordersRepository.createCommands.single.fulfillment,
+        FulfillmentDraft.local(tableId: 'table-1'),
+      );
+      expect(tester.takeException(), isNull);
+      semantics.dispose();
+    },
+  );
+
+  testWidgets('fulfillment mode opens pickup and delivery routes', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      CustomerApp(
+        environment: environment,
+        authRepository: FakeAuthRepository(refreshResult: registeredSession()),
+        sessionStore: MemoryAuthSessionStore(session: registeredSession()),
+        catalogRepository: FakeCatalogRepository(),
+        tablesRepository: FakeTablesRepository(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _openCartWithProduct(tester);
+    await tester.tap(find.byKey(const Key('cart-continue')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('fulfillment-mode-pickup')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-pickup-details')), findsOneWidget);
+    expect(find.byKey(const Key('nav-menu')), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('page-fulfillment-mode')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('fulfillment-mode-delivery')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('page-delivery-details')), findsOneWidget);
+    expect(find.byKey(const Key('nav-menu')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('profile scrolls with large text and Android safe insets', (
     WidgetTester tester,
   ) async {
@@ -268,6 +403,18 @@ void main() {
 
 CustomerApp _authenticatedApp(ApiEnvironment environment) {
   return _appWithSession(environment, registeredSession());
+}
+
+Future<void> _openCartWithProduct(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('nav-menu')));
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.byKey(const ValueKey<String>('catalog-product-$productOneId')),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('product-add-to-cart')));
+  await tester.pumpAndSettle();
+  expect(find.byKey(const Key('page-cart')), findsOneWidget);
 }
 
 CustomerApp _appWithSession(ApiEnvironment environment, AuthSession session) {

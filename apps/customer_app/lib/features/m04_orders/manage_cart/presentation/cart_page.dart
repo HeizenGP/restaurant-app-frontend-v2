@@ -10,11 +10,13 @@ class CartPage extends StatelessWidget {
   const CartPage({
     required this.themeModeController,
     required this.cartController,
+    this.onContinue,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final CartController cartController;
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,10 @@ class CartPage extends StatelessWidget {
                   title: 'Tu carrito está vacío',
                   message: 'Agrega un producto disponible desde el menú',
                 )
-              : _CartContent(cartController: cartController),
+              : _CartContent(
+                  cartController: cartController,
+                  onContinue: onContinue,
+                ),
         );
       },
     );
@@ -42,9 +47,10 @@ class CartPage extends StatelessWidget {
 }
 
 class _CartContent extends StatelessWidget {
-  const _CartContent({required this.cartController});
+  const _CartContent({required this.cartController, this.onContinue});
 
   final CartController cartController;
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +91,19 @@ class _CartContent extends StatelessWidget {
         const SizedBox(height: 31),
         Semantics(
           button: true,
-          enabled: false,
-          label: 'Continuar con pedido, disponible en el siguiente bloque',
+          enabled: onContinue != null,
+          label: onContinue == null
+              ? 'Continuar con pedido, no disponible'
+              : 'Continuar con pedido',
           excludeSemantics: true,
           child: IgnorePointer(
+            ignoring: onContinue == null,
             child: ChifaButton(
-              key: Key('cart-continue-disabled'),
+              key: Key(
+                onContinue == null ? 'cart-continue-disabled' : 'cart-continue',
+              ),
               label: 'Continuar con pedido',
-              onPressed: _noAction,
+              onPressed: onContinue ?? _noAction,
             ),
           ),
         ),

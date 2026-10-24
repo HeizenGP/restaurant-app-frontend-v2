@@ -11,7 +11,13 @@ import '../features/m01_access/shared/infrastructure/flutter_secure_session_stor
 import '../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../features/m02_catalog/shared/application/catalog_contracts.dart';
 import '../features/m02_catalog/shared/infrastructure/catalog_rest_repository.dart';
+import '../features/m04_orders/choose_fulfillment/application/fulfillment_contracts.dart';
+import '../features/m04_orders/choose_fulfillment/application/fulfillment_controller.dart';
+import '../features/m04_orders/choose_fulfillment/infrastructure/tables_rest_repository.dart';
 import '../features/m04_orders/manage_cart/application/cart_controller.dart';
+import '../features/m04_orders/submit_order/application/order_contracts.dart';
+import '../features/m04_orders/submit_order/application/submit_order_controller.dart';
+import '../features/m04_orders/submit_order/infrastructure/orders_rest_repository.dart';
 import 'navigation/customer_router.dart';
 import 'theme/theme_mode_controller.dart';
 
@@ -22,6 +28,8 @@ class CustomerApp extends StatefulWidget {
     this.authRepository,
     this.sessionStore,
     this.catalogRepository,
+    this.tablesRepository,
+    this.ordersRepository,
     super.key,
   });
 
@@ -30,6 +38,8 @@ class CustomerApp extends StatefulWidget {
   final AuthRepository? authRepository;
   final AuthSessionStore? sessionStore;
   final CatalogRepository? catalogRepository;
+  final TablesRepository? tablesRepository;
+  final OrdersRepository? ordersRepository;
 
   @override
   State<CustomerApp> createState() => _CustomerAppState();
@@ -40,6 +50,8 @@ class _CustomerAppState extends State<CustomerApp> {
   late final AuthSessionController _authController;
   late final CatalogController _catalogController;
   late final CartController _cartController;
+  late final FulfillmentController _fulfillmentController;
+  late final SubmitOrderController _submitOrderController;
   late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
@@ -51,7 +63,10 @@ class _CustomerAppState extends State<CustomerApp> {
       initialMode: widget.initialThemeMode,
     );
     final http.Client? sharedClient;
-    if (widget.authRepository == null || widget.catalogRepository == null) {
+    if (widget.authRepository == null ||
+        widget.catalogRepository == null ||
+        widget.tablesRepository == null ||
+        widget.ordersRepository == null) {
       sharedClient = http.Client();
       _ownedHttpClient = sharedClient;
     } else {
@@ -80,11 +95,31 @@ class _CustomerAppState extends State<CustomerApp> {
         );
     _catalogController = CatalogController(repository: _catalogRepository);
     _cartController = CartController();
+    _fulfillmentController = FulfillmentController(
+      tablesRepository:
+          widget.tablesRepository ??
+          TablesRestRepository(
+            baseUri: widget.environment.baseUri,
+            client: sharedClient!,
+          ),
+    );
+    _submitOrderController = SubmitOrderController(
+      repository:
+          widget.ordersRepository ??
+          OrdersRestRepository(
+            baseUri: widget.environment.baseUri,
+            client: sharedClient!,
+          ),
+      accessTokenProvider: () => _authController.state.session?.accessToken,
+      refreshAccessToken: _authController.refreshSession,
+    );
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
       catalogController: _catalogController,
       cartController: _cartController,
+      fulfillmentController: _fulfillmentController,
+      submitOrderController: _submitOrderController,
     );
     _authController.restore();
   }
@@ -94,6 +129,8 @@ class _CustomerAppState extends State<CustomerApp> {
     _router.dispose();
     _catalogController.dispose();
     _cartController.dispose();
+    _fulfillmentController.dispose();
+    _submitOrderController.dispose();
     _authController.dispose();
     _themeModeController.dispose();
     _ownedHttpClient?.close();

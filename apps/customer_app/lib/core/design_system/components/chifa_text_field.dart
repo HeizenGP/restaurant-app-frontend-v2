@@ -27,6 +27,7 @@ class ChifaTextField extends StatelessWidget {
     this.hintStyle,
     this.inputStyle,
     this.fieldHeight,
+    this.fillColor,
     super.key,
   });
 
@@ -52,6 +53,7 @@ class ChifaTextField extends StatelessWidget {
   final TextStyle? hintStyle;
   final TextStyle? inputStyle;
   final double? fieldHeight;
+  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +96,7 @@ class ChifaTextField extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: hintStyle,
+                fillColor: fillColor,
                 contentPadding: contentPadding,
                 constraints: fieldHeight == null
                     ? null

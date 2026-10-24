@@ -65,6 +65,11 @@ final class CartController extends ChangeNotifier {
     return true;
   }
 
+  void clear() {
+    if (_state.isEmpty) return;
+    _emit(const CartState.empty());
+  }
+
   void _emit(CartState value) {
     if (_disposed) return;
     _state = value;
