@@ -19,6 +19,11 @@ class CatalogProductDetailPage extends StatefulWidget {
     required this.controller,
     required this.onAddProduct,
     required this.onOpenCart,
+    this.onProductAdded,
+    this.onBackPressed,
+    this.showBackButton,
+    this.showCartInHeader = false,
+    this.tableLabel,
     super.key,
   });
 
@@ -26,6 +31,11 @@ class CatalogProductDetailPage extends StatefulWidget {
   final ProductDetailController controller;
   final AddSelectedProduct onAddProduct;
   final VoidCallback onOpenCart;
+  final VoidCallback? onProductAdded;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
+  final bool showCartInHeader;
+  final String? tableLabel;
 
   @override
   State<CatalogProductDetailPage> createState() {
@@ -68,8 +78,18 @@ class _CatalogProductDetailPageState extends State<CatalogProductDetailPage> {
                 onIncrease: () => setState(() => _quantity += 1),
                 onAddToCart: () {
                   final bool added = widget.onAddProduct(product, _quantity);
-                  if (added) widget.onOpenCart();
+                  if (added) {
+                    if (widget.onProductAdded != null) {
+                      widget.onProductAdded!();
+                    } else {
+                      widget.onOpenCart();
+                    }
+                  }
                 },
+                onBackPressed: widget.onBackPressed,
+                showBackButton: widget.showBackButton,
+                onCartPressed: widget.showCartInHeader ? widget.onOpenCart : null,
+                tableLabel: widget.tableLabel,
               ),
       ),
     );
@@ -84,6 +104,10 @@ class FoundationProductDetailPage extends StatelessWidget {
     this.onDecrease,
     this.onIncrease,
     this.onAddToCart,
+    this.onBackPressed,
+    this.showBackButton,
+    this.onCartPressed,
+    this.tableLabel,
     super.key,
   });
 
@@ -93,6 +117,10 @@ class FoundationProductDetailPage extends StatelessWidget {
   final VoidCallback? onDecrease;
   final VoidCallback? onIncrease;
   final VoidCallback? onAddToCart;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
+  final VoidCallback? onCartPressed;
+  final String? tableLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +134,10 @@ class FoundationProductDetailPage extends StatelessWidget {
       contentGap: 15,
       safeBottom: true,
       themeModeController: themeModeController,
+      onBackPressed: onBackPressed,
+      showBackButton: showBackButton,
+      onCartPressed: onCartPressed,
+      tableLabel: tableLabel,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

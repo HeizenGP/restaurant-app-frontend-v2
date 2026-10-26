@@ -11,12 +11,18 @@ class CartPage extends StatelessWidget {
     required this.themeModeController,
     required this.cartController,
     this.onContinue,
+    this.onBackPressed,
+    this.tableLabel,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final CartController cartController;
   final VoidCallback? onContinue;
+  final VoidCallback? onBackPressed;
+  final String? tableLabel;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,9 @@ class CartPage extends StatelessWidget {
           subtitle: 'Confirma cantidades antes de enviar.',
           contentGap: 36,
           themeModeController: themeModeController,
+          onBackPressed: onBackPressed,
+          showBackButton: showBackButton,
+          tableLabel: tableLabel,
           child: cartController.state.isEmpty
               ? const ChifaStateView(
                   key: Key('cart-empty-state'),

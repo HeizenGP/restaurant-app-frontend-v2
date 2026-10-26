@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../core/api_environment.dart';
 import '../core/design_system/theme/app_theme.dart';
+import '../features/m01_access/profile/application/user_profile_controller.dart';
 import '../features/m01_access/shared/application/auth_contracts.dart';
 import '../features/m01_access/shared/application/auth_session_controller.dart';
 import '../features/m01_access/shared/domain/auth_models.dart';
@@ -40,6 +41,7 @@ class CustomerApp extends StatefulWidget {
     this.ordersRepository,
     this.paymentStatusRepository,
     this.orderTrackingRepository,
+    this.userProfileController,
     super.key,
   });
 
@@ -52,6 +54,7 @@ class CustomerApp extends StatefulWidget {
   final OrdersRepository? ordersRepository;
   final PaymentStatusRepository? paymentStatusRepository;
   final OrderTrackingRepository? orderTrackingRepository;
+  final UserProfileController? userProfileController;
 
   @override
   State<CustomerApp> createState() => _CustomerAppState();
@@ -67,6 +70,8 @@ class _CustomerAppState extends State<CustomerApp> {
   late final PaymentStatusController _paymentStatusController;
   late final OrderHistoryController _orderHistoryController;
   late final OrderTrackingController _orderTrackingController;
+  late final UserProfileController _userProfileController;
+  UserProfileController? _ownedUserProfileController;
   late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
@@ -176,6 +181,13 @@ class _CustomerAppState extends State<CustomerApp> {
       accessTokenProvider: () => _authController.state.session?.accessToken,
       refreshAccessToken: _authController.refreshSession,
     );
+    if (widget.userProfileController case final UserProfileController injected) {
+      _userProfileController = injected;
+      _ownedUserProfileController = null;
+    } else {
+      _userProfileController = UserProfileController();
+      _ownedUserProfileController = _userProfileController;
+    }
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
@@ -186,6 +198,7 @@ class _CustomerAppState extends State<CustomerApp> {
       paymentStatusController: _paymentStatusController,
       orderHistoryController: _orderHistoryController,
       orderTrackingController: _orderTrackingController,
+      profileController: _userProfileController,
     );
     _authController.addListener(_onAuthStateChanged);
     _authController.restore();
@@ -202,6 +215,7 @@ class _CustomerAppState extends State<CustomerApp> {
     _paymentStatusController.dispose();
     _orderHistoryController.dispose();
     _orderTrackingController.dispose();
+    _ownedUserProfileController?.dispose();
     _authController.dispose();
     _themeModeController.dispose();
     _ownedHttpClient?.close();

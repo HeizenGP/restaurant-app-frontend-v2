@@ -107,6 +107,29 @@ void main() {
       ),
     );
   });
+
+  test('assigned table is locked until released', () async {
+    final FulfillmentController controller = FulfillmentController(
+      tablesRepository: _FakeTablesRepository(),
+    );
+    addTearDown(controller.dispose);
+    await controller.loadTables();
+
+    controller.lockAssignedTable('available');
+    expect(controller.state.hasAssignedTable, isTrue);
+    expect(controller.state.assignedTableId, 'available');
+
+    // Attempting to select another table is blocked
+    controller.selectTable('occupied');
+    expect(controller.state.assignedTableId, 'available');
+    expect(controller.state.selectedTableId, 'available');
+
+    // Released when order is paid/cleared
+    controller.releaseAssignedTable();
+    expect(controller.state.hasAssignedTable, isFalse);
+    expect(controller.state.assignedTableId, isNull);
+    expect(controller.state.selectedTableId, isNull);
+  });
 }
 
 const List<RestaurantTable> _tables = <RestaurantTable>[

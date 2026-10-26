@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/design_system/design_system.dart';
@@ -6,9 +7,14 @@ import '../../shared/application/auth_session_controller.dart';
 import '../../shared/presentation/access_widgets.dart';
 
 class GuestAccessPage extends StatelessWidget {
-  const GuestAccessPage({required this.authController, super.key});
+  const GuestAccessPage({
+    required this.authController,
+    this.showBackButton,
+    super.key,
+  });
 
   final AuthSessionController authController;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +25,14 @@ class GuestAccessPage extends StatelessWidget {
       },
       child: AccessSimpleScaffold(
         pageKey: const Key('page-invitado'),
+        showBackButton: showBackButton,
+        onBackPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/acceso');
+          }
+        },
         child: AnimatedBuilder(
           animation: authController,
           builder: (BuildContext context, Widget? child) {

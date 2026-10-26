@@ -7,9 +7,14 @@ import '../../shared/domain/auth_models.dart';
 import '../../shared/presentation/access_widgets.dart';
 
 class RegistrationPage extends StatefulWidget {
-  const RegistrationPage({required this.authController, super.key});
+  const RegistrationPage({
+    required this.authController,
+    this.showBackButton,
+    super.key,
+  });
 
   final AuthSessionController authController;
+  final bool? showBackButton;
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -49,6 +54,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
       },
       child: AccessSimpleScaffold(
         pageKey: const Key('page-registro'),
+        showBackButton: widget.showBackButton,
+        onBackPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/acceso');
+          }
+        },
         child: AutofillGroup(
           child: Form(
             key: _formKey,

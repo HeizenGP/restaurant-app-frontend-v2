@@ -13,6 +13,7 @@ final class FulfillmentState {
     this.tablesStatus = TablesStatus.initial,
     this.tables = const <RestaurantTable>[],
     this.selectedTableId,
+    this.assignedTableId,
     this.tablesFailure,
   });
 
@@ -21,11 +22,24 @@ final class FulfillmentState {
   final TablesStatus tablesStatus;
   final List<RestaurantTable> tables;
   final String? selectedTableId;
+  final String? assignedTableId;
   final TablesFailure? tablesFailure;
 
-  RestaurantTable? get selectedTable {
+  bool get hasAssignedTable =>
+      assignedTableId != null && assignedTableId!.isNotEmpty;
+
+  RestaurantTable? get assignedTable {
+    if (assignedTableId == null) return null;
     for (final RestaurantTable table in tables) {
-      if (table.id == selectedTableId) return table;
+      if (table.id == assignedTableId) return table;
+    }
+    return null;
+  }
+
+  RestaurantTable? get selectedTable {
+    final String? effectiveId = selectedTableId ?? assignedTableId;
+    for (final RestaurantTable table in tables) {
+      if (table.id == effectiveId) return table;
     }
     return null;
   }
@@ -52,8 +66,9 @@ final class FulfillmentController extends ChangeNotifier {
         tablesStatus: _state.tablesStatus,
         tables: _state.tables,
         selectedTableId: mode == FulfillmentMode.local
-            ? _state.selectedTableId
+            ? (_state.selectedTableId ?? _state.assignedTableId)
             : null,
+        assignedTableId: _state.assignedTableId,
       ),
     );
   }
@@ -65,7 +80,8 @@ final class FulfillmentController extends ChangeNotifier {
         mode: FulfillmentMode.local,
         tablesStatus: TablesStatus.loading,
         tables: _state.tables,
-        selectedTableId: _state.selectedTableId,
+        selectedTableId: _state.selectedTableId ?? _state.assignedTableId,
+        assignedTableId: _state.assignedTableId,
       ),
     );
 
@@ -76,11 +92,10 @@ final class FulfillmentController extends ChangeNotifier {
       if (!_isCurrent(requestVersion)) return;
 
       String? selectedTableId;
-      final RestaurantTable? current = _findTable(
-        tables,
-        _state.selectedTableId,
-      );
-      if (current != null && current.isAvailable) {
+      final String? targetId =
+          _state.assignedTableId ?? _state.selectedTableId;
+      final RestaurantTable? current = _findTable(tables, targetId);
+      if (current != null && (current.isAvailable || current.id == _state.assignedTableId)) {
         selectedTableId = current.id;
       }
 
@@ -90,6 +105,7 @@ final class FulfillmentController extends ChangeNotifier {
           tablesStatus: TablesStatus.success,
           tables: tables,
           selectedTableId: selectedTableId,
+          assignedTableId: _state.assignedTableId,
         ),
       );
     } on Object catch (error) {
@@ -99,7 +115,8 @@ final class FulfillmentController extends ChangeNotifier {
           mode: FulfillmentMode.local,
           tablesStatus: TablesStatus.failure,
           tables: _state.tables,
-          selectedTableId: _state.selectedTableId,
+          selectedTableId: _state.selectedTableId ?? _state.assignedTableId,
+          assignedTableId: _state.assignedTableId,
           tablesFailure: _safeFailure(error),
         ),
       );
@@ -109,21 +126,27 @@ final class FulfillmentController extends ChangeNotifier {
   Future<void> retryTables() => loadTables();
 
   void selectTable(String tableId) {
+    if (_state.hasAssignedTable && _state.assignedTableId != tableId) {
+      return;
+    }
     final RestaurantTable? table = _findTable(_state.tables, tableId);
-    if (table == null || !table.isAvailable) return;
+    if (table == null) return;
+    if (!table.isAvailable && table.id != _state.assignedTableId) return;
     _emit(
       FulfillmentState(
         mode: FulfillmentMode.local,
         tablesStatus: _state.tablesStatus,
         tables: _state.tables,
         selectedTableId: table.id,
+        assignedTableId: _state.assignedTableId,
       ),
     );
   }
 
   FulfillmentDraft? completeLocal() {
     final RestaurantTable? table = _state.selectedTable;
-    if (table == null || !table.isAvailable) return null;
+    if (table == null) return null;
+    if (!table.isAvailable && table.id != _state.assignedTableId) return null;
     final FulfillmentDraft draft = FulfillmentDraft.local(tableId: table.id);
     _emit(
       FulfillmentState(
@@ -132,9 +155,45 @@ final class FulfillmentController extends ChangeNotifier {
         tablesStatus: _state.tablesStatus,
         tables: _state.tables,
         selectedTableId: table.id,
+        assignedTableId: table.id,
       ),
     );
     return draft;
+  }
+
+  void lockAssignedTable(String tableId) {
+    _emit(
+      FulfillmentState(
+        mode: FulfillmentMode.local,
+        draft: _state.draft,
+        tablesStatus: _state.tablesStatus,
+        tables: _state.tables,
+        selectedTableId: tableId,
+        assignedTableId: tableId,
+      ),
+    );
+  }
+
+  void releaseAssignedTable() {
+    _emit(
+      FulfillmentState(
+        tablesStatus: _state.tablesStatus,
+        tables: _state.tables,
+        selectedTableId: null,
+        assignedTableId: null,
+      ),
+    );
+  }
+
+  void clearDraft() {
+    _emit(
+      FulfillmentState(
+        tablesStatus: _state.tablesStatus,
+        tables: _state.tables,
+        selectedTableId: _state.assignedTableId,
+        assignedTableId: _state.assignedTableId,
+      ),
+    );
   }
 
   FulfillmentDraft? completePickup({

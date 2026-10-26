@@ -8,6 +8,7 @@ import 'package:customer_app/features/m04_orders/choose_fulfillment/domain/fulfi
 import 'package:customer_app/features/m04_orders/choose_fulfillment/presentation/fulfillment_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 void main() {
   testWidgets('mode screen stores the selected mode and exposes navigation', (
@@ -74,6 +75,52 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey<String>('table-t2')));
     await tester.pump();
+    await tester.tap(find.byKey(const Key('table-finish')));
+    expect(finished, FulfillmentDraft.local(tableId: 't2'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tables in grid mode render 2 square columns with Lucide icons', (
+    WidgetTester tester,
+  ) async {
+    await _configureSurface(tester, const Size(390, 844));
+    final FulfillmentController controller = FulfillmentController(
+      tablesRepository: _FakeTablesRepository(),
+    );
+    final ThemeModeController themeController = ThemeModeController();
+    FulfillmentDraft? finished;
+    addTearDown(controller.dispose);
+    addTearDown(themeController.dispose);
+
+    await tester.pumpWidget(
+      _testApp(
+        TableSelectionPage(
+          themeModeController: themeController,
+          controller: controller,
+          useGrid: true,
+          onFinished: (FulfillmentDraft value) => finished = value,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mesa A-01'), findsOneWidget);
+    expect(find.text('OCUPADA'), findsOneWidget);
+    expect(find.text('DISPONIBLE'), findsOneWidget);
+    expect(find.byIcon(LucideIcons.ban), findsOneWidget);
+    expect(find.byIcon(LucideIcons.armchair), findsOneWidget);
+
+    // Occupied table t1 cannot be tapped
+    await tester.tap(find.byKey(const ValueKey<String>('table-t1')));
+    await tester.pump();
+    expect(controller.state.selectedTableId, isNull);
+
+    // Available table t2 can be selected and finished
+    await tester.tap(find.byKey(const ValueKey<String>('table-t2')));
+    await tester.pump();
+    expect(controller.state.selectedTableId, 't2');
+    expect(find.text('SELECCIONADA'), findsOneWidget);
+
     await tester.tap(find.byKey(const Key('table-finish')));
     expect(finished, FulfillmentDraft.local(tableId: 't2'));
     expect(tester.takeException(), isNull);

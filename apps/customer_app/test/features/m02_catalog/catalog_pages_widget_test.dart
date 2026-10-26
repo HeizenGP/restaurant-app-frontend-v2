@@ -254,6 +254,90 @@ void main() {
     expect(find.text('No disponible para venta'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'catalog grid layout supports direct add to cart and product opening',
+    (WidgetTester tester) async {
+      await _configurePhoneSurface(tester, const Size(390, 844));
+      final FakeCatalogRepository repository = FakeCatalogRepository();
+      final CatalogController controller = CatalogController(
+        repository: repository,
+      );
+      final ThemeModeController themeController = ThemeModeController();
+      CatalogProduct? openedProduct;
+      CatalogProduct? addedProduct;
+      addTearDown(controller.dispose);
+      addTearDown(themeController.dispose);
+
+      await tester.pumpWidget(
+        _testApp(
+          CatalogBrowsePage(
+            themeModeController: themeController,
+            catalogController: controller,
+            useGrid: true,
+            onAddProduct: (product) => addedProduct = product,
+            onOpenProduct: (product) => openedProduct = product,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify grid product card and direct add button exist
+      final Finder addBtn = find.byKey(
+        const ValueKey<String>('catalog-product-add-$productOneId'),
+      );
+      expect(addBtn, findsOneWidget);
+
+      // Tap add directly
+      await tester.tap(addBtn);
+      await tester.pump();
+      expect(addedProduct, productOne);
+      expect(openedProduct, isNull);
+
+      // Tap card body to open full detail
+      final Finder cardBody = find.byKey(
+        const ValueKey<String>('catalog-product-$productOneId'),
+      );
+      await tester.tap(cardBody);
+      await tester.pump();
+      expect(openedProduct, productOne);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('detail invokes onProductAdded callback on successful add', (
+    WidgetTester tester,
+  ) async {
+    await _configurePhoneSurface(tester, const Size(390, 844));
+    final ThemeModeController themeController = ThemeModeController();
+    addTearDown(themeController.dispose);
+    final ProductDetailController controller =
+        ProductDetailController.fromSelection(
+          categoryId: categoryOneId,
+          productId: productOneId,
+          selectedProduct: productOne,
+        );
+    var productAddedCalled = false;
+
+    await tester.pumpWidget(
+      _testApp(
+        CatalogProductDetailPage(
+          themeModeController: themeController,
+          controller: controller,
+          onAddProduct: (_, _) => true,
+          onProductAdded: () => productAddedCalled = true,
+          onOpenCart: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('product-add-to-cart')));
+    await tester.pump();
+
+    expect(productAddedCalled, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Widget _testApp(Widget child) {

@@ -19,6 +19,9 @@ class OrderReviewPage extends StatefulWidget {
     this.productsSubtitle = 'Ítems, cantidades y precios congelados',
     this.attentionSubtitle = 'Mesa o dirección, según modalidad',
     this.amountSubtitle = 'Revisión final y total del pedido',
+    this.onBackPressed,
+    this.showBackButton,
+    this.tableLabel,
     super.key,
   });
 
@@ -29,6 +32,9 @@ class OrderReviewPage extends StatefulWidget {
   final String productsSubtitle;
   final String attentionSubtitle;
   final String amountSubtitle;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
+  final String? tableLabel;
 
   @override
   State<OrderReviewPage> createState() => _OrderReviewPageState();
@@ -48,6 +54,9 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             subtitle: 'Pedido de la modalidad seleccionada.',
             contentGap: 39,
             themeModeController: widget.themeModeController,
+            onBackPressed: widget.onBackPressed,
+            showBackButton: widget.showBackButton,
+            tableLabel: widget.tableLabel,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -126,6 +135,8 @@ class OrderResultPage extends StatefulWidget {
     required this.orderId,
     required this.onViewOrders,
     required this.onBackToHome,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
@@ -134,6 +145,8 @@ class OrderResultPage extends StatefulWidget {
   final String orderId;
   final VoidCallback onViewOrders;
   final VoidCallback onBackToHome;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   State<OrderResultPage> createState() => _OrderResultPageState();
@@ -196,6 +209,8 @@ class _OrderResultPageState extends State<OrderResultPage> {
           themeModeController: widget.themeModeController,
           order: order,
           onViewOrders: widget.onViewOrders,
+          onBackPressed: widget.onBackPressed ?? widget.onBackToHome,
+          showBackButton: widget.showBackButton,
         );
       },
     );
@@ -207,12 +222,16 @@ class OrderSubmittedPage extends StatelessWidget {
     required this.themeModeController,
     required this.order,
     required this.onViewOrders,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final OrderSnapshot order;
   final VoidCallback onViewOrders;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +242,8 @@ class OrderSubmittedPage extends StatelessWidget {
         subtitle: 'El restaurante revisará tu pedido.',
         contentGap: 29,
         themeModeController: themeModeController,
+        onBackPressed: onBackPressed,
+        showBackButton: showBackButton,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -302,6 +323,8 @@ class OrderExceptionPage extends StatelessWidget {
     required this.failure,
     required this.onBackToHome,
     this.onRetry,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
@@ -309,6 +332,8 @@ class OrderExceptionPage extends StatelessWidget {
   final OrderFailure failure;
   final VoidCallback onBackToHome;
   final VoidCallback? onRetry;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -320,6 +345,8 @@ class OrderExceptionPage extends StatelessWidget {
         subtitle: 'Mensajes claros y próximos pasos.',
         contentGap: 17,
         themeModeController: themeModeController,
+        onBackPressed: onBackPressed ?? onBackToHome,
+        showBackButton: showBackButton,
         child: Semantics(
           liveRegion: true,
           label: failure.message,

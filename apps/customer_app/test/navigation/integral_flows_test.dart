@@ -65,6 +65,10 @@ void main() {
       await tester.tap(find.byKey(const Key('product-add-to-cart')));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('page-menu')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('header-cart-button')));
+      await tester.pumpAndSettle();
+
       expect(find.byKey(const Key('page-cart')), findsOneWidget);
       await tester.tap(find.byKey(const Key('cart-continue')));
       await tester.pumpAndSettle();
@@ -150,6 +154,9 @@ void main() {
       await tester.tap(find.byKey(const Key('product-add-to-cart')));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('header-cart-button')));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.byKey(const Key('cart-continue')));
       await tester.pumpAndSettle();
 
@@ -208,6 +215,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('product-add-to-cart')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('header-cart-button')));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('cart-continue')));

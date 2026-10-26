@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/m01_access/continue_as_guest/presentation/guest_access_page.dart';
+import '../../features/m01_access/profile/application/user_profile_controller.dart';
+import '../../features/m01_access/profile/domain/profile_models.dart';
+import '../../features/m01_access/profile/presentation/profile_pages.dart';
 import '../../features/m01_access/register_account/presentation/registration_page.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
 import '../../features/m01_access/sign_in/presentation/sign_in_page.dart';
@@ -53,6 +56,12 @@ abstract final class CustomerRoutes {
   static const String orderAdvance = 'order-advance';
   static const String orderPayments = 'order-payments';
   static const String orderTracking = 'order-tracking';
+  static const String editProfile = 'edit-profile';
+  static const String addAddress = 'add-address';
+  static const String editAddress = 'edit-address';
+  static const String addCard = 'add-card';
+  static const String editCard = 'edit-card';
+  static const String photoViewer = 'photo-viewer';
 }
 
 GoRouter createCustomerRouter({
@@ -65,6 +74,7 @@ GoRouter createCustomerRouter({
   PaymentStatusController? paymentStatusController,
   OrderHistoryController? orderHistoryController,
   OrderTrackingController? orderTrackingController,
+  UserProfileController? profileController,
 }) {
   bool prepareOrderReview(FulfillmentDraft draft) {
     if (cartController.state.isEmpty) return false;
@@ -164,13 +174,26 @@ GoRouter createCustomerRouter({
                 path: '/',
                 name: CustomerRoutes.home,
                 builder: (BuildContext context, GoRouterState state) {
-                  return CatalogHomePage(
-                    themeModeController: themeModeController,
-                    catalogController: catalogController,
-                    onOpenMenu: () => context.go('/menu'),
-                    onCategorySelected: (String categoryId) {
-                      unawaited(catalogController.selectCategory(categoryId));
-                      context.go('/menu');
+                  return AnimatedBuilder(
+                    animation: Listenable.merge(<Listenable>[
+                      cartController,
+                      fulfillmentController,
+                    ]),
+                    builder: (BuildContext context, _) {
+                      return CatalogHomePage(
+                        themeModeController: themeModeController,
+                        catalogController: catalogController,
+                        onOpenMenu: () => context.go('/menu'),
+                        onCategorySelected: (String categoryId) {
+                          unawaited(catalogController.selectCategory(categoryId));
+                          context.go('/menu');
+                        },
+                        onOpenCart: () => context.goNamed(CustomerRoutes.cart),
+                        cartItemCount: cartController.state.totalQuantity,
+                        tableLabel: fulfillmentController.state.assignedTable?.code != null
+                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                            : null,
+                      );
                     },
                   );
                 },
@@ -183,17 +206,46 @@ GoRouter createCustomerRouter({
                 path: '/menu',
                 name: CustomerRoutes.menu,
                 builder: (BuildContext context, GoRouterState state) {
-                  return CatalogBrowsePage(
-                    themeModeController: themeModeController,
-                    catalogController: catalogController,
-                    onOpenProduct: (CatalogProduct product) {
-                      context.pushNamed(
-                        CustomerRoutes.productDetail,
-                        pathParameters: <String, String>{
-                          'categoryId': product.categoryId,
-                          'productId': product.id,
+                  return AnimatedBuilder(
+                    animation: Listenable.merge(<Listenable>[
+                      cartController,
+                      fulfillmentController,
+                    ]),
+                    builder: (BuildContext context, _) {
+                      return CatalogBrowsePage(
+                        themeModeController: themeModeController,
+                        catalogController: catalogController,
+                        useGrid: true,
+                        showBackButton: true,
+                        onBackPressed: () => context.go('/'),
+                        onOpenCart: () => context.goNamed(CustomerRoutes.cart),
+                        cartItemCount: cartController.state.totalQuantity,
+                        cartTotalCents: cartController.state.subtotalCents,
+                        tableLabel: fulfillmentController.state.assignedTable?.code != null
+                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                            : null,
+                        onAddProduct: (CatalogProduct product) {
+                          if (product.availableForSale) {
+                            cartController.addProduct(
+                              CartProductSnapshot(
+                                id: product.id,
+                                categoryId: product.categoryId,
+                                name: product.name,
+                                unitPriceCents: product.priceCents,
+                              ),
+                            );
+                          }
                         },
-                        extra: product,
+                        onOpenProduct: (CatalogProduct product) {
+                          context.pushNamed(
+                            CustomerRoutes.productDetail,
+                            pathParameters: <String, String>{
+                              'categoryId': product.categoryId,
+                              'productId': product.id,
+                            },
+                            extra: product,
+                          );
+                        },
                       );
                     },
                   );
@@ -203,11 +255,21 @@ GoRouter createCustomerRouter({
                     path: 'carrito',
                     name: CustomerRoutes.cart,
                     builder: (BuildContext context, GoRouterState state) {
-                      return CartPage(
-                        themeModeController: themeModeController,
-                        cartController: cartController,
-                        onContinue: () {
-                          context.pushNamed(CustomerRoutes.fulfillmentMode);
+                      return AnimatedBuilder(
+                        animation: fulfillmentController,
+                        builder: (BuildContext context, _) {
+                          return CartPage(
+                            themeModeController: themeModeController,
+                            cartController: cartController,
+                            showBackButton: true,
+                            onBackPressed: () => context.go('/menu'),
+                            tableLabel: fulfillmentController.state.assignedTable?.code != null
+                                ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                                : null,
+                            onContinue: () {
+                              context.pushNamed(CustomerRoutes.fulfillmentMode);
+                            },
+                          );
                         },
                       );
                     },
@@ -247,17 +309,159 @@ GoRouter createCustomerRouter({
                 path: '/cuenta',
                 name: CustomerRoutes.account,
                 builder: (BuildContext context, GoRouterState state) {
-                  final session = authController.state.session;
-                  final user = session?.user;
-                  return FoundationAccountPage(
-                    themeModeController: themeModeController,
-                    isGuest: session?.isGuest ?? true,
-                    displayName: user?.displayName,
-                    email: user?.email,
-                    onOpenOrders: () => context.go('/pedidos'),
-                    onLogout: authController.logout,
+                  return AnimatedBuilder(
+                    animation: Listenable.merge(<Listenable>[
+                      cartController,
+                      fulfillmentController,
+                      ?profileController,
+                    ]),
+                    builder: (BuildContext context, _) {
+                      final session = authController.state.session;
+                      final user = session?.user;
+                      return FoundationAccountPage(
+                        themeModeController: themeModeController,
+                        isGuest: session?.isGuest ?? true,
+                        displayName: profileController?.displayName ?? user?.displayName,
+                        email: user?.email,
+                        profileController: profileController,
+                        onOpenOrders: () => context.go('/pedidos'),
+                        onLogout: authController.logout,
+                        onBackPressed: () => context.go('/'),
+                        showBackButton: true,
+                        onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+                        cartItemCount: cartController.state.totalQuantity,
+                        tableLabel: fulfillmentController.state.assignedTable?.code != null
+                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                            : null,
+                      );
+                    },
                   );
                 },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: 'editar-perfil',
+                    name: CustomerRoutes.editProfile,
+                    builder: (BuildContext context, GoRouterState state) {
+                      final session = authController.state.session;
+                      final user = session?.user;
+                      return EditProfilePage(
+                        themeModeController: themeModeController,
+                        controller: profileController ?? UserProfileController(),
+                        currentDisplayName: profileController?.displayName ??
+                            user?.displayName ??
+                            'Cliente',
+                        currentEmail: user?.email ?? 'cliente@chifaasia.pe',
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'direcciones/nueva',
+                    name: CustomerRoutes.addAddress,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return AddAddressPage(
+                        themeModeController: themeModeController,
+                        controller: profileController ?? UserProfileController(),
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'tarjetas/nueva',
+                    name: CustomerRoutes.addCard,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return AddCardPage(
+                        themeModeController: themeModeController,
+                        controller: profileController ?? UserProfileController(),
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'direcciones/editar',
+                    name: CustomerRoutes.editAddress,
+                    builder: (BuildContext context, GoRouterState state) {
+                      final CustomerAddress? address = state.extra is CustomerAddress
+                          ? state.extra! as CustomerAddress
+                          : null;
+                      return AddAddressPage(
+                        themeModeController: themeModeController,
+                        controller: profileController ?? UserProfileController(),
+                        existingAddress: address,
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'tarjetas/editar',
+                    name: CustomerRoutes.editCard,
+                    builder: (BuildContext context, GoRouterState state) {
+                      final SavedPaymentCard? card = state.extra is SavedPaymentCard
+                          ? state.extra! as SavedPaymentCard
+                          : null;
+                      return AddCardPage(
+                        themeModeController: themeModeController,
+                        controller: profileController ?? UserProfileController(),
+                        existingCard: card,
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'foto',
+                    name: CustomerRoutes.photoViewer,
+                    builder: (BuildContext context, GoRouterState state) {
+                      final session = authController.state.session;
+                      final user = session?.user;
+                      return ProfilePhotoViewerPage(
+                        themeModeController: themeModeController,
+                        avatarPath: profileController?.avatarPath,
+                        displayName: profileController?.displayName ??
+                            user?.displayName ??
+                            'Cliente',
+                        onEditProfile: () =>
+                            context.goNamed(CustomerRoutes.editProfile),
+                        onBackPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.goNamed(CustomerRoutes.account);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -314,6 +518,15 @@ GoRouter createCustomerRouter({
           return DeliveryDetailsPage(
             themeModeController: themeModeController,
             controller: fulfillmentController,
+            savedAddresses: profileController?.addresses,
+            showBackButton: true,
+            onBackPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.pushNamed(CustomerRoutes.fulfillmentMode);
+              }
+            },
             onFinished: (FulfillmentDraft draft) {
               finishPreparation(context, draft);
             },
@@ -440,6 +653,7 @@ GoRouter createCustomerRouter({
               themeModeController: themeModeController,
               controller: orderTrackingController,
               orderId: orderId,
+              showBackButton: true,
               onBackToOrders: () => context.goNamed(CustomerRoutes.orders),
               onViewAdvance: (String id) {
                 context.pushNamed(
@@ -466,26 +680,50 @@ GoRouter createCustomerRouter({
           final CatalogProduct? selectedProduct = state.extra is CatalogProduct
               ? state.extra! as CatalogProduct
               : null;
-          return CatalogProductDetailPage(
-            themeModeController: themeModeController,
-            controller: ProductDetailController.fromSelection(
-              categoryId: categoryId,
-              productId: productId,
-              selectedProduct: selectedProduct,
-            ),
-            onAddProduct: (CatalogProduct product, int quantity) {
-              if (!product.availableForSale) return false;
-              return cartController.addProduct(
-                CartProductSnapshot(
-                  id: product.id,
-                  categoryId: product.categoryId,
-                  name: product.name,
-                  unitPriceCents: product.priceCents,
+          return AnimatedBuilder(
+            animation: fulfillmentController,
+            builder: (BuildContext context, _) {
+              return CatalogProductDetailPage(
+                themeModeController: themeModeController,
+                controller: ProductDetailController.fromSelection(
+                  categoryId: categoryId,
+                  productId: productId,
+                  selectedProduct: selectedProduct,
                 ),
-                quantity: quantity,
+                onAddProduct: (CatalogProduct product, int quantity) {
+                  if (!product.availableForSale) return false;
+                  return cartController.addProduct(
+                    CartProductSnapshot(
+                      id: product.id,
+                      categoryId: product.categoryId,
+                      name: product.name,
+                      unitPriceCents: product.priceCents,
+                    ),
+                    quantity: quantity,
+                  );
+                },
+                onProductAdded: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/menu');
+                  }
+                },
+                onOpenCart: () => context.goNamed(CustomerRoutes.cart),
+                showBackButton: true,
+                onBackPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/menu');
+                  }
+                },
+                showCartInHeader: true,
+                tableLabel: fulfillmentController.state.assignedTable?.code != null
+                    ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                    : null,
               );
             },
-            onOpenCart: () => context.goNamed(CustomerRoutes.cart),
           );
         },
       ),

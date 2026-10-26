@@ -1,18 +1,34 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../app/theme/theme_mode_controller.dart';
 import '../../../core/design_system/design_system.dart';
+import '../../m01_access/profile/application/user_profile_controller.dart';
+import '../../m01_access/profile/domain/profile_models.dart';
+import '../../m01_access/profile/presentation/profile_pages.dart';
 
 class FoundationHomePage extends StatelessWidget {
   const FoundationHomePage({
     required this.themeModeController,
     this.content,
+    this.onBackPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.tableLabel,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final Widget? content;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String? tableLabel;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +38,11 @@ class FoundationHomePage extends StatelessWidget {
       subtitle: 'Una tradición china con alma peruana.',
       contentGap: 15,
       themeModeController: themeModeController,
+      onBackPressed: onBackPressed,
+      onCartPressed: onCartPressed,
+      cartItemCount: cartItemCount,
+      tableLabel: tableLabel,
+      showBackButton: showBackButton,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -44,11 +65,21 @@ class FoundationCatalogPage extends StatelessWidget {
   const FoundationCatalogPage({
     required this.themeModeController,
     this.content,
+    this.onBackPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.tableLabel,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final Widget? content;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String? tableLabel;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +89,11 @@ class FoundationCatalogPage extends StatelessWidget {
       subtitle: 'Elige una categoría y descubre los platos.',
       contentGap: 14,
       themeModeController: themeModeController,
+      onBackPressed: onBackPressed,
+      onCartPressed: onCartPressed,
+      cartItemCount: cartItemCount,
+      tableLabel: tableLabel,
+      showBackButton: showBackButton,
       child:
           content ??
           const ChifaStateView(
@@ -74,11 +110,21 @@ class FoundationOrdersPage extends StatelessWidget {
   const FoundationOrdersPage({
     required this.themeModeController,
     this.content,
+    this.onBackPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.tableLabel,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final Widget? content;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String? tableLabel;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +134,11 @@ class FoundationOrdersPage extends StatelessWidget {
       subtitle: 'Solicitudes e historial de esta cuenta.',
       contentGap: 13,
       themeModeController: themeModeController,
+      onBackPressed: onBackPressed,
+      onCartPressed: onCartPressed,
+      cartItemCount: cartItemCount,
+      tableLabel: tableLabel,
+      showBackButton: showBackButton,
       child:
           content ??
           const ChifaStateView(
@@ -165,6 +216,12 @@ class FoundationAccountPage extends StatelessWidget {
     this.accountCardEmail,
     this.onOpenOrders,
     this.onLogout,
+    this.onBackPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.tableLabel,
+    this.showBackButton,
+    this.profileController,
     super.key,
   }) : assert(
          isGuest || (displayName != null && email != null),
@@ -180,18 +237,38 @@ class FoundationAccountPage extends StatelessWidget {
   final String? accountCardEmail;
   final VoidCallback? onOpenOrders;
   final Future<void> Function()? onLogout;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String? tableLabel;
+  final bool? showBackButton;
+  final UserProfileController? profileController;
 
   @override
   Widget build(BuildContext context) {
+    if (profileController != null) {
+      return AnimatedBuilder(
+        animation: profileController!,
+        builder: (BuildContext context, Widget? _) {
+          return _buildContent(context);
+        },
+      );
+    }
+    return _buildContent(context);
+  }
+
+  Widget _buildContent(BuildContext context) {
     final AppPalette palette = context.appPalette;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final String identityName = isGuest ? 'Invitado' : displayName!.trim();
+    final String identityName = isGuest
+        ? 'Invitado'
+        : (profileController?.displayName ?? displayName!.trim());
     final String identityDetail = isGuest
         ? 'Sesión temporal sin cuenta registrada'
         : email!.trim();
-    final String initials = switch (avatarInitials?.trim()) {
+    final String initials = switch (profileController?.avatarPath ?? avatarInitials?.trim()) {
       final String value when value.isNotEmpty =>
-        value.characters.first.toUpperCase(),
+        value.characters.first,
       _ when identityName.isEmpty => isGuest ? 'I' : 'C',
       _ => identityName.characters.first.toUpperCase(),
     };
@@ -217,12 +294,47 @@ class FoundationAccountPage extends StatelessWidget {
                   onAvatarPressed: onLogout == null
                       ? null
                       : () => _confirmLogout(context),
+                  onBackPressed: onBackPressed,
+                  showBackButton: showBackButton,
+                  onCartPressed: onCartPressed,
+                  cartItemCount: cartItemCount,
+                  tableLabel: tableLabel,
                 ),
                 const SizedBox(height: 22),
                 _ProfileVisual(
                   palette: palette,
                   isDark: isDark,
                   initials: initials,
+                  avatarPath: profileController?.avatarPath,
+                  onTapAvatar: profileController != null
+                      ? () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => ProfilePhotoViewerPage(
+                                themeModeController: themeModeController,
+                                avatarPath: profileController?.avatarPath,
+                                displayName: profileController?.displayName ??
+                                    identityName,
+                                onEditProfile: !isGuest
+                                    ? () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => EditProfilePage(
+                                              themeModeController:
+                                                  themeModeController,
+                                              controller: profileController!,
+                                              currentDisplayName: identityName,
+                                              currentEmail: identityDetail,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    : null,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 7),
@@ -266,59 +378,336 @@ class FoundationAccountPage extends StatelessWidget {
                   child: _AccountActions(
                     isGuest: isGuest,
                     onOpenOrders: onOpenOrders,
+                    onEditProfile: profileController != null && !isGuest
+                        ? () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => EditProfilePage(
+                                  themeModeController: themeModeController,
+                                  controller: profileController!,
+                                  currentDisplayName: identityName,
+                                  currentEmail: identityDetail,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2),
-                  child: _ProfileTabs(),
-                ),
-                const SizedBox(height: 13),
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Text(
-                    isGuest ? 'Información de la sesión' : 'Datos personales',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontFamily: AppTypography.bodyFontFamily,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: isGuest
-                      ? const ChifaStateView(
-                          key: Key('guest-account-empty-state'),
-                          kind: ChifaStateKind.empty,
-                          title: 'Sin datos personales',
-                          message:
-                              'La sesión de invitado no guarda datos de cuenta',
-                        )
-                      : _AccountDataCard(
-                          key: const Key('account-data-card'),
-                          displayName: accountCardName ?? identityName,
-                          email: accountCardEmail ?? identityDetail,
-                        ),
-                ),
-                const SizedBox(height: 3),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  child: Text(
-                    isGuest
-                        ? 'La sesión de invitado no almacena un perfil.'
-                        : 'Fotos, teléfonos y edición: sin API actual',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: palette.textSecondary, fontSize: 10),
+                  child: _ProfileTabs(
+                    selectedIndex: profileController?.selectedTabIndex ?? 0,
+                    onTabSelected: profileController?.setTabIndex,
                   ),
                 ),
+                const SizedBox(height: 13),
+                _buildTabSection(context, palette, identityName, identityDetail),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTabSection(
+    BuildContext context,
+    AppPalette palette,
+    String identityName,
+    String identityDetail,
+  ) {
+    if (profileController != null && profileController!.selectedTabIndex == 1) {
+      return _buildAddressesSection(context, palette);
+    }
+    if (profileController != null && profileController!.selectedTabIndex == 2) {
+      return _buildCardsSection(context, palette);
+    }
+    return _buildInformationSection(context, palette, identityName, identityDetail);
+  }
+
+  Widget _buildInformationSection(
+    BuildContext context,
+    AppPalette palette,
+    String identityName,
+    String identityDetail,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Text(
+            isGuest ? 'Información de la sesión' : 'Datos personales',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: isGuest
+              ? const ChifaStateView(
+                  key: Key('guest-account-empty-state'),
+                  kind: ChifaStateKind.empty,
+                  title: 'Sin datos personales',
+                  message: 'La sesión de invitado no guarda datos de cuenta',
+                )
+              : _AccountDataCard(
+                  key: const Key('account-data-card'),
+                  displayName: accountCardName ?? identityName,
+                  email: accountCardEmail ?? identityDetail,
+                ),
+        ),
+        if (profileController?.phone != null &&
+            profileController!.phone!.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: ChifaCard(
+              key: const Key('account-phone-card'),
+              icon: LucideIcons.phone,
+              title: '+51 ${profileController!.phone}',
+              subtitle: 'Celular registrado · Validado',
+              minimumHeight: 65,
+            ),
+          ),
+        ],
+        const SizedBox(height: 3),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 7),
+          child: Text(
+            isGuest
+                ? 'La sesión de invitado no almacena un perfil.'
+                : (profileController != null
+                    ? 'Datos verificados para tus pedidos y entregas'
+                    : 'Fotos, teléfonos y edición: sin API actual'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: palette.textSecondary,
+                  fontSize: 10,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddressesSection(BuildContext context, AppPalette palette) {
+    final List<CustomerAddress> addresses = profileController!.addresses;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Text(
+            'Mis direcciones de entrega',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (addresses.isEmpty)
+          const ChifaStateView(
+            key: Key('addresses-empty-state'),
+            kind: ChifaStateKind.empty,
+            title: 'Sin direcciones guardadas',
+            message: 'Agrega una dirección para pedir por delivery más rápido',
+          )
+        else
+          for (final CustomerAddress addr in addresses) ...<Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: ChifaCard(
+                key: ValueKey<String>('address-card-${addr.id}'),
+                icon: LucideIcons.mapPin,
+                title: addr.label + (addr.isDefault ? ' (Predeterminada)' : ''),
+                subtitle: addr.address +
+                    (addr.reference != null ? '\nRef: ${addr.reference}' : ''),
+                subtitleMaxLines: 3,
+                minimumHeight: 70,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => AddAddressPage(
+                        themeModeController: themeModeController,
+                        controller: profileController!,
+                        existingAddress: addr,
+                      ),
+                    ),
+                  );
+                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IconButton(
+                      key: ValueKey<String>('edit-address-${addr.id}'),
+                      icon: Icon(
+                        LucideIcons.pencil,
+                        size: 16,
+                        color: palette.brandRed,
+                      ),
+                      tooltip: 'Editar dirección',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => AddAddressPage(
+                              themeModeController: themeModeController,
+                              controller: profileController!,
+                              existingAddress: addr,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      key: ValueKey<String>('delete-address-${addr.id}'),
+                      icon: Icon(
+                        LucideIcons.trash2,
+                        size: 16,
+                        color: palette.textSecondary,
+                      ),
+                      tooltip: 'Eliminar dirección',
+                      onPressed: () => profileController!.removeAddress(addr.id),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        const SizedBox(height: 10),
+        ChifaButton(
+          key: const Key('account-add-address-button'),
+          label: '+ Agregar dirección',
+          height: 48,
+          borderRadius: 12,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => AddAddressPage(
+                  themeModeController: themeModeController,
+                  controller: profileController!,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCardsSection(BuildContext context, AppPalette palette) {
+    final List<SavedPaymentCard> cards = profileController!.cards;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Text(
+            'Tarjetas y medios de pago',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (cards.isEmpty)
+          const ChifaStateView(
+            key: Key('cards-empty-state'),
+            kind: ChifaStateKind.empty,
+            title: 'Sin tarjetas registradas',
+            message: 'Agrega una tarjeta de débito o crédito para tus pedidos',
+          )
+        else
+          for (final SavedPaymentCard card in cards) ...<Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: ChifaCard(
+                key: ValueKey<String>('card-item-${card.id}'),
+                icon: LucideIcons.creditCard,
+                title: '${card.brand} ${card.cardNumberMasked}',
+                subtitle: 'Titular: ${card.cardHolder} · Vence: ${card.expiry}',
+                minimumHeight: 70,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => AddCardPage(
+                        themeModeController: themeModeController,
+                        controller: profileController!,
+                        existingCard: card,
+                      ),
+                    ),
+                  );
+                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IconButton(
+                      key: ValueKey<String>('edit-card-${card.id}'),
+                      icon: Icon(
+                        LucideIcons.pencil,
+                        size: 16,
+                        color: palette.brandRed,
+                      ),
+                      tooltip: 'Editar tarjeta',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => AddCardPage(
+                              themeModeController: themeModeController,
+                              controller: profileController!,
+                              existingCard: card,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      key: ValueKey<String>('delete-card-${card.id}'),
+                      icon: Icon(
+                        LucideIcons.trash2,
+                        size: 16,
+                        color: palette.textSecondary,
+                      ),
+                      tooltip: 'Eliminar tarjeta',
+                      onPressed: () => profileController!.removeCard(card.id),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        const SizedBox(height: 10),
+        ChifaButton(
+          key: const Key('account-add-card-button'),
+          label: '+ Agregar tarjeta (16 dígitos)',
+          height: 48,
+          borderRadius: 12,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => AddCardPage(
+                  themeModeController: themeModeController,
+                  controller: profileController!,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -410,11 +799,15 @@ class _ProfileVisual extends StatelessWidget {
     required this.palette,
     required this.isDark,
     required this.initials,
+    this.avatarPath,
+    this.onTapAvatar,
   });
 
   final AppPalette palette;
   final bool isDark;
   final String initials;
+  final String? avatarPath;
+  final VoidCallback? onTapAvatar;
 
   @override
   Widget build(BuildContext context) {
@@ -441,6 +834,8 @@ class _ProfileVisual extends StatelessWidget {
                       dimension: avatarSize,
                       isDark: isDark,
                       initials: initials,
+                      avatarPath: avatarPath,
+                      onTap: onTapAvatar,
                     ),
                   ),
                 ),
@@ -459,56 +854,110 @@ class _ProfileAvatar extends StatelessWidget {
     required this.dimension,
     required this.isDark,
     required this.initials,
+    this.avatarPath,
+    this.onTap,
   });
 
   final double dimension;
   final bool isDark;
   final String initials;
+  final String? avatarPath;
+  final VoidCallback? onTap;
+
+  Widget _buildFallback(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      alignment: Alignment.center,
+      children: <Widget>[
+        SvgPicture.asset(
+          isDark
+              ? 'assets/images/m01/account_avatar_ring_dark.svg'
+              : 'assets/images/m01/account_avatar_ring_light.svg',
+        ),
+        Align(
+          child: FractionallySizedBox(
+            widthFactor: 99 / 112,
+            heightFactor: 99 / 112,
+            child: SvgPicture.asset(
+              isDark
+                  ? 'assets/images/m01/account_avatar_dark.svg'
+                  : 'assets/images/m01/account_avatar_light.svg',
+            ),
+          ),
+        ),
+        Center(
+          child: Text(
+            initials,
+            textScaler: TextScaler.noScaling,
+            style: TextStyle(
+              color: AppColors.onBrand,
+              fontFamily: AppTypography.displayFontFamily,
+              fontSize: dimension * 48 / 112,
+              fontWeight: FontWeight.w600,
+              height: 1.25,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final String? path = avatarPath?.trim();
+    final Widget avatarCore = SizedBox.square(
+      dimension: dimension,
+      child: (path != null && path.isNotEmpty)
+          ? Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isDark ? const Color(0xFFD4AF37) : const Color(0xFFC53030),
+                  width: 3,
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: path.startsWith('http')
+                    ? Image.network(
+                        path,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _buildFallback(context),
+                      )
+                    : (path.startsWith('/') || path.startsWith('file:'))
+                        ? Image.file(
+                            File(path.replaceFirst('file://', '')),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => _buildFallback(context),
+                          )
+                        : Image.asset(
+                            path,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => _buildFallback(context),
+                          ),
+              ),
+            )
+          : _buildFallback(context),
+    );
+
     return Semantics(
       image: true,
       label: 'Avatar de cliente $initials',
       excludeSemantics: true,
-      child: SizedBox.square(
-        dimension: dimension,
-        child: Stack(
-          fit: StackFit.expand,
-          alignment: Alignment.center,
-          children: <Widget>[
-            SvgPicture.asset(
-              isDark
-                  ? 'assets/images/m01/account_avatar_ring_dark.svg'
-                  : 'assets/images/m01/account_avatar_ring_light.svg',
-            ),
-            Align(
-              child: FractionallySizedBox(
-                widthFactor: 99 / 112,
-                heightFactor: 99 / 112,
-                child: SvgPicture.asset(
-                  isDark
-                      ? 'assets/images/m01/account_avatar_dark.svg'
-                      : 'assets/images/m01/account_avatar_light.svg',
-                ),
-              ),
-            ),
-            Center(
-              child: Text(
-                initials,
-                textScaler: TextScaler.noScaling,
-                style: TextStyle(
-                  color: AppColors.onBrand,
-                  fontFamily: AppTypography.displayFontFamily,
-                  fontSize: dimension * 48 / 112,
-                  fontWeight: FontWeight.w600,
-                  height: 1.25,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: onTap != null
+          ? GestureDetector(
+              key: const Key('account-avatar-touchable'),
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              child: avatarCore,
+            )
+          : avatarCore,
     );
   }
 }
@@ -710,10 +1159,15 @@ class _AccountStatusBadge extends StatelessWidget {
 }
 
 class _AccountActions extends StatelessWidget {
-  const _AccountActions({required this.isGuest, this.onOpenOrders});
+  const _AccountActions({
+    required this.isGuest,
+    this.onOpenOrders,
+    this.onEditProfile,
+  });
 
   final bool isGuest;
   final VoidCallback? onOpenOrders;
+  final VoidCallback? onEditProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -724,10 +1178,16 @@ class _AccountActions extends StatelessWidget {
           label: 'Ver mis pedidos',
           onPressed: onOpenOrders,
         );
-        final Widget secondary = _DisabledAccountAction(
-          label: isGuest ? 'Perfil no disponible' : 'Editar perfil',
-          detail: isGuest ? 'Sesión de invitado' : 'API pendiente',
-        );
+        final Widget secondary = onEditProfile != null && !isGuest
+            ? _AccountAction(
+                key: const Key('account-edit-profile-action'),
+                label: 'Editar perfil',
+                onPressed: onEditProfile,
+              )
+            : _DisabledAccountAction(
+                label: isGuest ? 'Perfil no disponible' : 'Editar perfil',
+                detail: isGuest ? 'Sesión de invitado' : 'API pendiente',
+              );
 
         if (constraints.maxWidth < 330) {
           return Column(
@@ -851,78 +1311,73 @@ class _DisabledAccountAction extends StatelessWidget {
 }
 
 class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs();
+  const _ProfileTabs({
+    this.selectedIndex = 0,
+    this.onTabSelected,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int>? onTabSelected;
 
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
+    final List<String> labels = onTabSelected != null
+        ? const <String>['Información', 'Direcciones', 'Tarjetas']
+        : const <String>['Información', 'Pedidos', 'Preferencias'];
+
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 45),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 5, 4, 5),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                flex: 116,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: palette.surfaceTint,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 9,
-                    ),
-                    child: Text(
-                      'Información',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: palette.brandRed,
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+      child: Material(
+        color: Colors.transparent,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: palette.surface,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 5, 4, 5),
+            child: Row(
+              children: <Widget>[
+                for (int i = 0; i < labels.length; i++)
+                  Expanded(
+                    flex: i == 0 ? 116 : (i == 1 ? 105 : 113),
+                    child: InkWell(
+                      key: Key('profile-tab-$i'),
+                      onTap: onTabSelected != null ? () => onTabSelected!(i) : null,
+                      borderRadius: BorderRadius.circular(10),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: selectedIndex == i
+                              ? palette.surfaceTint
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 9,
+                          ),
+                          child: Text(
+                            labels[i],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: selectedIndex == i
+                                  ? palette.brandRed
+                                  : palette.textSecondary,
+                              fontFamily: AppTypography.bodyFontFamily,
+                              fontSize: 11,
+                              fontWeight: selectedIndex == i
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const Expanded(flex: 105, child: _ProfileTabLabel('Pedidos')),
-              const Expanded(
-                flex: 113,
-                child: _ProfileTabLabel('Preferencias'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileTabLabel extends StatelessWidget {
-  const _ProfileTabLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 9),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: context.appPalette.textSecondary,
-            fontFamily: AppTypography.bodyFontFamily,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+              ],
+            ),
           ),
         ),
       ),

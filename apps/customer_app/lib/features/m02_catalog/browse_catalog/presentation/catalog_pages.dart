@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -15,6 +16,10 @@ class CatalogHomePage extends StatefulWidget {
     required this.catalogController,
     required this.onOpenMenu,
     required this.onCategorySelected,
+    this.onBackPressed,
+    this.onOpenCart,
+    this.cartItemCount = 0,
+    this.tableLabel,
     super.key,
   });
 
@@ -22,6 +27,10 @@ class CatalogHomePage extends StatefulWidget {
   final CatalogController catalogController;
   final VoidCallback onOpenMenu;
   final ValueChanged<String> onCategorySelected;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onOpenCart;
+  final int cartItemCount;
+  final String? tableLabel;
 
   @override
   State<CatalogHomePage> createState() => _CatalogHomePageState();
@@ -56,6 +65,10 @@ class _CatalogHomePageState extends State<CatalogHomePage> {
         final CatalogState state = widget.catalogController.state;
         return FoundationHomePage(
           themeModeController: widget.themeModeController,
+          onBackPressed: widget.onBackPressed,
+          onCartPressed: widget.onOpenCart,
+          cartItemCount: widget.cartItemCount,
+          tableLabel: widget.tableLabel,
           content: _HomeCatalogContent(
             state: state,
             onOpenMenu: widget.onOpenMenu,
@@ -73,12 +86,28 @@ class CatalogBrowsePage extends StatefulWidget {
     required this.themeModeController,
     required this.catalogController,
     required this.onOpenProduct,
+    this.onBackPressed,
+    this.onOpenCart,
+    this.onAddProduct,
+    this.useGrid = false,
+    this.cartItemCount = 0,
+    this.cartTotalCents = 0,
+    this.tableLabel,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final CatalogController catalogController;
   final ValueChanged<CatalogProduct> onOpenProduct;
+  final VoidCallback? onBackPressed;
+  final VoidCallback? onOpenCart;
+  final ValueChanged<CatalogProduct>? onAddProduct;
+  final bool useGrid;
+  final int cartItemCount;
+  final int cartTotalCents;
+  final String? tableLabel;
+  final bool? showBackButton;
 
   @override
   State<CatalogBrowsePage> createState() => _CatalogBrowsePageState();
@@ -111,18 +140,118 @@ class _CatalogBrowsePageState extends State<CatalogBrowsePage> {
       animation: widget.catalogController,
       builder: (BuildContext context, Widget? child) {
         final CatalogState state = widget.catalogController.state;
-        return FoundationCatalogPage(
+        final Widget page = FoundationCatalogPage(
           themeModeController: widget.themeModeController,
+          onBackPressed: widget.onBackPressed,
+          showBackButton: widget.showBackButton,
+          onCartPressed: widget.onOpenCart,
+          cartItemCount: widget.cartItemCount,
+          tableLabel: widget.tableLabel,
           content: _BrowseCatalogContent(
             state: state,
+            useGrid: widget.useGrid,
             onCategorySelected: (String categoryId) {
               unawaited(widget.catalogController.selectCategory(categoryId));
             },
             onOpenProduct: widget.onOpenProduct,
+            onAddProduct: widget.onAddProduct,
             onRetry: () => unawaited(widget.catalogController.retry()),
           ),
         );
+
+        if (widget.cartItemCount > 0 && widget.onOpenCart != null) {
+          return Stack(
+            children: <Widget>[
+              page,
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: FloatingCartBar(
+                  itemCount: widget.cartItemCount,
+                  totalCents: widget.cartTotalCents,
+                  onOpenCart: widget.onOpenCart!,
+                ),
+              ),
+            ],
+          );
+        }
+        return page;
       },
+    );
+  }
+}
+
+class FloatingCartBar extends StatelessWidget {
+  const FloatingCartBar({
+    required this.itemCount,
+    required this.totalCents,
+    required this.onOpenCart,
+    super.key,
+  });
+
+  final int itemCount;
+  final int totalCents;
+  final VoidCallback onOpenCart;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    final String items = itemCount == 1 ? '1 plato' : '$itemCount platos';
+    final String price = 'S/ ${(totalCents / 100).toStringAsFixed(2)}';
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Material(
+          color: palette.brandRed,
+          borderRadius: BorderRadius.circular(16),
+          elevation: 6,
+          child: InkWell(
+            key: const Key('catalog-floating-cart-bar'),
+            onTap: onOpenCart,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: Row(
+                children: <Widget>[
+                  const Icon(
+                    LucideIcons.shoppingBag,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '$items · $price',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    'Ver Carrito',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    LucideIcons.arrowRight,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -231,12 +360,16 @@ class _BrowseCatalogContent extends StatelessWidget {
     required this.onCategorySelected,
     required this.onOpenProduct,
     required this.onRetry,
+    this.useGrid = false,
+    this.onAddProduct,
   });
 
   final CatalogState state;
   final ValueChanged<String> onCategorySelected;
   final ValueChanged<CatalogProduct> onOpenProduct;
   final VoidCallback onRetry;
+  final bool useGrid;
+  final ValueChanged<CatalogProduct>? onAddProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -300,7 +433,12 @@ class _BrowseCatalogContent extends StatelessWidget {
             message: 'No hay productos disponibles en esta categoría',
           )
         else
-          _ProductList(products: state.products, onOpenProduct: onOpenProduct),
+          _ProductList(
+            products: state.products,
+            onOpenProduct: onOpenProduct,
+            useGrid: useGrid,
+            onAddProduct: onAddProduct,
+          ),
         const SizedBox(height: 29),
         Text(
           'Fotos y descripciones: API no disponible',
@@ -312,13 +450,47 @@ class _BrowseCatalogContent extends StatelessWidget {
 }
 
 class _ProductList extends StatelessWidget {
-  const _ProductList({required this.products, required this.onOpenProduct});
+  const _ProductList({
+    required this.products,
+    required this.onOpenProduct,
+    this.useGrid = false,
+    this.onAddProduct,
+  });
 
   final List<CatalogProduct> products;
   final ValueChanged<CatalogProduct> onOpenProduct;
+  final bool useGrid;
+  final ValueChanged<CatalogProduct>? onAddProduct;
 
   @override
   Widget build(BuildContext context) {
+    if (useGrid) {
+      final double textScale = MediaQuery.textScalerOf(context).scale(1.0);
+      final double childAspectRatio = textScale > 1.25
+          ? 0.48
+          : (textScale > 1.1 ? 0.54 : 0.62);
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: products.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: childAspectRatio,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          final CatalogProduct product = products[index];
+          return _GridProductCard(
+            product: product,
+            onOpenProduct: onOpenProduct,
+            onAddProduct: onAddProduct,
+          );
+        },
+      );
+    }
+
     return Column(
       children: <Widget>[
         for (int index = 0; index < products.length; index++) ...<Widget>[
@@ -326,6 +498,204 @@ class _ProductList extends StatelessWidget {
           if (index != products.length - 1) const SizedBox(height: 10),
         ],
       ],
+    );
+  }
+}
+
+class _GridProductCard extends StatelessWidget {
+  const _GridProductCard({
+    required this.product,
+    required this.onOpenProduct,
+    this.onAddProduct,
+  });
+
+  final CatalogProduct product;
+  final ValueChanged<CatalogProduct> onOpenProduct;
+  final ValueChanged<CatalogProduct>? onAddProduct;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool available = product.availableForSale;
+    final String price = formatCatalogPrice(product.priceCents);
+    final double textScale = MediaQuery.textScalerOf(context).scale(1.0);
+    final double imageHeight = textScale > 1.25 ? 86.0 : 112.0;
+
+    return Semantics(
+      button: true,
+      enabled: available,
+      label:
+          '${product.name}. $price. ${available ? "Disponible" : "No disponible"}',
+      child: Material(
+        key: ValueKey<String>('catalog-product-${product.id}'),
+        color: palette.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: palette.border,
+            width: 1.0,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: available ? () => onOpenProduct(product) : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Visual header container
+              Container(
+                height: imageHeight,
+                color: isDark
+                    ? palette.surfaceTint.withValues(alpha: 0.5)
+                    : palette.surfaceTint,
+                child: Stack(
+                  children: <Widget>[
+                    Center(
+                      child: SvgPicture.asset(
+                        'assets/images/m02/food_glyph.svg',
+                        width: textScale > 1.25 ? 40 : 52,
+                        height: textScale > 1.25 ? 40 : 52,
+                        colorFilter: ColorFilter.mode(
+                          palette.accentGold,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: available
+                              ? (isDark
+                                  ? const Color(0xFF1C4532)
+                                  : const Color(0xFFC6F6D5))
+                              : (isDark
+                                  ? const Color(0xFF4A151E)
+                                  : const Color(0xFFFED7D7)),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          available ? 'DISPONIBLE' : 'AGOTADO',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                            color: available
+                                ? (isDark
+                                    ? const Color(0xFF68D391)
+                                    : const Color(0xFF22543D))
+                                : (isDark
+                                    ? const Color(0xFFFC8181)
+                                    : const Color(0xFF742A2A)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Body content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Text(
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          color: available
+                              ? palette.textPrimary
+                              : palette.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        price,
+                        style: TextStyle(
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: palette.brandRed,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Platanitos-style AGREGAR button
+                      SizedBox(
+                        height: 32,
+                        child: Material(
+                          color: available
+                              ? const Color(0xFF1E7E34) // Platanitos green
+                              : (isDark ? Colors.grey[800] : Colors.grey[300]),
+                          borderRadius: BorderRadius.circular(8),
+                          child: InkWell(
+                            key: ValueKey<String>(
+                              'catalog-product-add-${product.id}',
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: available && onAddProduct != null
+                                ? () => onAddProduct!(product)
+                                : null,
+                            child: Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        LucideIcons.shoppingBag,
+                                        size: 13,
+                                        color: available
+                                            ? Colors.white
+                                            : palette.textSecondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        available ? 'AGREGAR' : 'AGOTADO',
+                                        style: TextStyle(
+                                          fontFamily:
+                                              AppTypography.bodyFontFamily,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                          color: available
+                                              ? Colors.white
+                                              : palette.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

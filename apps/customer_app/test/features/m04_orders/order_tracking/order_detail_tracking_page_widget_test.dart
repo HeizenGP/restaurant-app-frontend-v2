@@ -141,6 +141,155 @@ void main() {
 
       expect(find.byKey(const Key('page-order-tracking')), findsOneWidget);
     });
+
+    testWidgets('opens order breakdown dialog and displays itemized details', (
+      WidgetTester tester,
+    ) async {
+      await _configureSurface(tester);
+      final FakeOrderTrackingRepository repo = FakeOrderTrackingRepository(
+        order: fakeOrderSnapshot(
+          id: 'ord-breakdown-1',
+          modality: FulfillmentMode.local,
+          totalAmount: '35.00',
+          lines: const <OrderLineSnapshot>[
+            OrderLineSnapshot(
+              productId: 'p-1',
+              productName: 'Arroz Chaufa',
+              quantity: 2,
+              unitPrice: '17.50',
+            ),
+          ],
+        ),
+        tracking: fakeTrackingSnapshot(
+          orderId: 'ord-breakdown-1',
+          modality: FulfillmentMode.local,
+          orderStatus: 'REQUESTED',
+          stage: 'REQUESTED',
+          totalAmount: '35.00',
+          paidAmount: '0.00',
+          balance: '35.00',
+          paymentStatus: 'UNPAID',
+        ),
+      );
+
+      final OrderTrackingController controller = OrderTrackingController(
+        repository: repo,
+        accessTokenProvider: () => 'token',
+        refreshAccessToken: () async => true,
+      );
+      final ThemeModeController themeController = ThemeModeController();
+      addTearDown(() {
+        controller.dispose();
+        themeController.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: OrderDetailTrackingPage(
+            themeModeController: themeController,
+            controller: controller,
+            orderId: 'ord-breakdown-1',
+            onBackToOrders: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap products card to open full breakdown
+      await tester.tap(find.byKey(const Key('tracking-products-card')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('order-breakdown-dialog')), findsOneWidget);
+      expect(find.text('Detalle del pedido'), findsOneWidget);
+      expect(find.text('Total a pagar'), findsOneWidget);
+      expect(find.text('S/ 35.00'), findsWidgets);
+      expect(find.text('Cerrar'), findsOneWidget);
+
+      await tester.tap(find.text('Cerrar'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('order-breakdown-dialog')), findsNothing);
+    });
+
+    testWidgets('allows requesting cancellation with observation', (
+      WidgetTester tester,
+    ) async {
+      await _configureSurface(tester);
+      final FakeOrderTrackingRepository repo = FakeOrderTrackingRepository(
+        order: fakeOrderSnapshot(
+          id: 'ord-cancel-1',
+          modality: FulfillmentMode.pickup,
+          totalAmount: '20.00',
+          lines: const <OrderLineSnapshot>[
+            OrderLineSnapshot(
+              productId: 'p-1',
+              productName: 'Tallarín Saltado',
+              quantity: 1,
+              unitPrice: '20.00',
+            ),
+          ],
+        ),
+        tracking: fakeTrackingSnapshot(
+          orderId: 'ord-cancel-1',
+          modality: FulfillmentMode.pickup,
+          orderStatus: 'REQUESTED',
+          stage: 'REQUESTED',
+          totalAmount: '20.00',
+          paidAmount: '0.00',
+          balance: '20.00',
+          paymentStatus: 'UNPAID',
+        ),
+      );
+
+      final OrderTrackingController controller = OrderTrackingController(
+        repository: repo,
+        accessTokenProvider: () => 'token',
+        refreshAccessToken: () async => true,
+      );
+      final ThemeModeController themeController = ThemeModeController();
+      addTearDown(() {
+        controller.dispose();
+        themeController.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: OrderDetailTrackingPage(
+            themeModeController: themeController,
+            controller: controller,
+            orderId: 'ord-cancel-1',
+            onBackToOrders: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Cancellation button should be visible
+      final Finder cancelBtn = find.byKey(const Key('tracking-cancel-button'));
+      expect(cancelBtn, findsOneWidget);
+
+      await tester.tap(cancelBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('cancellation-dialog')), findsOneWidget);
+
+      // Enter observation
+      await tester.enterText(
+        find.byKey(const Key('cancellation-reason-input')),
+        'Cambio de planes urgente',
+      );
+      await tester.pump();
+
+      // Confirm cancellation
+      await tester.tap(find.byKey(const Key('cancellation-confirm-action')));
+      await tester.pumpAndSettle();
+
+      // Verify cancellation card appeared with the observation
+      expect(find.byKey(const Key('tracking-cancellation-card')), findsOneWidget);
+      expect(find.textContaining('Cambio de planes urgente'), findsOneWidget);
+      expect(find.byKey(const Key('tracking-cancel-button')), findsNothing);
+    });
   });
 }
 

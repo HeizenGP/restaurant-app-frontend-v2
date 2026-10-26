@@ -188,6 +188,10 @@ void main() {
     await tester.tap(find.byKey(const Key('product-add-to-cart')));
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('page-menu')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('header-cart-button')));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('page-cart')), findsOneWidget);
     expect(find.text(productOne.name), findsOneWidget);
     expect(find.text('1 unidad · S/ 24.25'), findsOneWidget);
@@ -477,6 +481,9 @@ Future<void> _openCartWithProduct(WidgetTester tester) async {
   );
   await tester.pumpAndSettle();
   await tester.tap(find.byKey(const Key('product-add-to-cart')));
+  await tester.pumpAndSettle();
+  expect(find.byKey(const Key('page-menu')), findsOneWidget);
+  await tester.tap(find.byKey(const Key('header-cart-button')));
   await tester.pumpAndSettle();
   expect(find.byKey(const Key('page-cart')), findsOneWidget);
 }

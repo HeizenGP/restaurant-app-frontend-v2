@@ -14,6 +14,8 @@ final class OrderTrackingState {
     this.order,
     this.tracking,
     this.failure,
+    this.cancellationObservation,
+    this.cancellationRequestedAt,
   });
 
   final OrderTrackingPhase phase;
@@ -21,6 +23,10 @@ final class OrderTrackingState {
   final OrderSnapshot? order;
   final OrderTrackingSnapshot? tracking;
   final OrderFailure? failure;
+  final String? cancellationObservation;
+  final DateTime? cancellationRequestedAt;
+
+  bool get isCancellationRequested => cancellationObservation != null;
 
   bool get canRetry {
     return phase == OrderTrackingPhase.failure &&
@@ -30,6 +36,17 @@ final class OrderTrackingState {
 }
 
 final class OrderTrackingController extends ChangeNotifier {
+  static final Map<String, (String reason, DateTime date)> _cancellations =
+      <String, (String, DateTime)>{};
+
+  static bool isCancellationRequestedFor(String orderId) =>
+      _cancellations.containsKey(orderId.trim());
+
+  static String? cancellationObservationFor(String orderId) =>
+      _cancellations[orderId.trim()]?.$1;
+
+  static DateTime? cancellationDateFor(String orderId) =>
+      _cancellations[orderId.trim()]?.$2;
   factory OrderTrackingController({
     required OrderTrackingRepository repository,
     required OrderAccessTokenProvider accessTokenProvider,
@@ -98,12 +115,17 @@ final class OrderTrackingController extends ChangeNotifier {
         },
       );
 
+      final (String, DateTime)? existingCancellation =
+          _cancellations[normalizedId];
+
       _emit(
         OrderTrackingState(
           phase: OrderTrackingPhase.ready,
           orderId: normalizedId,
           order: order,
           tracking: tracking,
+          cancellationObservation: existingCancellation?.$1,
+          cancellationRequestedAt: existingCancellation?.$2,
         ),
       );
       return true;
@@ -119,6 +141,29 @@ final class OrderTrackingController extends ChangeNotifier {
     } finally {
       _operationInFlight = false;
     }
+  }
+
+  Future<bool> requestCancellation({required String reason}) async {
+    final String trimmed = reason.trim();
+    if (trimmed.isEmpty) return false;
+    final String? id = _state.orderId;
+    if (id == null) return false;
+
+    final DateTime now = DateTime.now();
+    _cancellations[id] = (trimmed, now);
+
+    _emit(
+      OrderTrackingState(
+        phase: _state.phase,
+        orderId: id,
+        order: _state.order,
+        tracking: _state.tracking,
+        failure: _state.failure,
+        cancellationObservation: trimmed,
+        cancellationRequestedAt: now,
+      ),
+    );
+    return true;
   }
 
   Future<bool> retry() async {

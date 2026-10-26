@@ -9,16 +9,28 @@ class AccessSimpleScaffold extends StatelessWidget {
   const AccessSimpleScaffold({
     required this.pageKey,
     required this.child,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
   final Key pageKey;
   final Widget child;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final VoidCallback? effectiveBack = onBackPressed ??
+        ((ModalRoute.of(context)?.canPop ?? false)
+            ? () => Navigator.of(context).pop()
+            : null);
+    final bool displayBack =
+        (showBackButton ?? (ModalRoute.of(context)?.canPop ?? false)) &&
+        effectiveBack != null;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -47,7 +59,54 @@ class AccessSimpleScaffold extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(24, 7, 24, 24),
-                        child: child,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            if (displayBack) ...<Widget>[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Semantics(
+                                  button: true,
+                                  label: 'Volver',
+                                  onTap: effectiveBack,
+                                  excludeSemantics: true,
+                                  child: Tooltip(
+                                    message: 'Volver',
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        key: const Key('access-back-button'),
+                                        onTap: effectiveBack,
+                                        borderRadius: BorderRadius.circular(
+                                          AppRadii.control,
+                                        ),
+                                        child: Container(
+                                          width: 41,
+                                          height: 41,
+                                          decoration: BoxDecoration(
+                                            color: palette.surfaceTint,
+                                            borderRadius:
+                                                BorderRadius.circular(
+                                                  AppRadii.control,
+                                                ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Icon(
+                                            LucideIcons.arrowLeft,
+                                            color: palette.brandRed,
+                                            size: 21,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            child,
+                          ],
+                        ),
                       ),
                     ),
                   ),

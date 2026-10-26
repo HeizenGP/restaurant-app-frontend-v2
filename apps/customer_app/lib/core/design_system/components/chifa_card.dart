@@ -17,6 +17,7 @@ class ChifaCard extends StatelessWidget {
     this.enabled = true,
     this.semanticLabel,
     this.minimumHeight = 73,
+    this.subtitleMaxLines = 2,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class ChifaCard extends StatelessWidget {
   final bool enabled;
   final String? semanticLabel;
   final double minimumHeight;
+  final int subtitleMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,7 @@ class ChifaCard extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    maxLines: 2,
+                    maxLines: subtitleMaxLines,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyMedium
                         ?.copyWith(color: palette.cardTextSecondary),

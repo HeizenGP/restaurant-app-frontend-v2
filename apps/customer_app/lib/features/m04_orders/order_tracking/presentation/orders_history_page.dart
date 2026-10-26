@@ -8,6 +8,7 @@ import '../../../../core/design_system/design_system.dart';
 import '../../choose_fulfillment/domain/fulfillment_models.dart';
 import '../../submit_order/domain/order_models.dart';
 import '../application/order_history_controller.dart';
+import '../application/order_tracking_controller.dart';
 import '../domain/order_tracking_models.dart';
 
 class OrdersHistoryPage extends StatefulWidget {
@@ -15,12 +16,18 @@ class OrdersHistoryPage extends StatefulWidget {
     required this.themeModeController,
     required this.controller,
     required this.onOpenOrderDetail,
+    this.onBackPressed,
+    this.showBackButton,
+    this.tableLabel,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final OrderHistoryController controller;
   final ValueChanged<String> onOpenOrderDetail;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
+  final String? tableLabel;
 
   @override
   State<OrdersHistoryPage> createState() => _OrdersHistoryPageState();
@@ -47,6 +54,9 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
           subtitle: 'Solicitudes e historial de esta cuenta.',
           contentGap: 13,
           themeModeController: widget.themeModeController,
+          onBackPressed: widget.onBackPressed,
+          showBackButton: widget.showBackButton,
+          tableLabel: widget.tableLabel,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -130,6 +140,9 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
     final String shortId = order.id.length >= 8
         ? order.id.substring(0, 8).toUpperCase()
         : order.id.toUpperCase();
+    if (OrderTrackingController.isCancellationRequestedFor(order.id)) {
+      return 'Pedido #$shortId · cancelado/solicitado';
+    }
     final String statusLabel = switch (order.status) {
       'REQUESTED' => 'reciente',
       'APPROVED' => 'aprobado',
@@ -142,6 +155,12 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
   }
 
   String _orderSubtitle(OrderSnapshot order) {
+    if (OrderTrackingController.isCancellationRequestedFor(order.id)) {
+      final String? obs =
+          OrderTrackingController.cancellationObservationFor(order.id);
+      final String obsText = obs != null ? ' · Obs: $obs' : '';
+      return 'CANCELACIÓN SOLICITADA$obsText\n${_formatModality(order.modality)} · S/ ${order.totalAmount}';
+    }
     final String statusDesc = switch (order.status) {
       'REQUESTED' => 'REQUESTED · pendiente de aprobación',
       'APPROVED' => 'APPROVED · en preparación',

@@ -15,6 +15,8 @@ class AdvanceStatusPage extends StatefulWidget {
     required this.controller,
     required this.orderId,
     required this.onViewOrder,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
@@ -22,6 +24,8 @@ class AdvanceStatusPage extends StatefulWidget {
   final PaymentStatusController controller;
   final String orderId;
   final VoidCallback onViewOrder;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   State<AdvanceStatusPage> createState() => _AdvanceStatusPageState();
@@ -66,6 +70,8 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
             themeModeController: widget.themeModeController,
             summary: advance,
             onViewOrder: widget.onViewOrder,
+            onBackPressed: widget.onBackPressed,
+            showBackButton: widget.showBackButton,
           );
         }
         return _PaymentStatePage(
@@ -75,6 +81,8 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
           subtitle: 'Solo aplicable a recojo o delivery.',
           state: state,
           loadingTitle: 'Consultando anticipo',
+          onBackPressed: widget.onBackPressed ?? widget.onViewOrder,
+          showBackButton: widget.showBackButton,
           onRetry: state.canRetry
               ? () {
                   unawaited(widget.controller.retry());
@@ -91,12 +99,16 @@ class AdvanceSummaryPage extends StatelessWidget {
     required this.themeModeController,
     required this.summary,
     required this.onViewOrder,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final AdvanceSummary summary;
   final VoidCallback onViewOrder;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +119,8 @@ class AdvanceSummaryPage extends StatelessWidget {
         subtitle: 'Solo aplicable a recojo o delivery.',
         contentGap: 35,
         themeModeController: themeModeController,
+        onBackPressed: onBackPressed ?? onViewOrder,
+        showBackButton: showBackButton,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -166,6 +180,8 @@ class OrderPaymentStatusPage extends StatefulWidget {
     required this.controller,
     required this.orderId,
     required this.onBackToOrder,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
@@ -173,6 +189,8 @@ class OrderPaymentStatusPage extends StatefulWidget {
   final PaymentStatusController controller;
   final String orderId;
   final VoidCallback onBackToOrder;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   State<OrderPaymentStatusPage> createState() => _OrderPaymentStatusPageState();
@@ -217,6 +235,8 @@ class _OrderPaymentStatusPageState extends State<OrderPaymentStatusPage> {
             themeModeController: widget.themeModeController,
             summary: summary,
             onBackToOrder: widget.onBackToOrder,
+            onBackPressed: widget.onBackPressed,
+            showBackButton: widget.showBackButton,
           );
         }
         return _PaymentStatePage(
@@ -226,6 +246,8 @@ class _OrderPaymentStatusPageState extends State<OrderPaymentStatusPage> {
           subtitle: 'Resumen consultable de tu pedido.',
           state: state,
           loadingTitle: 'Consultando pagos',
+          onBackPressed: widget.onBackPressed ?? widget.onBackToOrder,
+          showBackButton: widget.showBackButton,
           onRetry: state.canRetry
               ? () {
                   unawaited(widget.controller.retry());
@@ -242,12 +264,16 @@ class PaymentSummaryPage extends StatelessWidget {
     required this.themeModeController,
     required this.summary,
     required this.onBackToOrder,
+    this.onBackPressed,
+    this.showBackButton,
     super.key,
   });
 
   final ThemeModeController themeModeController;
   final PaymentSummary summary;
   final VoidCallback onBackToOrder;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -258,6 +284,8 @@ class PaymentSummaryPage extends StatelessWidget {
         subtitle: 'Resumen consultable de tu pedido.',
         contentGap: 30,
         themeModeController: themeModeController,
+        onBackPressed: onBackPressed ?? onBackToOrder,
+        showBackButton: showBackButton,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -336,6 +364,8 @@ class _PaymentStatePage extends StatelessWidget {
     required this.state,
     required this.loadingTitle,
     this.onRetry,
+    this.onBackPressed,
+    this.showBackButton,
   });
 
   final Key pageKey;
@@ -345,6 +375,8 @@ class _PaymentStatePage extends StatelessWidget {
   final PaymentStatusState state;
   final String loadingTitle;
   final VoidCallback? onRetry;
+  final VoidCallback? onBackPressed;
+  final bool? showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -355,6 +387,8 @@ class _PaymentStatePage extends StatelessWidget {
         title: title,
         subtitle: subtitle,
         themeModeController: themeModeController,
+        onBackPressed: onBackPressed,
+        showBackButton: showBackButton,
         child: ChifaStateView(
           kind: isFailure ? ChifaStateKind.error : ChifaStateKind.loading,
           title: isFailure ? 'No pudimos consultar' : loadingTitle,

@@ -55,6 +55,10 @@ void main() {
     await tester.tap(find.byKey(const Key('product-add-to-cart')));
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('page-menu')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('header-cart-button')));
+    await tester.pumpAndSettle();
+
     // Verificamos que el carrito tiene el producto
     expect(find.byKey(const Key('page-cart')), findsOneWidget);
     expect(find.byKey(ValueKey<String>('cart-product-$productOneId')), findsOneWidget);
