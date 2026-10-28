@@ -22,8 +22,12 @@ class CatalogProductDetailPage extends StatefulWidget {
     this.onProductAdded,
     this.onBackPressed,
     this.showBackButton,
-    this.showCartInHeader = false,
+    this.showCartInHeader = true,
     this.tableLabel,
+    this.cartItemCount = 0,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     super.key,
   });
 
@@ -36,6 +40,10 @@ class CatalogProductDetailPage extends StatefulWidget {
   final bool? showBackButton;
   final bool showCartInHeader;
   final String? tableLabel;
+  final int cartItemCount;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
 
   @override
   State<CatalogProductDetailPage> createState() {
@@ -67,6 +75,11 @@ class _CatalogProductDetailPageState extends State<CatalogProductDetailPage> {
         body: product == null
             ? FoundationProductDetailUnavailablePage(
                 themeModeController: widget.themeModeController,
+                initials: widget.initials,
+                avatarPath: widget.avatarPath,
+                onAvatarPressed: widget.onAvatarPressed,
+                cartItemCount: widget.cartItemCount,
+                onCartPressed: widget.onOpenCart,
               )
             : FoundationProductDetailPage(
                 themeModeController: widget.themeModeController,
@@ -88,7 +101,11 @@ class _CatalogProductDetailPageState extends State<CatalogProductDetailPage> {
                 },
                 onBackPressed: widget.onBackPressed,
                 showBackButton: widget.showBackButton,
-                onCartPressed: widget.showCartInHeader ? widget.onOpenCart : null,
+                onCartPressed: widget.onOpenCart,
+                cartItemCount: widget.cartItemCount,
+                initials: widget.initials,
+                avatarPath: widget.avatarPath,
+                onAvatarPressed: widget.onAvatarPressed,
                 tableLabel: widget.tableLabel,
               ),
       ),
@@ -107,6 +124,10 @@ class FoundationProductDetailPage extends StatelessWidget {
     this.onBackPressed,
     this.showBackButton,
     this.onCartPressed,
+    this.cartItemCount = 0,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     this.tableLabel,
     super.key,
   });
@@ -120,6 +141,10 @@ class FoundationProductDetailPage extends StatelessWidget {
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
   final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
   final String? tableLabel;
 
   @override
@@ -137,6 +162,10 @@ class FoundationProductDetailPage extends StatelessWidget {
       onBackPressed: onBackPressed,
       showBackButton: showBackButton,
       onCartPressed: onCartPressed,
+      cartItemCount: cartItemCount,
+      initials: initials,
+      avatarPath: avatarPath,
+      onAvatarPressed: onAvatarPressed,
       tableLabel: tableLabel,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -236,10 +265,20 @@ class FoundationProductDetailPage extends StatelessWidget {
 class FoundationProductDetailUnavailablePage extends StatelessWidget {
   const FoundationProductDetailUnavailablePage({
     required this.themeModeController,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.cartItemCount = 0,
+    this.onCartPressed,
     super.key,
   });
 
   final ThemeModeController themeModeController;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final int cartItemCount;
+  final VoidCallback? onCartPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +288,11 @@ class FoundationProductDetailUnavailablePage extends StatelessWidget {
       subtitle: 'Producto seleccionado del catálogo.',
       safeBottom: true,
       themeModeController: themeModeController,
+      initials: initials,
+      avatarPath: avatarPath,
+      onAvatarPressed: onAvatarPressed,
+      cartItemCount: cartItemCount,
+      onCartPressed: onCartPressed,
       child: const ChifaStateView(
         key: Key('product-detail-not-found'),
         kind: ChifaStateKind.error,

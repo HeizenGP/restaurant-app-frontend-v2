@@ -20,6 +20,11 @@ class OrderDetailTrackingPage extends StatefulWidget {
     this.onViewAdvance,
     this.onViewPayments,
     this.showBackButton,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     super.key,
   });
 
@@ -30,6 +35,11 @@ class OrderDetailTrackingPage extends StatefulWidget {
   final ValueChanged<String>? onViewAdvance;
   final ValueChanged<String>? onViewPayments;
   final bool? showBackButton;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
 
   @override
   State<OrderDetailTrackingPage> createState() =>
@@ -138,6 +148,11 @@ class _OrderDetailTrackingPageState extends State<OrderDetailTrackingPage> {
           tracking: tracking,
           onBackToOrders: widget.onBackToOrders,
           showBackButton: widget.showBackButton,
+          onCartPressed: widget.onCartPressed,
+          cartItemCount: widget.cartItemCount,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
           onViewAdvance: widget.onViewAdvance != null
               ? () => widget.onViewAdvance!(order.id)
               : null,
@@ -160,6 +175,11 @@ class _TrackingContentPage extends StatelessWidget {
     this.showBackButton,
     this.onViewAdvance,
     this.onViewPayments,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
   });
 
   final ThemeModeController themeModeController;
@@ -170,6 +190,11 @@ class _TrackingContentPage extends StatelessWidget {
   final bool? showBackButton;
   final VoidCallback? onViewAdvance;
   final VoidCallback? onViewPayments;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +218,11 @@ class _TrackingContentPage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackToOrders,
         showBackButton: showBackButton,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[

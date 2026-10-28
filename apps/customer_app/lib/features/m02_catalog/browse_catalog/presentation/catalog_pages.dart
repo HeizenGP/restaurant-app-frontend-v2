@@ -20,6 +20,10 @@ class CatalogHomePage extends StatefulWidget {
     this.onOpenCart,
     this.cartItemCount = 0,
     this.tableLabel,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onNotificationPressed,
     super.key,
   });
 
@@ -31,6 +35,10 @@ class CatalogHomePage extends StatefulWidget {
   final VoidCallback? onOpenCart;
   final int cartItemCount;
   final String? tableLabel;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onNotificationPressed;
 
   @override
   State<CatalogHomePage> createState() => _CatalogHomePageState();
@@ -69,6 +77,10 @@ class _CatalogHomePageState extends State<CatalogHomePage> {
           onCartPressed: widget.onOpenCart,
           cartItemCount: widget.cartItemCount,
           tableLabel: widget.tableLabel,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onNotificationPressed: widget.onNotificationPressed,
           content: _HomeCatalogContent(
             state: state,
             onOpenMenu: widget.onOpenMenu,
@@ -93,6 +105,10 @@ class CatalogBrowsePage extends StatefulWidget {
     this.cartItemCount = 0,
     this.cartTotalCents = 0,
     this.tableLabel,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onNotificationPressed,
     this.showBackButton,
     super.key,
   });
@@ -107,6 +123,10 @@ class CatalogBrowsePage extends StatefulWidget {
   final int cartItemCount;
   final int cartTotalCents;
   final String? tableLabel;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onNotificationPressed;
   final bool? showBackButton;
 
   @override
@@ -147,6 +167,10 @@ class _CatalogBrowsePageState extends State<CatalogBrowsePage> {
           onCartPressed: widget.onOpenCart,
           cartItemCount: widget.cartItemCount,
           tableLabel: widget.tableLabel,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onNotificationPressed: widget.onNotificationPressed,
           content: _BrowseCatalogContent(
             state: state,
             useGrid: widget.useGrid,

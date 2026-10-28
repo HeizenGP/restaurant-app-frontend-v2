@@ -14,6 +14,9 @@ class CartPage extends StatelessWidget {
     this.onBackPressed,
     this.tableLabel,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     super.key,
   });
 
@@ -23,6 +26,9 @@ class CartPage extends StatelessWidget {
   final VoidCallback? onBackPressed;
   final String? tableLabel;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +44,10 @@ class CartPage extends StatelessWidget {
           onBackPressed: onBackPressed,
           showBackButton: showBackButton,
           tableLabel: tableLabel,
+          initials: initials,
+          avatarPath: avatarPath,
+          onAvatarPressed: onAvatarPressed,
+          cartItemCount: cartController.state.totalQuantity,
           child: cartController.state.isEmpty
               ? const ChifaStateView(
                   key: Key('cart-empty-state'),

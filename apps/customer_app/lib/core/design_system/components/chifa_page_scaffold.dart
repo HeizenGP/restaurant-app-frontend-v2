@@ -13,11 +13,14 @@ class ChifaPageScaffold extends StatelessWidget {
     this.pageKey,
     this.contentGap = 14,
     this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     this.safeBottom = false,
     this.onBackPressed,
     this.showBackButton,
     this.onCartPressed,
     this.cartItemCount = 0,
+    this.onNotificationPressed,
     this.tableLabel,
     super.key,
   });
@@ -29,11 +32,14 @@ class ChifaPageScaffold extends StatelessWidget {
   final Key? pageKey;
   final double contentGap;
   final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
   final bool safeBottom;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
   final VoidCallback? onCartPressed;
   final int cartItemCount;
+  final VoidCallback? onNotificationPressed;
   final String? tableLabel;
 
   @override
@@ -60,10 +66,13 @@ class ChifaPageScaffold extends StatelessWidget {
                     isDarkMode: isDarkMode,
                     onToggleTheme: themeModeController.toggle,
                     initials: initials,
+                    avatarPath: avatarPath,
+                    onAvatarPressed: onAvatarPressed,
                     onBackPressed: onBackPressed,
                     showBackButton: showBackButton,
                     onCartPressed: onCartPressed,
                     cartItemCount: cartItemCount,
+                    onNotificationPressed: onNotificationPressed,
                     tableLabel: tableLabel,
                   ),
                 ),

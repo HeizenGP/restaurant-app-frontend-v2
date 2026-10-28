@@ -17,6 +17,10 @@ class FoundationHomePage extends StatelessWidget {
     this.onBackPressed,
     this.onCartPressed,
     this.cartItemCount = 0,
+    this.onNotificationPressed,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     this.tableLabel,
     this.showBackButton,
     super.key,
@@ -27,6 +31,10 @@ class FoundationHomePage extends StatelessWidget {
   final VoidCallback? onBackPressed;
   final VoidCallback? onCartPressed;
   final int cartItemCount;
+  final VoidCallback? onNotificationPressed;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
   final String? tableLabel;
   final bool? showBackButton;
 
@@ -41,22 +49,19 @@ class FoundationHomePage extends StatelessWidget {
       onBackPressed: onBackPressed,
       onCartPressed: onCartPressed,
       cartItemCount: cartItemCount,
+      onNotificationPressed: onNotificationPressed,
+      initials: initials,
+      avatarPath: avatarPath,
+      onAvatarPressed: onAvatarPressed,
       tableLabel: tableLabel,
       showBackButton: showBackButton,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          const _BrandHero(),
-          const SizedBox(height: 23),
-          content ??
-              const ChifaStateView(
-                key: Key('home-empty-catalog'),
-                kind: ChifaStateKind.empty,
-                title: 'Sin categorías disponibles',
-                message: 'No hay datos del catálogo para mostrar por ahora',
-              ),
-        ],
-      ),
+      child: content ??
+          const ChifaStateView(
+            key: Key('home-empty-catalog'),
+            kind: ChifaStateKind.empty,
+            title: 'Sin categorías disponibles',
+            message: 'No hay datos del catálogo para mostrar por ahora',
+          ),
     );
   }
 }
@@ -68,6 +73,10 @@ class FoundationCatalogPage extends StatelessWidget {
     this.onBackPressed,
     this.onCartPressed,
     this.cartItemCount = 0,
+    this.onNotificationPressed,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     this.tableLabel,
     this.showBackButton,
     super.key,
@@ -78,6 +87,10 @@ class FoundationCatalogPage extends StatelessWidget {
   final VoidCallback? onBackPressed;
   final VoidCallback? onCartPressed;
   final int cartItemCount;
+  final VoidCallback? onNotificationPressed;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
   final String? tableLabel;
   final bool? showBackButton;
 
@@ -92,6 +105,10 @@ class FoundationCatalogPage extends StatelessWidget {
       onBackPressed: onBackPressed,
       onCartPressed: onCartPressed,
       cartItemCount: cartItemCount,
+      onNotificationPressed: onNotificationPressed,
+      initials: initials,
+      avatarPath: avatarPath,
+      onAvatarPressed: onAvatarPressed,
       tableLabel: tableLabel,
       showBackButton: showBackButton,
       child:
@@ -113,6 +130,10 @@ class FoundationOrdersPage extends StatelessWidget {
     this.onBackPressed,
     this.onCartPressed,
     this.cartItemCount = 0,
+    this.onNotificationPressed,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
     this.tableLabel,
     this.showBackButton,
     super.key,
@@ -123,6 +144,10 @@ class FoundationOrdersPage extends StatelessWidget {
   final VoidCallback? onBackPressed;
   final VoidCallback? onCartPressed;
   final int cartItemCount;
+  final VoidCallback? onNotificationPressed;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
   final String? tableLabel;
   final bool? showBackButton;
 
@@ -137,6 +162,10 @@ class FoundationOrdersPage extends StatelessWidget {
       onBackPressed: onBackPressed,
       onCartPressed: onCartPressed,
       cartItemCount: cartItemCount,
+      onNotificationPressed: onNotificationPressed,
+      initials: initials,
+      avatarPath: avatarPath,
+      onAvatarPressed: onAvatarPressed,
       tableLabel: tableLabel,
       showBackButton: showBackButton,
       child:
@@ -291,6 +320,7 @@ class FoundationAccountPage extends StatelessWidget {
                   isDarkMode: isDark,
                   onToggleTheme: themeModeController.toggle,
                   initials: initials,
+                  avatarPath: profileController?.avatarPath,
                   onAvatarPressed: onLogout == null
                       ? null
                       : () => _confirmLogout(context),
@@ -300,7 +330,7 @@ class FoundationAccountPage extends StatelessWidget {
                   cartItemCount: cartItemCount,
                   tableLabel: tableLabel,
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 12),
                 _ProfileVisual(
                   palette: palette,
                   isDark: isDark,
@@ -336,43 +366,71 @@ class FoundationAccountPage extends StatelessWidget {
                         }
                       : null,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  child: Text(
-                    identityName,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontFamily: AppTypography.displayFontFamily,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      height: 41 / 32,
-                    ),
+                Center(
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              identityName,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: palette.textPrimary,
+                                fontFamily: AppTypography.displayFontFamily,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                          if (profileController != null && !isGuest) ...<Widget>[
+                            const SizedBox(width: 4),
+                            IconButton(
+                              key: const Key('account-name-edit-icon'),
+                              icon: Icon(
+                                LucideIcons.pencil,
+                                size: 15,
+                                color: isDark ? const Color(0xFFD4AF37) : palette.brandRed,
+                              ),
+                              tooltip: 'Editar nombre',
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => EditProfilePage(
+                                      themeModeController: themeModeController,
+                                      controller: profileController!,
+                                      currentDisplayName: identityName,
+                                      currentEmail: identityDetail,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        identityDetail,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: palette.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      _AccountStatusBadge(
+                        isGuest: isGuest,
+                        palette: palette,
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 9),
-                  child: Text(
-                    identityDetail,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
-                      fontSize: 13,
-                      height: 23 / 13,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: _AccountStatusBadge(
-                      isGuest: isGuest,
-                      palette: palette,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: _AccountActions(
@@ -394,7 +452,7 @@ class FoundationAccountPage extends StatelessWidget {
                         : null,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _ProfileTabs(
@@ -402,7 +460,7 @@ class FoundationAccountPage extends StatelessWidget {
                     onTabSelected: profileController?.setTabIndex,
                   ),
                 ),
-                const SizedBox(height: 13),
+                const SizedBox(height: 10),
                 _buildTabSection(context, palette, identityName, identityDetail),
               ],
             ),
@@ -462,6 +520,21 @@ class FoundationAccountPage extends StatelessWidget {
                   key: const Key('account-data-card'),
                   displayName: accountCardName ?? identityName,
                   email: accountCardEmail ?? identityDetail,
+                  controller: profileController,
+                  onEdit: profileController != null && !isGuest
+                      ? () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => EditProfilePage(
+                                themeModeController: themeModeController,
+                                controller: profileController!,
+                                currentDisplayName: identityName,
+                                currentEmail: identityDetail,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                 ),
         ),
         if (profileController?.phone != null &&
@@ -529,10 +602,20 @@ class FoundationAccountPage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: ChifaCard(
                 key: ValueKey<String>('address-card-${addr.id}'),
-                icon: LucideIcons.mapPin,
+                icon: switch (addr.label.toLowerCase()) {
+                  'casa' => LucideIcons.home,
+                  'trabajo' || 'oficina' => LucideIcons.briefcase,
+                  'pareja' => LucideIcons.heart,
+                  _ => LucideIcons.mapPin,
+                },
                 title: addr.label + (addr.isDefault ? ' (Predeterminada)' : ''),
                 subtitle: addr.address +
-                    (addr.reference != null ? '\nRef: ${addr.reference}' : ''),
+                    (addr.department != null && addr.department!.isNotEmpty
+                        ? ', Dpto ${addr.department}'
+                        : '') +
+                    (addr.reference != null && addr.reference!.isNotEmpty
+                        ? '\nRef: ${addr.reference}'
+                        : ''),
                 subtitleMaxLines: 3,
                 minimumHeight: 70,
                 onTap: () {
@@ -588,6 +671,7 @@ class FoundationAccountPage extends StatelessWidget {
         ChifaButton(
           key: const Key('account-add-address-button'),
           label: '+ Agregar dirección',
+          leading: LucideIcons.plus,
           height: 48,
           borderRadius: 12,
           onPressed: () {
@@ -694,6 +778,7 @@ class FoundationAccountPage extends StatelessWidget {
         ChifaButton(
           key: const Key('account-add-card-button'),
           label: '+ Agregar tarjeta (16 dígitos)',
+          leading: LucideIcons.plus,
           height: 48,
           borderRadius: 12,
           onPressed: () {
@@ -736,64 +821,6 @@ class FoundationAccountPage extends StatelessWidget {
   }
 }
 
-class _BrandHero extends StatelessWidget {
-  const _BrandHero();
-
-  @override
-  Widget build(BuildContext context) {
-    final AppPalette palette = context.appPalette;
-
-    return Semantics(
-      container: true,
-      label: 'Cocina Chifa. Un antojo, un gran momento.',
-      excludeSemantics: true,
-      child: Container(
-        height: 167,
-        decoration: BoxDecoration(
-          color: palette.brandSurface,
-          borderRadius: BorderRadius.circular(AppRadii.hero),
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 24,
-              top: 22,
-              width: 270,
-              height: 24,
-              child: Text(
-                'COCINA CHIFA',
-                maxLines: 1,
-                style: TextStyle(
-                  color: palette.onBrand,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Positioned(
-              left: 24,
-              top: 60,
-              width: 282,
-              height: 76,
-              child: Text(
-                'Un antojo,\nun gran momento',
-                style: TextStyle(
-                  color: palette.onBrand,
-                  fontFamily: AppTypography.displayFontFamily,
-                  fontSize: 31,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ProfileVisual extends StatelessWidget {
   const _ProfileVisual({
     required this.palette,
@@ -811,40 +838,18 @@ class _ProfileVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double avatarSize = (constraints.maxWidth * 112 / 354).clamp(
-          88.0,
-          112.0,
-        );
-        final double avatarInset = constraints.maxWidth * 12 / 354;
-
-        return Column(
-          children: <Widget>[
-            Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.bottomLeft,
-              children: <Widget>[
-                _ProfileCover(palette: palette),
-                Padding(
-                  padding: EdgeInsets.only(left: avatarInset),
-                  child: Transform.translate(
-                    offset: Offset(0, avatarSize * 0.49),
-                    child: _ProfileAvatar(
-                      dimension: avatarSize,
-                      isDark: isDark,
-                      initials: initials,
-                      avatarPath: avatarPath,
-                      onTap: onTapAvatar,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: avatarSize * 0.56),
-          ],
-        );
-      },
+    const double avatarSize = 120.0;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 10),
+        child: _ProfileAvatar(
+          dimension: avatarSize,
+          isDark: isDark,
+          initials: initials,
+          avatarPath: avatarPath,
+          onTap: onTapAvatar,
+        ),
+      ),
     );
   }
 }
@@ -946,6 +951,42 @@ class _ProfileAvatar extends StatelessWidget {
           : _buildFallback(context),
     );
 
+    final Widget interactiveAvatar = (onTap != null)
+        ? Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              avatarCore,
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25D366),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      width: 2.5,
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    LucideIcons.camera,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          )
+        : avatarCore;
+
     return Semantics(
       image: true,
       label: 'Avatar de cliente $initials',
@@ -955,150 +996,9 @@ class _ProfileAvatar extends StatelessWidget {
               key: const Key('account-avatar-touchable'),
               behavior: HitTestBehavior.opaque,
               onTap: onTap,
-              child: avatarCore,
+              child: interactiveAvatar,
             )
           : avatarCore,
-    );
-  }
-}
-
-class _ProfileCover extends StatelessWidget {
-  const _ProfileCover({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 354 / 196,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double factor = (constraints.maxWidth / 354).clamp(0.78, 1);
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(20 * factor),
-            child: ColoredBox(
-              color: palette.profileCover,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Align(
-                    alignment: const Alignment(3.18, 1.14),
-                    child: FractionallySizedBox(
-                      widthFactor: 255 / 354,
-                      heightFactor: 255 / 196,
-                      child: SvgPicture.asset(
-                        'assets/images/m01/account_orbit.svg',
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: const Alignment(1.54, -1.44),
-                    child: FractionallySizedBox(
-                      widthFactor: 151 / 354,
-                      heightFactor: 151 / 196,
-                      child: SvgPicture.asset(
-                        'assets/images/m01/account_orbit_inner.svg',
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: const Alignment(0.83, -0.17),
-                    child: FractionallySizedBox(
-                      widthFactor: 70 / 354,
-                      heightFactor: 70 / 196,
-                      child: SvgPicture.asset(
-                        'assets/images/m01/account_sun.svg',
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      21 * factor,
-                      29 * factor,
-                      20 * factor,
-                      17 * factor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          width: 42 * factor,
-                          height: 2,
-                          decoration: BoxDecoration(
-                            color: palette.accentGold,
-                            borderRadius: BorderRadius.circular(1),
-                          ),
-                        ),
-                        SizedBox(height: 12 * factor),
-                        Text(
-                          'CHIFA ASIA  ·  DESDE EL CORAZÓN',
-                          maxLines: 1,
-                          textScaler: TextScaler.noScaling,
-                          style: TextStyle(
-                            color: AppColors.onBrand,
-                            fontFamily: AppTypography.bodyFontFamily,
-                            fontSize: 10 * factor,
-                            fontWeight: FontWeight.w700,
-                            height: 1.9,
-                          ),
-                        ),
-                        SizedBox(height: 29 * factor),
-                        Text(
-                          'Tu lugar especial',
-                          maxLines: 1,
-                          textScaler: TextScaler.noScaling,
-                          style: TextStyle(
-                            color: AppColors.onBrand,
-                            fontFamily: AppTypography.displayFontFamily,
-                            fontSize: 33 * factor,
-                            fontWeight: FontWeight.w600,
-                            height: 1.1,
-                          ),
-                        ),
-                        const Spacer(),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: SizedBox(
-                            width: 107 * factor,
-                            height: 23 * factor,
-                            child: const _DiamondPattern(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _DiamondPattern extends StatelessWidget {
-  const _DiamondPattern();
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List<Widget>.generate(
-          4,
-          (int index) => Transform.rotate(
-            angle: -0.785398,
-            child: Container(
-              width: 17,
-              height: 17,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0x6BE5BC74)),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1176,12 +1076,14 @@ class _AccountActions extends StatelessWidget {
         final Widget primary = _AccountAction(
           key: const Key('account-orders-action'),
           label: 'Ver mis pedidos',
+          icon: onOpenOrders != null ? LucideIcons.receipt : null,
           onPressed: onOpenOrders,
         );
         final Widget secondary = onEditProfile != null && !isGuest
             ? _AccountAction(
                 key: const Key('account-edit-profile-action'),
                 label: 'Editar perfil',
+                icon: LucideIcons.pencil,
                 onPressed: onEditProfile,
               )
             : _DisabledAccountAction(
@@ -1212,9 +1114,15 @@ class _AccountActions extends StatelessWidget {
 }
 
 class _AccountAction extends StatelessWidget {
-  const _AccountAction({required this.label, this.onPressed, super.key});
+  const _AccountAction({
+    required this.label,
+    this.icon,
+    this.onPressed,
+    super.key,
+  });
 
   final String label;
+  final IconData? icon;
   final VoidCallback? onPressed;
 
   @override
@@ -1223,18 +1131,41 @@ class _AccountAction extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 47),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Center(
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.onBrand,
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
+        child: icon == null
+            ? Center(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.onBrand,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(icon, size: 16, color: AppColors.onBrand),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.onBrand,
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
 
@@ -1389,51 +1320,149 @@ class _AccountDataCard extends StatelessWidget {
   const _AccountDataCard({
     required this.displayName,
     required this.email,
+    this.controller,
+    this.onEdit,
     super.key,
   });
 
   final String displayName;
   final String email;
+  final UserProfileController? controller;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
-    final TextStyle labelStyle = TextStyle(
-      color: palette.textSecondary,
-      fontFamily: AppTypography.bodyFontFamily,
-      fontSize: 11,
-      fontWeight: FontWeight.w500,
-    );
-    final TextStyle valueStyle = TextStyle(
-      color: palette.textPrimary,
-      fontFamily: AppTypography.bodyFontFamily,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-    );
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 120),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.controlBorder),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text('Nombre', style: labelStyle),
-              const SizedBox(height: 3),
-              Text(displayName, style: valueStyle),
-              Divider(height: 20, color: palette.controlBorder),
-              Text('Correo electrónico', style: labelStyle),
-              const SizedBox(height: 3),
-              Text(email, style: valueStyle),
-            ],
+    final String effectiveName = (controller?.lastName != null && controller!.lastName!.isNotEmpty)
+        ? '${controller!.displayName ?? displayName} ${controller!.lastName}'
+        : (controller?.displayName ?? displayName);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.controlBorder),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-        ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // Item 1: Nombre (estilo WhatsApp)
+          _buildWhatsAppTile(
+            context: context,
+            palette: palette,
+            icon: LucideIcons.user,
+            label: 'Nombre',
+            value: effectiveName,
+            helper:
+                'Visible para el restaurante y en tus pedidos.',
+            trailing: onEdit != null
+                ? IconButton(
+                    key: const Key('account-name-edit-icon'),
+                    icon: Icon(
+                      LucideIcons.pencil,
+                      size: 16,
+                      color: isDark ? palette.accentGold : palette.brandRed,
+                    ),
+                    tooltip: 'Editar nombre',
+                    onPressed: onEdit,
+                  )
+                : null,
+          ),
+          Divider(height: 1, indent: 56, endIndent: 16, color: palette.controlBorder),
+          // Item 2: Correo electrónico
+          _buildWhatsAppTile(
+            context: context,
+            palette: palette,
+            icon: LucideIcons.mail,
+            label: 'Correo electrónico',
+            value: email,
+            helper: 'Cuenta principal vinculada.',
+            trailing: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Icon(
+                LucideIcons.badgeCheck,
+                size: 20,
+                color: palette.success,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWhatsAppTile({
+    required BuildContext context,
+    required AppPalette palette,
+    required IconData icon,
+    required String label,
+    required String value,
+    required String helper,
+    Widget? trailing,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: palette.surfaceTint,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 16, color: palette.textSecondary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: palette.textSecondary,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: palette.textPrimary,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  helper,
+                  style: TextStyle(
+                    color: palette.textSecondary.withValues(alpha: 0.8),
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 10,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ?trailing,
+        ],
       ),
     );
   }

@@ -157,8 +157,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       alignment: Alignment.bottomRight,
                       children: <Widget>[
                         Container(
-                          width: 104,
-                          height: 104,
+                          width: 120,
+                          height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: palette.surfaceTint,
@@ -179,15 +179,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.all(7),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: palette.brandRed,
+                            color: const Color(0xFF25D366),
                             shape: BoxShape.circle,
-                            border: Border.all(color: palette.surface, width: 2),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                              width: 2.5,
+                            ),
                           ),
                           child: const Icon(
                             LucideIcons.camera,
-                            size: 16,
+                            size: 18,
                             color: Colors.white,
                           ),
                         ),
@@ -380,23 +383,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ),
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
-            // Personal Information
-            Text(
-              'Datos personales',
-              style: TextStyle(
-                fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: palette.textPrimary,
-              ),
+            // Section 1: Datos de Identidad
+            _buildSectionHeader(
+              icon: LucideIcons.user,
+              title: 'DATOS DE IDENTIDAD',
+              palette: palette,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             ChifaTextField(
               key: const Key('edit-profile-name'),
               controller: _nameController,
+              leadingIcon: LucideIcons.user,
               label: 'Nombre completo',
               hintText: 'Ej. Roberto',
               keyboardType: TextInputType.name,
@@ -407,70 +407,117 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             ChifaTextField(
               key: const Key('edit-profile-lastname'),
               controller: _lastNameController,
+              leadingIcon: LucideIcons.userCheck,
               label: 'Apellidos',
               hintText: 'Ej. Wong Chang',
               keyboardType: TextInputType.name,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
+            ChifaTextField(
+              key: const Key('edit-profile-email'),
+              controller: _emailController,
+              leadingIcon: LucideIcons.mail,
+              label: 'Correo electrónico (Cuenta principal)',
+              hintText: 'correo@ejemplo.com',
+              keyboardType: TextInputType.emailAddress,
+              enabled: false,
+            ),
+
+            const SizedBox(height: 18),
+
+            // Section 2: Contacto y Promociones
+            _buildSectionHeader(
+              icon: LucideIcons.phone,
+              title: 'CONTACTO Y BENEFICIOS',
+              palette: palette,
+            ),
+            const SizedBox(height: 10),
 
             ChifaTextField(
               key: const Key('edit-profile-phone'),
               controller: _phoneController,
+              leadingIcon: LucideIcons.phone,
               label: 'Celular de contacto (Perú - 9 dígitos)',
               hintText: 'Ej. 987654321',
               keyboardType: TextInputType.phone,
               validator: ProfileValidators.phone,
             ),
-            const SizedBox(height: 16),
-
-            ChifaTextField(
-              key: const Key('edit-profile-email'),
-              controller: _emailController,
-              label: 'Correo electrónico',
-              hintText: 'correo@ejemplo.com',
-              keyboardType: TextInputType.emailAddress,
-              enabled: false,
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             ChifaTextField(
               key: const Key('edit-profile-birthdate'),
               controller: _birthDateController,
+              leadingIcon: LucideIcons.cake,
               label: 'Fecha de nacimiento (Promociones)',
               hintText: 'DD/MM/AAAA (ej. 15/08/1995)',
               keyboardType: TextInputType.datetime,
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 18),
+
+            // Section 3: Notas de Cocina
+            _buildSectionHeader(
+              icon: LucideIcons.utensilsCrossed,
+              title: 'NOTAS PARA LA COCINA',
+              palette: palette,
+            ),
+            const SizedBox(height: 10),
 
             ChifaTextField(
               key: const Key('edit-profile-dietary'),
               controller: _dietaryController,
+              leadingIcon: LucideIcons.chefHat,
               label: 'Preferencias culinarias / Alergias',
               hintText: 'Ej. Sin picante, poco sillao, alérgico a mariscos',
               keyboardType: TextInputType.multiline,
             ),
 
-            const SizedBox(height: 36),
+            const SizedBox(height: 24),
 
             ChifaButton(
               key: const Key('edit-profile-save-button'),
-              label: 'Guardar cambios',
+              label: 'Guardar cambios de perfil',
+              leading: LucideIcons.check,
               height: 52,
               borderRadius: 14,
               onPressed: _save,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     ),
   );
 }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    required AppPalette palette,
+  }) {
+    return Row(
+      children: <Widget>[
+        Icon(icon, size: 14, color: palette.brandRed),
+        const SizedBox(width: 7),
+        Text(
+          title,
+          style: TextStyle(
+            fontFamily: AppTypography.bodyFontFamily,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: palette.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildAvatarImage(AppPalette palette) {
     if (_currentPhotoPath != null && _currentPhotoPath!.trim().isNotEmpty) {

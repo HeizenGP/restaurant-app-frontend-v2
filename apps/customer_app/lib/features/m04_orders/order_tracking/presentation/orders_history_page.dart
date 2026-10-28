@@ -18,6 +18,12 @@ class OrdersHistoryPage extends StatefulWidget {
     required this.onOpenOrderDetail,
     this.onBackPressed,
     this.showBackButton,
+    this.onCartPressed,
+    this.cartItemCount = 0,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onNotificationPressed,
     this.tableLabel,
     super.key,
   });
@@ -27,6 +33,12 @@ class OrdersHistoryPage extends StatefulWidget {
   final ValueChanged<String> onOpenOrderDetail;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onNotificationPressed;
   final String? tableLabel;
 
   @override
@@ -56,6 +68,12 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
           themeModeController: widget.themeModeController,
           onBackPressed: widget.onBackPressed,
           showBackButton: widget.showBackButton,
+          onCartPressed: widget.onCartPressed,
+          cartItemCount: widget.cartItemCount,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onNotificationPressed: widget.onNotificationPressed,
           tableLabel: widget.tableLabel,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

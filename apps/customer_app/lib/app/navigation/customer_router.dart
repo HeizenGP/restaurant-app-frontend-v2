@@ -23,6 +23,7 @@ import '../../features/m04_orders/manage_cart/domain/cart_models.dart';
 import '../../features/m04_orders/manage_cart/presentation/cart_page.dart';
 import '../../features/m04_orders/order_tracking/application/order_history_controller.dart';
 import '../../features/m04_orders/order_tracking/application/order_tracking_controller.dart';
+import '../../features/m04_orders/order_tracking/domain/order_tracking_models.dart';
 import '../../features/m04_orders/order_tracking/presentation/order_detail_tracking_page.dart';
 import '../../features/m04_orders/order_tracking/presentation/orders_history_page.dart';
 import '../../features/m04_orders/submit_order/application/order_contracts.dart';
@@ -30,6 +31,7 @@ import '../../features/m04_orders/submit_order/application/submit_order_controll
 import '../../features/m04_orders/submit_order/domain/order_models.dart';
 import '../../features/m04_orders/submit_order/presentation/order_submission_pages.dart';
 import '../../features/m06_payments/view_payment_status/application/payment_status_controller.dart';
+import '../../features/m06_payments/view_payment_status/domain/payment_models.dart';
 import '../../features/m06_payments/view_payment_status/presentation/payment_status_pages.dart';
 import '../../features/ui_foundation/presentation/foundation_pages.dart';
 import '../theme/theme_mode_controller.dart';
@@ -105,11 +107,67 @@ GoRouter createCustomerRouter({
 
   void finishSuccessfulSubmission(BuildContext context, OrderSnapshot order) {
     cartController.clear();
-    fulfillmentController.clear();
+    if (order.modality == FulfillmentMode.local && order.tableId != null) {
+      fulfillmentController.lockAssignedTable(order.tableId!);
+    } else {
+      fulfillmentController.clearDraft();
+    }
     context.goNamed(
       CustomerRoutes.orderSubmitted,
       pathParameters: <String, String>{'orderId': order.id},
     );
+  }
+
+  orderTrackingController?.addListener(() {
+    final OrderTrackingSnapshot? tracking =
+        orderTrackingController.state.tracking;
+    if (tracking != null &&
+        (tracking.isPaid || tracking.orderStatus == 'CLOSED')) {
+      fulfillmentController.releaseAssignedTable();
+    }
+  });
+
+  paymentStatusController?.addListener(() {
+    final PaymentSummary? summary =
+        paymentStatusController.state.paymentSummary;
+    if (summary != null && summary.paymentStatus == 'PAID') {
+      fulfillmentController.releaseAssignedTable();
+    }
+  });
+
+  orderHistoryController?.addListener(() {
+    final List<OrderSnapshot> orders = orderHistoryController.state.orders;
+    if (orders.isNotEmpty) {
+      final OrderSnapshot? activeLocal = orders.cast<OrderSnapshot?>().firstWhere(
+        (OrderSnapshot? o) =>
+            o != null &&
+            o.modality == FulfillmentMode.local &&
+            o.tableId != null &&
+            o.status != 'CLOSED',
+        orElse: () => null,
+      );
+      if (activeLocal != null) {
+        if (fulfillmentController.state.assignedTableId != activeLocal.tableId) {
+          fulfillmentController.lockAssignedTable(activeLocal.tableId!);
+        }
+      } else if (fulfillmentController.state.hasAssignedTable) {
+        fulfillmentController.releaseAssignedTable();
+      }
+    }
+  });
+
+  String resolveInitials() {
+    final session = authController.state.session;
+    final user = session?.user;
+    final String name = profileController?.displayName ?? user?.displayName ?? '';
+    final String? avatar = profileController?.avatarPath;
+    if (avatar != null && avatar.isNotEmpty) {
+      return avatar.characters.first;
+    }
+    if (name.trim().isNotEmpty) {
+      return name.trim().characters.first.toUpperCase();
+    }
+    return (session?.isGuest ?? true) ? 'I' : 'C';
   }
 
   return GoRouter(
@@ -178,6 +236,7 @@ GoRouter createCustomerRouter({
                     animation: Listenable.merge(<Listenable>[
                       cartController,
                       fulfillmentController,
+                      ?profileController,
                     ]),
                     builder: (BuildContext context, _) {
                       return CatalogHomePage(
@@ -190,6 +249,9 @@ GoRouter createCustomerRouter({
                         },
                         onOpenCart: () => context.goNamed(CustomerRoutes.cart),
                         cartItemCount: cartController.state.totalQuantity,
+                        initials: resolveInitials(),
+                        avatarPath: profileController?.avatarPath,
+                        onAvatarPressed: () => context.go('/cuenta'),
                         tableLabel: fulfillmentController.state.assignedTable?.code != null
                             ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
                             : null,
@@ -210,6 +272,7 @@ GoRouter createCustomerRouter({
                     animation: Listenable.merge(<Listenable>[
                       cartController,
                       fulfillmentController,
+                      ?profileController,
                     ]),
                     builder: (BuildContext context, _) {
                       return CatalogBrowsePage(
@@ -221,6 +284,9 @@ GoRouter createCustomerRouter({
                         onOpenCart: () => context.goNamed(CustomerRoutes.cart),
                         cartItemCount: cartController.state.totalQuantity,
                         cartTotalCents: cartController.state.subtotalCents,
+                        initials: resolveInitials(),
+                        avatarPath: profileController?.avatarPath,
+                        onAvatarPressed: () => context.go('/cuenta'),
                         tableLabel: fulfillmentController.state.assignedTable?.code != null
                             ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
                             : null,
@@ -256,7 +322,11 @@ GoRouter createCustomerRouter({
                     name: CustomerRoutes.cart,
                     builder: (BuildContext context, GoRouterState state) {
                       return AnimatedBuilder(
-                        animation: fulfillmentController,
+                        animation: Listenable.merge(<Listenable>[
+                          cartController,
+                          fulfillmentController,
+                          ?profileController,
+                        ]),
                         builder: (BuildContext context, _) {
                           return CartPage(
                             themeModeController: themeModeController,
@@ -266,6 +336,9 @@ GoRouter createCustomerRouter({
                             tableLabel: fulfillmentController.state.assignedTable?.code != null
                                 ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
                                 : null,
+                            initials: resolveInitials(),
+                            avatarPath: profileController?.avatarPath,
+                            onAvatarPressed: () => context.go('/cuenta'),
                             onContinue: () {
                               context.pushNamed(CustomerRoutes.fulfillmentMode);
                             },
@@ -284,20 +357,46 @@ GoRouter createCustomerRouter({
                 path: '/pedidos',
                 name: CustomerRoutes.orders,
                 builder: (BuildContext context, GoRouterState state) {
-                  if (orderHistoryController != null) {
-                    return OrdersHistoryPage(
-                      themeModeController: themeModeController,
-                      controller: orderHistoryController,
-                      onOpenOrderDetail: (String orderId) {
-                        context.pushNamed(
-                          CustomerRoutes.orderTracking,
-                          pathParameters: <String, String>{'orderId': orderId},
+                  return AnimatedBuilder(
+                    animation: Listenable.merge(<Listenable>[
+                      cartController,
+                      fulfillmentController,
+                      ?orderHistoryController,
+                      ?profileController,
+                    ]),
+                    builder: (BuildContext context, _) {
+                      if (orderHistoryController != null) {
+                        return OrdersHistoryPage(
+                          themeModeController: themeModeController,
+                          controller: orderHistoryController,
+                          onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+                          cartItemCount: cartController.state.totalQuantity,
+                          initials: resolveInitials(),
+                          avatarPath: profileController?.avatarPath,
+                          onAvatarPressed: () => context.go('/cuenta'),
+                          tableLabel: fulfillmentController.state.assignedTable?.code != null
+                              ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                              : null,
+                          onOpenOrderDetail: (String orderId) {
+                            context.pushNamed(
+                              CustomerRoutes.orderTracking,
+                              pathParameters: <String, String>{'orderId': orderId},
+                            );
+                          },
                         );
-                      },
-                    );
-                  }
-                  return FoundationOrdersPage(
-                    themeModeController: themeModeController,
+                      }
+                      return FoundationOrdersPage(
+                        themeModeController: themeModeController,
+                        onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+                        cartItemCount: cartController.state.totalQuantity,
+                        initials: resolveInitials(),
+                        avatarPath: profileController?.avatarPath,
+                        onAvatarPressed: () => context.go('/cuenta'),
+                        tableLabel: fulfillmentController.state.assignedTable?.code != null
+                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
+                            : null,
+                      );
+                    },
                   );
                 },
               ),
@@ -474,6 +573,14 @@ GoRouter createCustomerRouter({
           return FulfillmentModePage(
             themeModeController: themeModeController,
             controller: fulfillmentController,
+            showBackButton: true,
+            onBackPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.goNamed(CustomerRoutes.cart);
+              }
+            },
             onModeSelected: (FulfillmentMode mode) {
               final String routeName = switch (mode) {
                 FulfillmentMode.local => CustomerRoutes.tableSelection,
@@ -492,6 +599,15 @@ GoRouter createCustomerRouter({
           return TableSelectionPage(
             themeModeController: themeModeController,
             controller: fulfillmentController,
+            showBackButton: true,
+            useGrid: true,
+            onBackPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.pushNamed(CustomerRoutes.fulfillmentMode);
+              }
+            },
             onFinished: (FulfillmentDraft draft) {
               finishPreparation(context, draft);
             },
@@ -505,6 +621,14 @@ GoRouter createCustomerRouter({
           return PickupDetailsPage(
             themeModeController: themeModeController,
             controller: fulfillmentController,
+            showBackButton: true,
+            onBackPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.pushNamed(CustomerRoutes.fulfillmentMode);
+              }
+            },
             onFinished: (FulfillmentDraft draft) {
               finishPreparation(context, draft);
             },
@@ -655,6 +779,11 @@ GoRouter createCustomerRouter({
               orderId: orderId,
               showBackButton: true,
               onBackToOrders: () => context.goNamed(CustomerRoutes.orders),
+              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+              cartItemCount: cartController.state.totalQuantity,
+              initials: resolveInitials(),
+              avatarPath: profileController?.avatarPath,
+              onAvatarPressed: () => context.go('/cuenta'),
               onViewAdvance: (String id) {
                 context.pushNamed(
                   CustomerRoutes.orderAdvance,
@@ -681,7 +810,11 @@ GoRouter createCustomerRouter({
               ? state.extra! as CatalogProduct
               : null;
           return AnimatedBuilder(
-            animation: fulfillmentController,
+            animation: Listenable.merge(<Listenable>[
+              cartController,
+              fulfillmentController,
+              ?profileController,
+            ]),
             builder: (BuildContext context, _) {
               return CatalogProductDetailPage(
                 themeModeController: themeModeController,
@@ -690,6 +823,10 @@ GoRouter createCustomerRouter({
                   productId: productId,
                   selectedProduct: selectedProduct,
                 ),
+                initials: resolveInitials(),
+                avatarPath: profileController?.avatarPath,
+                onAvatarPressed: () => context.go('/cuenta'),
+                cartItemCount: cartController.state.totalQuantity,
                 onAddProduct: (CatalogProduct product, int quantity) {
                   if (!product.availableForSale) return false;
                   return cartController.addProduct(
