@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/theme_mode_controller.dart';
@@ -87,6 +88,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _dietaryController.dispose();
     _customPhotoUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? file = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (file != null) {
+        setState(() {
+          _currentPhotoPath = file.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No se pudo acceder a la imagen: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   void _save() {
@@ -275,7 +302,53 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           Text(
-                            'Selecciona una foto de retrato:',
+                            'Sube una foto desde tu dispositivo:',
+                            style: TextStyle(
+                              fontFamily: AppTypography.bodyFontFamily,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  key: const Key('pick-photo-camera'),
+                                  icon: const Icon(LucideIcons.camera, size: 16),
+                                  label: const Text('Cámara'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: palette.brandRed,
+                                    side: BorderSide(color: palette.brandRed),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onPressed: () => _pickImage(ImageSource.camera),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  key: const Key('pick-photo-gallery'),
+                                  icon: const Icon(LucideIcons.image, size: 16),
+                                  label: const Text('Galería'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: palette.brandRed,
+                                    side: BorderSide(color: palette.brandRed),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onPressed: () => _pickImage(ImageSource.gallery),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'O selecciona una foto de retrato:',
                             style: TextStyle(
                               fontFamily: AppTypography.bodyFontFamily,
                               fontSize: 12,

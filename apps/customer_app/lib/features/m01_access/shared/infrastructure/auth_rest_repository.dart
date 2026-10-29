@@ -85,6 +85,60 @@ class AuthRestRepository implements AuthRepository {
     }
   }
 
+  @override
+  Future<CustomerIdentity> updateProfile({
+    required String accessToken,
+    String? displayName,
+    String? phone,
+    String? avatarUrl,
+    List<Map<String, dynamic>>? savedCards,
+    List<Map<String, dynamic>>? savedAddresses,
+  }) async {
+    final Map<String, Object?> body = <String, Object?>{};
+    if (displayName != null) body['display_name'] = displayName;
+    if (phone != null) body['phone'] = phone;
+    if (avatarUrl != null) body['avatar_url'] = avatarUrl;
+    if (savedCards != null) body['saved_cards'] = savedCards;
+    if (savedAddresses != null) body['saved_addresses'] = savedAddresses;
+
+    final http.Response response = await _patch(
+      'users/me/profile',
+      body: body,
+      bearerToken: accessToken,
+    );
+    if (response.statusCode != 200) {
+      throw _failureFor(response, request: _AuthRequest.profile);
+    }
+    return AuthJsonMapper.decodeUser(_decodeJson(response));
+  }
+
+  Future<http.Response> _patch(
+    String path, {
+    Map<String, Object?>? body,
+    String? bearerToken,
+  }) async {
+    try {
+      return await _client
+          .patch(
+            _endpoint(path),
+            headers: <String, String>{
+              'Accept': 'application/json',
+              if (body != null) 'Content-Type': 'application/json',
+              if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+            },
+            body: body == null ? null : jsonEncode(body),
+          )
+          .timeout(requestTimeout);
+    } on AuthFailure {
+      rethrow;
+    } on Object {
+      throw const AuthFailure(
+        AuthFailureKind.network,
+        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+      );
+    }
+  }
+
   Future<http.Response> _post(
     String path, {
     Map<String, Object?>? body,
@@ -185,4 +239,4 @@ class AuthRestRepository implements AuthRepository {
   }
 }
 
-enum _AuthRequest { register, login, guest, refresh, logout }
+enum _AuthRequest { register, login, guest, refresh, logout, profile }

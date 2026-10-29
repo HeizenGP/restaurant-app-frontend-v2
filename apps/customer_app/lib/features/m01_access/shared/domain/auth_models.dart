@@ -8,6 +8,10 @@ class CustomerIdentity {
     required this.isActive,
     required this.roles,
     required this.createdAt,
+    this.phone,
+    this.avatarUrl,
+    this.savedCards = const <dynamic>[],
+    this.savedAddresses = const <dynamic>[],
   });
 
   final String id;
@@ -16,6 +20,10 @@ class CustomerIdentity {
   final bool isActive;
   final List<String> roles;
   final DateTime createdAt;
+  final String? phone;
+  final String? avatarUrl;
+  final List<dynamic> savedCards;
+  final List<dynamic> savedAddresses;
 }
 
 class AuthSession {

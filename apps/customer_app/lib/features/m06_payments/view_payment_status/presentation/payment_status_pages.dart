@@ -17,6 +17,11 @@ class AdvanceStatusPage extends StatefulWidget {
     required this.onViewOrder,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -26,6 +31,11 @@ class AdvanceStatusPage extends StatefulWidget {
   final VoidCallback onViewOrder;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<AdvanceStatusPage> createState() => _AdvanceStatusPageState();
@@ -72,6 +82,11 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
             onViewOrder: widget.onViewOrder,
             onBackPressed: widget.onBackPressed,
             showBackButton: widget.showBackButton,
+            initials: widget.initials,
+            avatarPath: widget.avatarPath,
+            onAvatarPressed: widget.onAvatarPressed,
+            onCartPressed: widget.onCartPressed,
+            cartItemCount: widget.cartItemCount,
           );
         }
         return _PaymentStatePage(
@@ -83,6 +98,11 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
           loadingTitle: 'Consultando anticipo',
           onBackPressed: widget.onBackPressed ?? widget.onViewOrder,
           showBackButton: widget.showBackButton,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onCartPressed: widget.onCartPressed,
+          cartItemCount: widget.cartItemCount,
           onRetry: state.canRetry
               ? () {
                   unawaited(widget.controller.retry());
@@ -101,6 +121,11 @@ class AdvanceSummaryPage extends StatelessWidget {
     required this.onViewOrder,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -109,6 +134,11 @@ class AdvanceSummaryPage extends StatelessWidget {
   final VoidCallback onViewOrder;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +151,11 @@ class AdvanceSummaryPage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackPressed ?? onViewOrder,
         showBackButton: showBackButton,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -182,6 +217,11 @@ class OrderPaymentStatusPage extends StatefulWidget {
     required this.onBackToOrder,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -191,6 +231,11 @@ class OrderPaymentStatusPage extends StatefulWidget {
   final VoidCallback onBackToOrder;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<OrderPaymentStatusPage> createState() => _OrderPaymentStatusPageState();
@@ -237,6 +282,11 @@ class _OrderPaymentStatusPageState extends State<OrderPaymentStatusPage> {
             onBackToOrder: widget.onBackToOrder,
             onBackPressed: widget.onBackPressed,
             showBackButton: widget.showBackButton,
+            initials: widget.initials,
+            avatarPath: widget.avatarPath,
+            onAvatarPressed: widget.onAvatarPressed,
+            onCartPressed: widget.onCartPressed,
+            cartItemCount: widget.cartItemCount,
           );
         }
         return _PaymentStatePage(
@@ -248,6 +298,11 @@ class _OrderPaymentStatusPageState extends State<OrderPaymentStatusPage> {
           loadingTitle: 'Consultando pagos',
           onBackPressed: widget.onBackPressed ?? widget.onBackToOrder,
           showBackButton: widget.showBackButton,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onCartPressed: widget.onCartPressed,
+          cartItemCount: widget.cartItemCount,
           onRetry: state.canRetry
               ? () {
                   unawaited(widget.controller.retry());
@@ -266,6 +321,11 @@ class PaymentSummaryPage extends StatelessWidget {
     required this.onBackToOrder,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -274,6 +334,11 @@ class PaymentSummaryPage extends StatelessWidget {
   final VoidCallback onBackToOrder;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +351,11 @@ class PaymentSummaryPage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackPressed ?? onBackToOrder,
         showBackButton: showBackButton,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -366,6 +436,11 @@ class _PaymentStatePage extends StatelessWidget {
     this.onRetry,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
   });
 
   final Key pageKey;
@@ -377,6 +452,11 @@ class _PaymentStatePage extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -389,6 +469,11 @@ class _PaymentStatePage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackPressed,
         showBackButton: showBackButton,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
         child: ChifaStateView(
           kind: isFailure ? ChifaStateKind.error : ChifaStateKind.loading,
           title: isFailure ? 'No pudimos consultar' : loadingTitle,

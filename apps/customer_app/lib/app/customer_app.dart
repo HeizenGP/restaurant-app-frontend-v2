@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
@@ -95,6 +96,18 @@ class _CustomerAppState extends State<CustomerApp> {
       _fulfillmentController.clear();
       _orderHistoryController.clear();
       _orderTrackingController.clear();
+
+      if (authState.status == AuthStatus.signedOut || currentIsGuest || currentUserId == null) {
+        _userProfileController.clear();
+      } else {
+        unawaited(_userProfileController.loadForUser(currentUserId).then((_) {
+          if (mounted && session?.user != null && _lastSessionUserId == currentUserId) {
+            _userProfileController.syncWithUser(session!.user);
+          }
+        }));
+      }
+    } else if (session?.user != null && !currentIsGuest) {
+      _userProfileController.syncWithUser(session!.user);
     }
 
     if (authState.status == AuthStatus.signedIn) {
@@ -191,9 +204,13 @@ class _CustomerAppState extends State<CustomerApp> {
       _userProfileController = injected;
       _ownedUserProfileController = null;
     } else {
-      _userProfileController = UserProfileController();
+      _userProfileController = UserProfileController(
+        storage: const FlutterSecureStorage(),
+      );
       _ownedUserProfileController = _userProfileController;
+      unawaited(_userProfileController.clearLegacyStorage());
     }
+    _userProfileController.setRemoteUpdater(_authController.updateProfile);
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,

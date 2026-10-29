@@ -295,7 +295,8 @@ class FoundationAccountPage extends StatelessWidget {
     final String identityDetail = isGuest
         ? 'Sesión temporal sin cuenta registrada'
         : email!.trim();
-    final String initials = switch (profileController?.avatarPath ?? avatarInitials?.trim()) {
+    final String? effectiveAvatarPath = isGuest ? null : profileController?.avatarPath;
+    final String initials = switch (effectiveAvatarPath ?? avatarInitials?.trim()) {
       final String value when value.isNotEmpty =>
         value.characters.first,
       _ when identityName.isEmpty => isGuest ? 'I' : 'C',
@@ -320,7 +321,7 @@ class FoundationAccountPage extends StatelessWidget {
                   isDarkMode: isDark,
                   onToggleTheme: themeModeController.toggle,
                   initials: initials,
-                  avatarPath: profileController?.avatarPath,
+                  avatarPath: effectiveAvatarPath,
                   onAvatarPressed: onLogout == null
                       ? null
                       : () => _confirmLogout(context),
@@ -335,14 +336,14 @@ class FoundationAccountPage extends StatelessWidget {
                   palette: palette,
                   isDark: isDark,
                   initials: initials,
-                  avatarPath: profileController?.avatarPath,
-                  onTapAvatar: profileController != null
+                  avatarPath: effectiveAvatarPath,
+                  onTapAvatar: (profileController != null && !isGuest)
                       ? () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => ProfilePhotoViewerPage(
                                 themeModeController: themeModeController,
-                                avatarPath: profileController?.avatarPath,
+                                avatarPath: effectiveAvatarPath,
                                 displayName: profileController?.displayName ??
                                     identityName,
                                 onEditProfile: !isGuest
@@ -453,17 +454,143 @@ class FoundationAccountPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: _ProfileTabs(
-                    selectedIndex: profileController?.selectedTabIndex ?? 0,
-                    onTabSelected: profileController?.setTabIndex,
-                  ),
+                _buildConfigItem(
+                  context: context,
+                  palette: palette,
+                  index: 0,
+                  icon: LucideIcons.user,
+                  title: 'Información personal',
+                  subtitle: isGuest ? 'Sesión de invitado' : 'Nombre, correo y contacto',
+                  isSelected: (profileController?.selectedTabIndex ?? 0) == 0,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
+                _buildConfigItem(
+                  context: context,
+                  palette: palette,
+                  index: 1,
+                  icon: LucideIcons.mapPin,
+                  title: 'Direcciones de entrega',
+                  subtitle: isGuest
+                      ? 'No disponible en modo invitado'
+                      : (profileController != null
+                          ? '${profileController!.addresses.length} guardadas'
+                          : 'Gestionar direcciones'),
+                  isSelected: !isGuest && profileController?.selectedTabIndex == 1,
+                ),
+                const SizedBox(height: 8),
+                _buildConfigItem(
+                  context: context,
+                  palette: palette,
+                  index: 2,
+                  icon: LucideIcons.creditCard,
+                  title: 'Tarjetas y métodos de pago',
+                  subtitle: isGuest
+                      ? 'No disponible en modo invitado'
+                      : (profileController != null
+                          ? '${profileController!.cards.length} guardadas'
+                          : 'Gestionar tarjetas'),
+                  isSelected: !isGuest && profileController?.selectedTabIndex == 2,
+                ),
+                const SizedBox(height: 12),
                 _buildTabSection(context, palette, identityName, identityDetail),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfigItem({
+    required BuildContext context,
+    required AppPalette palette,
+    required int index,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+  }) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: Key('profile-tab-$index'),
+        onTap: (profileController != null && !isGuest)
+            ? () => profileController!.setTabIndex(index)
+            : null,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark
+                    ? palette.accentGold.withValues(alpha: 0.12)
+                    : palette.brandRed.withValues(alpha: 0.08))
+                : palette.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
+                  ? (isDark ? palette.accentGold : palette.brandRed)
+                  : palette.controlBorder,
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? (isDark
+                          ? palette.accentGold.withValues(alpha: 0.2)
+                          : palette.brandRed.withValues(alpha: 0.15))
+                      : palette.surfaceTint,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 17,
+                  color: isSelected
+                      ? (isDark ? palette.accentGold : palette.brandRed)
+                      : palette.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: palette.textPrimary,
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: palette.textSecondary,
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                isSelected ? LucideIcons.chevronDown : LucideIcons.chevronRight,
+                size: 18,
+                color: isSelected
+                    ? (isDark ? palette.accentGold : palette.brandRed)
+                    : palette.textSecondary,
+              ),
+            ],
           ),
         ),
       ),
@@ -476,6 +603,9 @@ class FoundationAccountPage extends StatelessWidget {
     String identityName,
     String identityDetail,
   ) {
+    if (isGuest) {
+      return _buildInformationSection(context, palette, identityName, identityDetail);
+    }
     if (profileController != null && profileController!.selectedTabIndex == 1) {
       return _buildAddressesSection(context, palette);
     }
@@ -537,7 +667,8 @@ class FoundationAccountPage extends StatelessWidget {
                       : null,
                 ),
         ),
-        if (profileController?.phone != null &&
+        if (!isGuest &&
+            profileController?.phone != null &&
             profileController!.phone!.isNotEmpty) ...<Widget>[
           const SizedBox(height: 10),
           Padding(
@@ -1232,81 +1363,6 @@ class _DisabledAccountAction extends StatelessWidget {
                     height: 1.1,
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs({
-    this.selectedIndex = 0,
-    this.onTabSelected,
-  });
-
-  final int selectedIndex;
-  final ValueChanged<int>? onTabSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppPalette palette = context.appPalette;
-    final List<String> labels = onTabSelected != null
-        ? const <String>['Información', 'Direcciones', 'Tarjetas']
-        : const <String>['Información', 'Pedidos', 'Preferencias'];
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 45),
-      child: Material(
-        color: Colors.transparent,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: palette.surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(4, 5, 4, 5),
-            child: Row(
-              children: <Widget>[
-                for (int i = 0; i < labels.length; i++)
-                  Expanded(
-                    flex: i == 0 ? 116 : (i == 1 ? 105 : 113),
-                    child: InkWell(
-                      key: Key('profile-tab-$i'),
-                      onTap: onTabSelected != null ? () => onTabSelected!(i) : null,
-                      borderRadius: BorderRadius.circular(10),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: selectedIndex == i
-                              ? palette.surfaceTint
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 9,
-                          ),
-                          child: Text(
-                            labels[i],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: selectedIndex == i
-                                  ? palette.brandRed
-                                  : palette.textSecondary,
-                              fontFamily: AppTypography.bodyFontFamily,
-                              fontSize: 11,
-                              fontWeight: selectedIndex == i
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),

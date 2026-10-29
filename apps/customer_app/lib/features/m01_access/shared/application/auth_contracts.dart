@@ -10,6 +10,15 @@ abstract interface class AuthRepository {
   Future<AuthSession> refresh(String refreshToken);
 
   Future<void> logout(String accessToken);
+
+  Future<CustomerIdentity> updateProfile({
+    required String accessToken,
+    String? displayName,
+    String? phone,
+    String? avatarUrl,
+    List<Map<String, dynamic>>? savedCards,
+    List<Map<String, dynamic>>? savedAddresses,
+  });
 }
 
 abstract interface class AuthSessionStore {

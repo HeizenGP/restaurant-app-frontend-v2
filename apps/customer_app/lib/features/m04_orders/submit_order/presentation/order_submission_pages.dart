@@ -22,6 +22,11 @@ class OrderReviewPage extends StatefulWidget {
     this.onBackPressed,
     this.showBackButton,
     this.tableLabel,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -35,6 +40,11 @@ class OrderReviewPage extends StatefulWidget {
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
   final String? tableLabel;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<OrderReviewPage> createState() => _OrderReviewPageState();
@@ -57,6 +67,11 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             onBackPressed: widget.onBackPressed,
             showBackButton: widget.showBackButton,
             tableLabel: widget.tableLabel,
+            initials: widget.initials,
+            avatarPath: widget.avatarPath,
+            onAvatarPressed: widget.onAvatarPressed,
+            onCartPressed: widget.onCartPressed,
+            cartItemCount: widget.cartItemCount,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -137,6 +152,11 @@ class OrderResultPage extends StatefulWidget {
     required this.onBackToHome,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -147,6 +167,11 @@ class OrderResultPage extends StatefulWidget {
   final VoidCallback onBackToHome;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<OrderResultPage> createState() => _OrderResultPageState();
@@ -189,6 +214,11 @@ class _OrderResultPageState extends State<OrderResultPage> {
             themeModeController: widget.themeModeController,
             failure: state.failure!,
             onBackToHome: widget.onBackToHome,
+            initials: widget.initials,
+            avatarPath: widget.avatarPath,
+            onAvatarPressed: widget.onAvatarPressed,
+            onCartPressed: widget.onCartPressed,
+            cartItemCount: widget.cartItemCount,
             onRetry: state.canRetryDetail
                 ? () {
                     unawaited(widget.controller.retryDetail());
@@ -211,6 +241,11 @@ class _OrderResultPageState extends State<OrderResultPage> {
           onViewOrders: widget.onViewOrders,
           onBackPressed: widget.onBackPressed ?? widget.onBackToHome,
           showBackButton: widget.showBackButton,
+          initials: widget.initials,
+          avatarPath: widget.avatarPath,
+          onAvatarPressed: widget.onAvatarPressed,
+          onCartPressed: widget.onCartPressed,
+          cartItemCount: widget.cartItemCount,
         );
       },
     );
@@ -224,6 +259,11 @@ class OrderSubmittedPage extends StatelessWidget {
     required this.onViewOrders,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -232,6 +272,11 @@ class OrderSubmittedPage extends StatelessWidget {
   final VoidCallback onViewOrders;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +289,11 @@ class OrderSubmittedPage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackPressed,
         showBackButton: showBackButton,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -325,6 +375,11 @@ class OrderExceptionPage extends StatelessWidget {
     this.onRetry,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -334,6 +389,11 @@ class OrderExceptionPage extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -347,6 +407,11 @@ class OrderExceptionPage extends StatelessWidget {
         themeModeController: themeModeController,
         onBackPressed: onBackPressed ?? onBackToHome,
         showBackButton: showBackButton,
+        initials: initials,
+        avatarPath: avatarPath,
+        onAvatarPressed: onAvatarPressed,
+        onCartPressed: onCartPressed,
+        cartItemCount: cartItemCount,
         child: Semantics(
           liveRegion: true,
           label: failure.message,

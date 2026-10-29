@@ -127,6 +127,42 @@ void main() {
       controller.setTabIndex(2);
       expect(controller.selectedTabIndex, 2);
     });
+
+    test('clear resets all in-memory fields', () {
+      final controller = UserProfileController(
+        initialDisplayName: 'Juan',
+        initialLastName: 'Perez',
+        initialPhone: '987654321',
+        initialAvatarPath: 'path/to/img.png',
+      );
+      expect(controller.displayName, 'Juan');
+      expect(controller.avatarPath, 'path/to/img.png');
+
+      controller.clear();
+
+      expect(controller.displayName, isNull);
+      expect(controller.lastName, isNull);
+      expect(controller.phone, isNull);
+      expect(controller.avatarPath, isNull);
+      expect(controller.addresses, isEmpty);
+      expect(controller.cards, isEmpty);
+    });
+
+    test('loadForUser with null or empty userId clears profile without loading storage', () async {
+      final controller = UserProfileController(
+        initialDisplayName: 'Juan',
+        initialPhone: '987654321',
+        initialAvatarPath: 'path/to/img.png',
+      );
+
+      await controller.loadForUser(null);
+
+      expect(controller.displayName, isNull);
+      expect(controller.phone, isNull);
+      expect(controller.avatarPath, isNull);
+      expect(controller.addresses, isEmpty);
+      expect(controller.cards, isEmpty);
+    });
   });
 
   group('Profile Full Pages', () {
@@ -374,6 +410,39 @@ void main() {
       await tester.tap(find.byKey(const Key('photo-viewer-back')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('page-photo-viewer')), findsNothing);
+    });
+
+    testWidgets('FoundationAccountPage in guest mode isolates profile data', (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(390, 844);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final controller = UserProfileController(
+        initialDisplayName: 'Pedro Pascal',
+        initialPhone: '955444333',
+        initialAvatarPath: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
+      );
+      final themeModeController = ThemeModeController();
+
+      await tester.pumpWidget(
+        _testApp(
+          FoundationAccountPage(
+            themeModeController: themeModeController,
+            isGuest: true,
+            displayName: null,
+            email: null,
+            profileController: controller,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Invitado'), findsOneWidget);
+      expect(find.text('SESIÓN DE INVITADO'), findsOneWidget);
+      expect(find.text('CUENTA REGISTRADA'), findsNothing);
+      expect(find.byKey(const Key('account-phone-card')), findsNothing);
+      expect(find.byKey(const Key('guest-account-empty-state')), findsOneWidget);
     });
 
     testWidgets('AddAddressPage edits existing address correctly', (WidgetTester tester) async {

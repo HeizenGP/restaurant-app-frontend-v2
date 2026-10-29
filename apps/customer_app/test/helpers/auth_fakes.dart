@@ -83,6 +83,29 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<CustomerIdentity> updateProfile({
+    required String accessToken,
+    String? displayName,
+    String? phone,
+    String? avatarUrl,
+    List<Map<String, dynamic>>? savedCards,
+    List<Map<String, dynamic>>? savedAddresses,
+  }) async {
+    return CustomerIdentity(
+      id: registrationResult.id,
+      displayName: displayName ?? registrationResult.displayName,
+      email: registrationResult.email,
+      isActive: registrationResult.isActive,
+      roles: registrationResult.roles,
+      createdAt: registrationResult.createdAt,
+      phone: phone ?? registrationResult.phone,
+      avatarUrl: avatarUrl ?? registrationResult.avatarUrl,
+      savedCards: savedCards ?? registrationResult.savedCards,
+      savedAddresses: savedAddresses ?? registrationResult.savedAddresses,
+    );
+  }
+
+  @override
   Future<AuthSession> refresh(String refreshToken) async {
     refreshCalls += 1;
     lastRefreshToken = refreshToken;

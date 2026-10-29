@@ -21,6 +21,10 @@ abstract final class AuthJsonMapper {
         isActive: value['is_active']! as bool,
         roles: List<String>.unmodifiable(rawRoles.cast<String>()),
         createdAt: DateTime.parse(value['created_at']! as String),
+        phone: value['phone'] as String?,
+        avatarUrl: value['avatar_url'] as String?,
+        savedCards: (value['saved_cards'] as List<dynamic>?) ?? const <dynamic>[],
+        savedAddresses: (value['saved_addresses'] as List<dynamic>?) ?? const <dynamic>[],
       );
     } on Object {
       throw const AuthFailure(
@@ -89,6 +93,10 @@ abstract final class AuthJsonMapper {
           'is_active': user.isActive,
           'roles': user.roles,
           'created_at': user.createdAt.toUtc().toIso8601String(),
+          'phone': user.phone,
+          'avatar_url': user.avatarUrl,
+          'saved_cards': user.savedCards,
+          'saved_addresses': user.savedAddresses,
         },
       },
     };

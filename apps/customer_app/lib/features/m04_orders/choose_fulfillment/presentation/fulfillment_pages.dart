@@ -18,6 +18,11 @@ class FulfillmentModePage extends StatelessWidget {
     required this.onModeSelected,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -26,6 +31,11 @@ class FulfillmentModePage extends StatelessWidget {
   final ValueChanged<FulfillmentMode> onModeSelected;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +55,11 @@ class FulfillmentModePage extends StatelessWidget {
             themeModeController: themeModeController,
             onBackPressed: onBackPressed,
             showBackButton: showBackButton,
+            initials: initials,
+            avatarPath: avatarPath,
+            onAvatarPressed: onAvatarPressed,
+            onCartPressed: onCartPressed,
+            cartItemCount: cartItemCount,
             tableLabel: controller.state.hasAssignedTable
                 ? 'Mesa ${controller.state.assignedTable?.code ?? ""}'
                 : null,
@@ -115,6 +130,11 @@ class TableSelectionPage extends StatefulWidget {
     this.onBackPressed,
     this.showBackButton,
     this.useGrid = false,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -124,6 +144,11 @@ class TableSelectionPage extends StatefulWidget {
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
   final bool useGrid;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<TableSelectionPage> createState() => _TableSelectionPageState();
@@ -158,6 +183,11 @@ class _TableSelectionPageState extends State<TableSelectionPage> {
             themeModeController: widget.themeModeController,
             onBackPressed: widget.onBackPressed,
             showBackButton: widget.showBackButton,
+            initials: widget.initials,
+            avatarPath: widget.avatarPath,
+            onAvatarPressed: widget.onAvatarPressed,
+            onCartPressed: widget.onCartPressed,
+            cartItemCount: widget.cartItemCount,
             tableLabel: state.hasAssignedTable
                 ? 'Mesa ${state.assignedTable?.code ?? ""}'
                 : null,
@@ -571,6 +601,11 @@ class PickupDetailsPage extends StatefulWidget {
     required this.onFinished,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -579,6 +614,11 @@ class PickupDetailsPage extends StatefulWidget {
   final ValueChanged<FulfillmentDraft> onFinished;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<PickupDetailsPage> createState() => _PickupDetailsPageState();
@@ -620,6 +660,11 @@ class _PickupDetailsPageState extends State<PickupDetailsPage> {
         themeModeController: widget.themeModeController,
         onBackPressed: widget.onBackPressed,
         showBackButton: widget.showBackButton,
+        initials: widget.initials,
+        avatarPath: widget.avatarPath,
+        onAvatarPressed: widget.onAvatarPressed,
+        onCartPressed: widget.onCartPressed,
+        cartItemCount: widget.cartItemCount,
         child: Form(
           key: _formKey,
           child: Column(
@@ -721,6 +766,11 @@ class DeliveryDetailsPage extends StatefulWidget {
     this.savedAddresses,
     this.onBackPressed,
     this.showBackButton,
+    this.initials = 'C',
+    this.avatarPath,
+    this.onAvatarPressed,
+    this.onCartPressed,
+    this.cartItemCount = 0,
     super.key,
   });
 
@@ -730,6 +780,11 @@ class DeliveryDetailsPage extends StatefulWidget {
   final List<CustomerAddress>? savedAddresses;
   final VoidCallback? onBackPressed;
   final bool? showBackButton;
+  final String initials;
+  final String? avatarPath;
+  final VoidCallback? onAvatarPressed;
+  final VoidCallback? onCartPressed;
+  final int cartItemCount;
 
   @override
   State<DeliveryDetailsPage> createState() => _DeliveryDetailsPageState();
@@ -777,6 +832,11 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
         themeModeController: widget.themeModeController,
         onBackPressed: widget.onBackPressed,
         showBackButton: widget.showBackButton,
+        initials: widget.initials,
+        avatarPath: widget.avatarPath,
+        onAvatarPressed: widget.onAvatarPressed,
+        onCartPressed: widget.onCartPressed,
+        cartItemCount: widget.cartItemCount,
         child: Form(
           key: _formKey,
           child: Column(

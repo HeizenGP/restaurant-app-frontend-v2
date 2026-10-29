@@ -158,6 +158,7 @@ GoRouter createCustomerRouter({
 
   String resolveInitials() {
     final session = authController.state.session;
+    if (session?.isGuest ?? true) return 'I';
     final user = session?.user;
     final String name = profileController?.displayName ?? user?.displayName ?? '';
     final String? avatar = profileController?.avatarPath;
@@ -167,7 +168,13 @@ GoRouter createCustomerRouter({
     if (name.trim().isNotEmpty) {
       return name.trim().characters.first.toUpperCase();
     }
-    return (session?.isGuest ?? true) ? 'I' : 'C';
+    return 'C';
+  }
+
+  String? resolveAvatar() {
+    final session = authController.state.session;
+    if (session?.isGuest ?? true) return null;
+    return profileController?.avatarPath;
   }
 
   return GoRouter(
@@ -250,7 +257,7 @@ GoRouter createCustomerRouter({
                         onOpenCart: () => context.goNamed(CustomerRoutes.cart),
                         cartItemCount: cartController.state.totalQuantity,
                         initials: resolveInitials(),
-                        avatarPath: profileController?.avatarPath,
+                        avatarPath: resolveAvatar(),
                         onAvatarPressed: () => context.go('/cuenta'),
                         tableLabel: fulfillmentController.state.assignedTable?.code != null
                             ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
@@ -285,7 +292,7 @@ GoRouter createCustomerRouter({
                         cartItemCount: cartController.state.totalQuantity,
                         cartTotalCents: cartController.state.subtotalCents,
                         initials: resolveInitials(),
-                        avatarPath: profileController?.avatarPath,
+                        avatarPath: resolveAvatar(),
                         onAvatarPressed: () => context.go('/cuenta'),
                         tableLabel: fulfillmentController.state.assignedTable?.code != null
                             ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
@@ -337,7 +344,7 @@ GoRouter createCustomerRouter({
                                 ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
                                 : null,
                             initials: resolveInitials(),
-                            avatarPath: profileController?.avatarPath,
+                            avatarPath: resolveAvatar(),
                             onAvatarPressed: () => context.go('/cuenta'),
                             onContinue: () {
                               context.pushNamed(CustomerRoutes.fulfillmentMode);
@@ -372,7 +379,7 @@ GoRouter createCustomerRouter({
                           onCartPressed: () => context.goNamed(CustomerRoutes.cart),
                           cartItemCount: cartController.state.totalQuantity,
                           initials: resolveInitials(),
-                          avatarPath: profileController?.avatarPath,
+                          avatarPath: resolveAvatar(),
                           onAvatarPressed: () => context.go('/cuenta'),
                           tableLabel: fulfillmentController.state.assignedTable?.code != null
                               ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
@@ -390,7 +397,7 @@ GoRouter createCustomerRouter({
                         onCartPressed: () => context.goNamed(CustomerRoutes.cart),
                         cartItemCount: cartController.state.totalQuantity,
                         initials: resolveInitials(),
-                        avatarPath: profileController?.avatarPath,
+                        avatarPath: resolveAvatar(),
                         onAvatarPressed: () => context.go('/cuenta'),
                         tableLabel: fulfillmentController.state.assignedTable?.code != null
                             ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
@@ -417,10 +424,13 @@ GoRouter createCustomerRouter({
                     builder: (BuildContext context, _) {
                       final session = authController.state.session;
                       final user = session?.user;
+                      final bool isGuest = session?.isGuest ?? true;
                       return FoundationAccountPage(
                         themeModeController: themeModeController,
-                        isGuest: session?.isGuest ?? true,
-                        displayName: profileController?.displayName ?? user?.displayName,
+                        isGuest: isGuest,
+                        displayName: isGuest
+                            ? 'Invitado'
+                            : (profileController?.displayName ?? user?.displayName),
                         email: user?.email,
                         profileController: profileController,
                         onOpenOrders: () => context.go('/pedidos'),
@@ -544,7 +554,7 @@ GoRouter createCustomerRouter({
                       final user = session?.user;
                       return ProfilePhotoViewerPage(
                         themeModeController: themeModeController,
-                        avatarPath: profileController?.avatarPath,
+                        avatarPath: resolveAvatar(),
                         displayName: profileController?.displayName ??
                             user?.displayName ??
                             'Cliente',
@@ -574,6 +584,11 @@ GoRouter createCustomerRouter({
             themeModeController: themeModeController,
             controller: fulfillmentController,
             showBackButton: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
             onBackPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -601,6 +616,11 @@ GoRouter createCustomerRouter({
             controller: fulfillmentController,
             showBackButton: true,
             useGrid: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
             onBackPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -622,6 +642,11 @@ GoRouter createCustomerRouter({
             themeModeController: themeModeController,
             controller: fulfillmentController,
             showBackButton: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
             onBackPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -644,6 +669,11 @@ GoRouter createCustomerRouter({
             controller: fulfillmentController,
             savedAddresses: profileController?.addresses,
             showBackButton: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
             onBackPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -676,6 +706,19 @@ GoRouter createCustomerRouter({
             attentionSubtitle: _attentionSummary(draft, fulfillmentController),
             amountSubtitle:
                 '${_formatSoles(cart.subtotalCents)} estimado por el carrito',
+            showBackButton: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
+            onBackPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/menu/carrito');
+              }
+            },
             onSubmitted: (OrderSnapshot order) {
               finishSuccessfulSubmission(context, order);
             },
@@ -694,6 +737,13 @@ GoRouter createCustomerRouter({
             themeModeController: themeModeController,
             controller: submitOrderController,
             orderId: orderId,
+            showBackButton: true,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
+            onBackPressed: () => context.goNamed(CustomerRoutes.orders),
             onViewOrders: () => context.goNamed(CustomerRoutes.orders),
             onBackToHome: () => context.goNamed(CustomerRoutes.home),
           );
@@ -713,6 +763,11 @@ GoRouter createCustomerRouter({
           return OrderExceptionPage(
             themeModeController: themeModeController,
             failure: failure,
+            initials: resolveInitials(),
+            avatarPath: resolveAvatar(),
+            onAvatarPressed: () => context.go('/cuenta'),
+            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+            cartItemCount: cartController.state.totalQuantity,
             onBackToHome: () => context.goNamed(CustomerRoutes.home),
             onRetry: submitOrderController.state.canRetrySubmission
                 ? () async {
@@ -739,6 +794,11 @@ GoRouter createCustomerRouter({
               themeModeController: themeModeController,
               controller: paymentStatusController,
               orderId: orderId,
+              initials: resolveInitials(),
+              avatarPath: resolveAvatar(),
+              onAvatarPressed: () => context.go('/cuenta'),
+              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+              cartItemCount: cartController.state.totalQuantity,
               onViewOrder: () {
                 context.goNamed(
                   CustomerRoutes.orderSubmitted,
@@ -757,6 +817,11 @@ GoRouter createCustomerRouter({
               themeModeController: themeModeController,
               controller: paymentStatusController,
               orderId: orderId,
+              initials: resolveInitials(),
+              avatarPath: resolveAvatar(),
+              onAvatarPressed: () => context.go('/cuenta'),
+              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
+              cartItemCount: cartController.state.totalQuantity,
               onBackToOrder: () {
                 context.goNamed(
                   CustomerRoutes.orderSubmitted,
@@ -782,7 +847,7 @@ GoRouter createCustomerRouter({
               onCartPressed: () => context.goNamed(CustomerRoutes.cart),
               cartItemCount: cartController.state.totalQuantity,
               initials: resolveInitials(),
-              avatarPath: profileController?.avatarPath,
+              avatarPath: resolveAvatar(),
               onAvatarPressed: () => context.go('/cuenta'),
               onViewAdvance: (String id) {
                 context.pushNamed(
@@ -824,7 +889,7 @@ GoRouter createCustomerRouter({
                   selectedProduct: selectedProduct,
                 ),
                 initials: resolveInitials(),
-                avatarPath: profileController?.avatarPath,
+                avatarPath: resolveAvatar(),
                 onAvatarPressed: () => context.go('/cuenta'),
                 cartItemCount: cartController.state.totalQuantity,
                 onAddProduct: (CatalogProduct product, int quantity) {

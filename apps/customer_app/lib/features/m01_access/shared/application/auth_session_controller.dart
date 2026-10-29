@@ -325,6 +325,39 @@ class AuthSessionController extends ChangeNotifier {
     await _clearStoredSessionAndSignOut(noticeMessage: notice);
   }
 
+  Future<bool> updateProfile({
+    String? displayName,
+    String? phone,
+    String? avatarUrl,
+    List<Map<String, dynamic>>? savedCards,
+    List<Map<String, dynamic>>? savedAddresses,
+  }) async {
+    final String? token = _state.session?.accessToken;
+    if (token == null || _state.session?.kind != AuthSessionKind.user) return false;
+    try {
+      final CustomerIdentity updated = await _repository.updateProfile(
+        accessToken: token,
+        displayName: displayName,
+        phone: phone,
+        avatarUrl: avatarUrl,
+        savedCards: savedCards,
+        savedAddresses: savedAddresses,
+      );
+      final AuthSession newSession = AuthSession(
+        accessToken: token,
+        refreshToken: _state.session?.refreshToken,
+        tokenType: _state.session?.tokenType ?? 'Bearer',
+        kind: AuthSessionKind.user,
+        user: updated,
+      );
+      await _sessionStore.write(newSession);
+      _setState(_state.copyWith(session: newSession));
+      return true;
+    } on Object {
+      return false;
+    }
+  }
+
   void clearMessages() {
     if (_state.errorMessage == null && _state.noticeMessage == null) return;
     _setState(_state.copyWith(clearError: true, clearNotice: true));
