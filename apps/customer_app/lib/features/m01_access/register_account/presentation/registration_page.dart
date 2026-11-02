@@ -38,6 +38,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final TextStyle hintStyle = TextStyle(
       color: palette.textSecondary,
       fontFamily: AppTypography.bodyFontFamily,
@@ -77,23 +78,99 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    const AccessKicker(),
-                    const SizedBox(height: 30),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 42),
-                      child: Text(
-                        'Crea tu cuenta',
-                        style: Theme.of(context).textTheme.displayLarge
-                            ?.copyWith(fontSize: 31, height: 42 / 31),
+                    // Modern Segmented Navigation Switcher
+                    Container(
+                      decoration: BoxDecoration(
+                        color: palette.surfaceTint,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: palette.controlBorder, width: 1.0),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: InkWell(
+                              key: const Key('go-login-tab'),
+                              onTap: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/acceso');
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                child: Center(
+                                  child: Text(
+                                    'Iniciar sesión',
+                                    style: TextStyle(
+                                      fontFamily: AppTypography.bodyFontFamily,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: palette.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF2C1318) : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark
+                                      ? const Color(0xFFD4AF37).withValues(alpha: 0.4)
+                                      : Colors.transparent,
+                                  width: 1,
+                                ),
+                                boxShadow: <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Crear cuenta',
+                                  style: TextStyle(
+                                    fontFamily: AppTypography.bodyFontFamily,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? const Color(0xFFE5C07B)
+                                        : palette.brandRed,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 37),
-                      child: Text(
-                        'Tus pedidos, en un solo lugar.',
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(fontSize: 12, height: 20 / 12),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Únete a KAIRO',
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        fontFamily: AppTypography.displayFontFamily,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: palette.textPrimary,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Crea tu cuenta para disfrutar de todos nuestros servicios',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: palette.textSecondary,
+                        fontSize: 12.5,
+                        height: 1.35,
                       ),
                     ),
                     if (state.errorMessage != null) ...<Widget>[

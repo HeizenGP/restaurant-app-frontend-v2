@@ -640,6 +640,16 @@ class _PickupDetailsPageState extends State<PickupDetailsPage> {
     _phoneController = TextEditingController(
       text: draft?.mode == FulfillmentMode.pickup ? draft?.contactPhone : null,
     );
+    _nameController.addListener(() {
+      if (!_showValidation && _nameController.text.isNotEmpty) {
+        setState(() => _showValidation = true);
+      }
+    });
+    _phoneController.addListener(() {
+      if (!_showValidation && _phoneController.text.isNotEmpty) {
+        setState(() => _showValidation = true);
+      }
+    });
   }
 
   @override
@@ -655,7 +665,7 @@ class _PickupDetailsPageState extends State<PickupDetailsPage> {
       child: ChifaPageScaffold(
         pageKey: const Key('page-pickup-details'),
         title: 'Recoge tu pedido',
-        subtitle: 'Retiro en el restaurante Chifa ASIA.',
+        subtitle: 'Retiro en el restaurante KAIRO.',
         contentGap: 54,
         themeModeController: widget.themeModeController,
         onBackPressed: widget.onBackPressed,
@@ -679,6 +689,9 @@ class _PickupDetailsPageState extends State<PickupDetailsPage> {
                 autofillHints: const <String>[AutofillHints.name],
                 validator: FulfillmentValidators.contactName,
                 autovalidateMode: _autovalidateMode,
+                isValid: _showValidation &&
+                    _nameController.text.trim().isNotEmpty &&
+                    FulfillmentValidators.contactName(_nameController.text) == null,
                 labelHeight: 16,
                 labelGap: 8,
                 fieldHeight: 53,
@@ -699,6 +712,9 @@ class _PickupDetailsPageState extends State<PickupDetailsPage> {
                 autofillHints: const <String>[AutofillHints.telephoneNumber],
                 validator: FulfillmentValidators.contactPhone,
                 autovalidateMode: _autovalidateMode,
+                isValid: _showValidation &&
+                    _phoneController.text.trim().isNotEmpty &&
+                    FulfillmentValidators.contactPhone(_phoneController.text) == null,
                 onFieldSubmitted: (_) => _submit(),
                 labelHeight: 16,
                 labelGap: 8,
@@ -811,6 +827,21 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
     _phoneController = TextEditingController(
       text: isDelivery ? draft?.contactPhone : null,
     );
+    _addressController.addListener(() {
+      if (!_showValidation && _addressController.text.isNotEmpty) {
+        setState(() => _showValidation = true);
+      }
+    });
+    _nameController.addListener(() {
+      if (!_showValidation && _nameController.text.isNotEmpty) {
+        setState(() => _showValidation = true);
+      }
+    });
+    _phoneController.addListener(() {
+      if (!_showValidation && _phoneController.text.isNotEmpty) {
+        setState(() => _showValidation = true);
+      }
+    });
   }
 
   @override
@@ -852,6 +883,9 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
                 autofillHints: const <String>[AutofillHints.fullStreetAddress],
                 validator: FulfillmentValidators.deliveryAddress,
                 autovalidateMode: _autovalidateMode,
+                isValid: _showValidation &&
+                    _addressController.text.trim().isNotEmpty &&
+                    FulfillmentValidators.deliveryAddress(_addressController.text) == null,
                 labelHeight: 16,
                 labelGap: 8,
                 fieldHeight: 53,
@@ -907,6 +941,9 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
                 autofillHints: const <String>[AutofillHints.name],
                 validator: FulfillmentValidators.contactName,
                 autovalidateMode: _autovalidateMode,
+                isValid: _showValidation &&
+                    _nameController.text.trim().isNotEmpty &&
+                    FulfillmentValidators.contactName(_nameController.text) == null,
                 labelHeight: 16,
                 labelGap: 8,
                 fieldHeight: 53,
@@ -927,6 +964,9 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
                 autofillHints: const <String>[AutofillHints.telephoneNumber],
                 validator: FulfillmentValidators.contactPhone,
                 autovalidateMode: _autovalidateMode,
+                isValid: _showValidation &&
+                    _phoneController.text.trim().isNotEmpty &&
+                    FulfillmentValidators.contactPhone(_phoneController.text) == null,
                 onFieldSubmitted: (_) => _submit(),
                 labelHeight: 16,
                 labelGap: 8,

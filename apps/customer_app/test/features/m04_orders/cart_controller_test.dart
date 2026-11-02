@@ -43,6 +43,29 @@ void main() {
     expect(controller.remove(productOne.id), isTrue);
     expect(controller.state.isEmpty, isTrue);
   });
+
+  test('adds product with notes and updates notes', () {
+    final CartController controller = CartController();
+    addTearDown(controller.dispose);
+
+    expect(
+      controller.addProduct(productOne, notes: 'Sin cebolla china'),
+      isTrue,
+    );
+    expect(
+      controller.state.itemFor(productOne.id)?.notes,
+      'Sin cebolla china',
+    );
+
+    expect(
+      controller.updateNotes(productOne.id, 'Poco picante'),
+      isTrue,
+    );
+    expect(
+      controller.state.itemFor(productOne.id)?.notes,
+      'Poco picante',
+    );
+  });
 }
 
 const CartProductSnapshot productOne = CartProductSnapshot(

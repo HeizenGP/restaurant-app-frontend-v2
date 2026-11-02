@@ -252,7 +252,7 @@ class _CustomerAppState extends State<CustomerApp> {
       builder: (BuildContext context, ThemeMode themeMode, Widget? child) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Chifa ASIA',
+          title: 'KAIRO',
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeMode,

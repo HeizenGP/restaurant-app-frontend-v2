@@ -34,6 +34,7 @@ import '../../features/m06_payments/view_payment_status/application/payment_stat
 import '../../features/m06_payments/view_payment_status/domain/payment_models.dart';
 import '../../features/m06_payments/view_payment_status/presentation/payment_status_pages.dart';
 import '../../features/ui_foundation/presentation/foundation_pages.dart';
+import '../../features/ui_foundation/presentation/kairo_splash_screen.dart';
 import '../theme/theme_mode_controller.dart';
 import 'customer_shell.dart';
 
@@ -201,7 +202,11 @@ GoRouter createCustomerRouter({
       return null;
     },
     routes: <RouteBase>[
-      _resetRoute(path: '/splash', name: CustomerRoutes.splash),
+      _resetRoute(
+        path: '/splash',
+        name: CustomerRoutes.splash,
+        authController: authController,
+      ),
       GoRoute(
         path: '/acceso',
         name: CustomerRoutes.access,
@@ -459,7 +464,7 @@ GoRouter createCustomerRouter({
                         currentDisplayName: profileController?.displayName ??
                             user?.displayName ??
                             'Cliente',
-                        currentEmail: user?.email ?? 'cliente@chifaasia.pe',
+                        currentEmail: user?.email ?? 'cliente@kairo.pe',
                         onBackPressed: () {
                           if (context.canPop()) {
                             context.pop();
@@ -892,7 +897,7 @@ GoRouter createCustomerRouter({
                 avatarPath: resolveAvatar(),
                 onAvatarPressed: () => context.go('/cuenta'),
                 cartItemCount: cartController.state.totalQuantity,
-                onAddProduct: (CatalogProduct product, int quantity) {
+                onAddProduct: (CatalogProduct product, int quantity, [String? notes]) {
                   if (!product.availableForSale) return false;
                   return cartController.addProduct(
                     CartProductSnapshot(
@@ -902,6 +907,7 @@ GoRouter createCustomerRouter({
                       unitPriceCents: product.priceCents,
                     ),
                     quantity: quantity,
+                    notes: notes,
                   );
                 },
                 onProductAdded: () {
@@ -960,12 +966,25 @@ String _formatSoles(int cents) {
   return 'S/ ${(cents / 100).toStringAsFixed(2)}';
 }
 
-GoRoute _resetRoute({required String path, required String name}) {
+GoRoute _resetRoute({
+  required String path,
+  required String name,
+  required AuthSessionController authController,
+}) {
   return GoRoute(
     path: path,
     name: name,
     builder: (BuildContext context, GoRouterState state) {
-      return const _UiResetPlaceholder();
+      return KairoSplashScreen(
+        onAnimationComplete: () {
+          final AuthStatus status = authController.state.status;
+          if (status == AuthStatus.signedOut) {
+            context.go('/acceso');
+          } else {
+            context.go('/');
+          }
+        },
+      );
     },
   );
 }

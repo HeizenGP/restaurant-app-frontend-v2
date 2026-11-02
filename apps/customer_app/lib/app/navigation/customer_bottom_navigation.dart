@@ -71,47 +71,62 @@ class CustomerBottomNavigation extends StatelessWidget {
                             label: destination.label,
                             onTap: () => onDestinationSelected(index),
                             excludeSemantics: true,
-                            child: Material(
-                              color: selected
-                                  ? palette.iconTile
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(
-                                AppRadii.navigationItem,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? palette.iconTile
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadii.navigationItem,
+                                ),
                               ),
-                              clipBehavior: Clip.antiAlias,
-                              child: InkWell(
-                                key: destination.semanticKey,
-                                onTap: () => onDestinationSelected(index),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 5,
-                                    bottom: 4,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Icon(
-                                        destination.icon,
-                                        color: foreground,
-                                        size: 21,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        destination.label,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.fade,
-                                        softWrap: false,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium
-                                            ?.copyWith(
-                                              color: foreground,
-                                              fontWeight: selected
-                                                  ? FontWeight.w600
-                                                  : FontWeight.w400,
-                                            ),
-                                      ),
-                                    ],
+                              child: Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadii.navigationItem,
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: InkWell(
+                                  key: destination.semanticKey,
+                                  onTap: () => onDestinationSelected(index),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 5,
+                                      bottom: 4,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        AnimatedScale(
+                                          scale: selected ? 1.08 : 1.0,
+                                          duration: const Duration(milliseconds: 200),
+                                          curve: Curves.easeOutBack,
+                                          child: Icon(
+                                            destination.icon,
+                                            color: foreground,
+                                            size: 21,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        AnimatedDefaultTextStyle(
+                                          duration: const Duration(milliseconds: 200),
+                                          style: (Theme.of(context).textTheme.labelMedium ?? const TextStyle()).copyWith(
+                                            color: foreground,
+                                            fontWeight: selected
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                          ),
+                                          child: Text(
+                                            destination.label,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.fade,
+                                            softWrap: false,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

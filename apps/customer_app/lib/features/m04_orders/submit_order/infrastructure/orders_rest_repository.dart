@@ -89,7 +89,7 @@ final class OrdersRestRepository implements OrdersRepository {
     } on Object {
       throw const OrderFailure(
         OrderFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
   }
@@ -180,7 +180,7 @@ final class OrdersRestRepository implements OrdersRepository {
       ),
       _ => const OrderFailure(
         OrderFailureKind.server,
-        'Chifa ASIA no está disponible por el momento. Inténtalo nuevamente.',
+        'KAIRO no está disponible por el momento. Inténtalo nuevamente.',
       ),
     };
   }

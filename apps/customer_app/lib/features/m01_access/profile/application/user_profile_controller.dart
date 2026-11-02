@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../domain/profile_models.dart';
 import '../../shared/domain/auth_models.dart';
+import '../domain/profile_models.dart';
 
 typedef RemoteProfileUpdater = Future<void> Function({
   String? displayName,
@@ -334,7 +334,7 @@ class UserProfileController extends ChangeNotifier {
       _lastName = lastName.trim();
     }
     if (phone != null) {
-      _phone = phone.trim();
+      _phone = phone.replaceAll(RegExp(r'\s+'), '').trim();
     }
     _avatarPath = avatarPath;
     if (birthDate != null) {

@@ -11,22 +11,41 @@ final class CartController extends ChangeNotifier {
 
   CartState get state => _state;
 
-  bool addProduct(CartProductSnapshot product, {int quantity = 1}) {
+  bool addProduct(
+    CartProductSnapshot product, {
+    int quantity = 1,
+    String? notes,
+  }) {
     if (quantity < 1) return false;
 
+    final String? trimmedNotes = notes?.trim().isNotEmpty == true ? notes!.trim() : null;
     final List<CartItem> items = List<CartItem>.of(_state.items);
     final int index = items.indexWhere((CartItem item) {
       return item.product.id == product.id;
     });
     if (index == -1) {
-      items.add(CartItem(product: product, quantity: quantity));
+      items.add(CartItem(product: product, quantity: quantity, notes: trimmedNotes));
     } else {
       final CartItem current = items[index];
       items[index] = CartItem(
         product: product,
         quantity: current.quantity + quantity,
+        notes: trimmedNotes ?? current.notes,
       );
     }
+    _emit(CartState(items));
+    return true;
+  }
+
+  bool updateNotes(String productId, String? notes) {
+    final List<CartItem> items = List<CartItem>.of(_state.items);
+    final int index = items.indexWhere((CartItem item) {
+      return item.product.id == productId;
+    });
+    if (index == -1) return false;
+
+    final String? trimmed = notes?.trim().isNotEmpty == true ? notes!.trim() : null;
+    items[index] = items[index].copyWith(notes: trimmed);
     _emit(CartState(items));
     return true;
   }

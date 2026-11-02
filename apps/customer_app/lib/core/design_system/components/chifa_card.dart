@@ -90,6 +90,8 @@ class ChifaCard extends StatelessWidget {
       opacity: enabled ? 1 : 0.62,
       child: Material(
         color: palette.surface,
+        elevation: isButton ? 1.0 : 0.0,
+        shadowColor: palette.border.withValues(alpha: 0.35),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.card),
           side: BorderSide(color: palette.border),

@@ -143,16 +143,17 @@ class _CartProductCard extends StatelessWidget {
         ? '1 unidad'
         : '${item.quantity} unidades';
     final String subtotal = formatCartPrice(item.subtotalCents);
+    final String notesSuffix = item.notes != null ? ' · Nota: "${item.notes}"' : '';
     return ChifaCard(
       key: ValueKey<String>('cart-product-${item.product.id}'),
       icon: LucideIcons.utensilsCrossed,
       title: item.product.name,
-      subtitle: '$units · $subtotal',
+      subtitle: '$units · $subtotal$notesSuffix',
       minimumHeight: 102,
       trailing: const SizedBox.shrink(),
       onTap: onEdit,
       semanticLabel:
-          '${item.product.name}. $units. Subtotal $subtotal. Toca para editar o eliminar.',
+          '${item.product.name}. $units. Subtotal $subtotal$notesSuffix. Toca para editar o eliminar.',
     );
   }
 }
@@ -162,77 +163,104 @@ Future<void> _showCartItemEditor(
   CartController cartController,
   String productId,
 ) async {
+  final CartItem? initialItem = cartController.state.itemFor(productId);
+  final TextEditingController notesController =
+      TextEditingController(text: initialItem?.notes ?? '');
+
   await showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
+    isScrollControlled: true,
     showDragHandle: true,
     builder: (BuildContext sheetContext) {
-      return AnimatedBuilder(
-        animation: cartController,
-        builder: (BuildContext context, Widget? child) {
-          final CartItem? item = cartController.state.itemFor(productId);
-          if (item == null) return const SizedBox.shrink();
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  item.product.name,
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Subtotal local · ${formatCartPrice(item.subtotalCents)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    IconButton(
-                      key: ValueKey<String>('cart-decrease-$productId'),
-                      tooltip: 'Disminuir cantidad',
-                      onPressed: item.quantity > 1
-                          ? () => cartController.decrement(productId)
-                          : null,
-                      icon: const Icon(LucideIcons.minus),
-                    ),
-                    SizedBox(
-                      width: 64,
-                      child: Text(
-                        '${item.quantity}',
-                        key: ValueKey<String>('cart-quantity-$productId'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+        ),
+        child: AnimatedBuilder(
+          animation: cartController,
+          builder: (BuildContext context, Widget? child) {
+            final CartItem? item = cartController.state.itemFor(productId);
+            if (item == null) return const SizedBox.shrink();
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    item.product.name,
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Subtotal local · ${formatCartPrice(item.subtotalCents)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      IconButton(
+                        key: ValueKey<String>('cart-decrease-$productId'),
+                        tooltip: 'Disminuir cantidad',
+                        onPressed: item.quantity > 1
+                            ? () => cartController.decrement(productId)
+                            : null,
+                        icon: const Icon(LucideIcons.minus),
+                      ),
+                      SizedBox(
+                        width: 64,
+                        child: Text(
+                          '${item.quantity}',
+                          key: ValueKey<String>('cart-quantity-$productId'),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      IconButton(
+                        key: ValueKey<String>('cart-increase-$productId'),
+                        tooltip: 'Aumentar cantidad',
+                        onPressed: () => cartController.increment(productId),
+                        icon: const Icon(LucideIcons.plus),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    key: ValueKey<String>('cart-item-notes-$productId'),
+                    controller: notesController,
+                    decoration: InputDecoration(
+                      labelText: 'Observación para este plato',
+                      hintText: 'Ej. Sin picante, poco arroz, etc.',
+                      prefixIcon: const Icon(LucideIcons.messageSquare, size: 18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    IconButton(
-                      key: ValueKey<String>('cart-increase-$productId'),
-                      tooltip: 'Aumentar cantidad',
-                      onPressed: () => cartController.increment(productId),
-                      icon: const Icon(LucideIcons.plus),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ChifaButton(
-                  key: ValueKey<String>('cart-remove-$productId'),
-                  label: 'Eliminar del carrito',
-                  variant: ChifaButtonVariant.secondary,
-                  onPressed: () {
-                    cartController.remove(productId);
-                    Navigator.of(sheetContext).pop();
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+                    onChanged: (String val) {
+                      cartController.updateNotes(productId, val);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  ChifaButton(
+                    key: ValueKey<String>('cart-remove-$productId'),
+                    label: 'Eliminar del carrito',
+                    variant: ChifaButtonVariant.secondary,
+                    onPressed: () {
+                      cartController.remove(productId);
+                      Navigator.of(sheetContext).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       );
     },
   );
+  notesController.dispose();
 }
 
 String formatCartPrice(int priceCents) {

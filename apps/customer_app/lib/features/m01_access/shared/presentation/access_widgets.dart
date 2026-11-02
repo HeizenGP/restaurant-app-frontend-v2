@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/design_system/design_system.dart';
@@ -131,7 +130,7 @@ class AccessKicker extends StatelessWidget {
       child: Align(
         alignment: Alignment.topLeft,
         child: Text(
-          'CHIFA ASIA  •  ${isDark ? 'NOCHE' : 'DÍA'}',
+          'KAIRO  •  ${isDark ? 'NOCHE' : 'DÍA'}',
           maxLines: 1,
           style: TextStyle(
             color: context.appPalette.accentGold,
@@ -152,18 +151,18 @@ class LoginBrandHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final String suffix = isDark ? 'dark' : 'light';
-    final Color background = isDark
-        ? const Color(0xFF3D2024)
-        : const Color(0xFF8A262D);
-    final Color gold = isDark
-        ? const Color(0xFFE3BD73)
-        : const Color(0xFFF3CA83);
+    final Color backgroundTop = isDark
+        ? const Color(0xFF0A0708)
+        : const Color(0xFF1E0A0E);
+    final Color backgroundBottom = isDark
+        ? const Color(0xFF190B0E)
+        : const Color(0xFF381016);
+    const Color goldAccent = Color(0xFFD4AF37);
+    const Color goldShimmer = Color(0xFFF6E8B1);
 
     return Semantics(
       container: true,
-      label:
-          'Chifa ASIA, cocina chifa contemporánea. Una tradición que enamora.',
+      label: 'KAIRO',
       excludeSemantics: true,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -173,127 +172,122 @@ class LoginBrandHero extends StatelessWidget {
           final double factor = width / 390;
           double scaled(double value) => value * factor;
 
+          final double heroHeight = scaled(220);
+
           return SizedBox(
             key: const Key('login-hero'),
             width: double.infinity,
-            height: scaled(308),
+            height: heroHeight,
             child: ClipRect(
-              child: ColoredBox(
-                color: background,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[backgroundTop, backgroundBottom],
+                  ),
+                ),
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: SizedBox(
                     key: const Key('login-artwork-canvas'),
                     width: width,
-                    height: scaled(308),
+                    height: heroHeight,
                     child: Stack(
+                      alignment: Alignment.center,
                       children: <Widget>[
-                        Positioned(
-                          left: scaled(239),
-                          top: scaled(-82),
-                          width: scaled(235),
-                          height: scaled(235),
-                          child: SvgPicture.asset(
-                            'assets/images/m01/login_halo_$suffix.svg',
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(124),
-                          top: scaled(39),
-                          width: scaled(151),
-                          height: scaled(151),
-                          child: SvgPicture.asset(
-                            'assets/images/m01/login_center_$suffix.svg',
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(45),
-                          top: scaled(83),
-                          width: scaled(72),
-                          height: scaled(72),
-                          child: SvgPicture.asset(
-                            'assets/images/m01/login_detail_$suffix.svg',
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(28),
-                          top: scaled(61),
-                          width: scaled(48),
-                          height: scaled(2),
-                          child: DecoratedBox(
+                        // Ambient radial aura
+                        Center(
+                          child: Container(
+                            width: scaled(150),
+                            height: scaled(150),
                             decoration: BoxDecoration(
-                              color: gold.withValues(alpha: 0.95),
-                              borderRadius: BorderRadius.circular(2),
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: <Color>[
+                                  const Color(0xFF8B222C).withValues(alpha: 0.30),
+                                  goldAccent.withValues(alpha: 0.10),
+                                  Colors.transparent,
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        Positioned(
-                          left: scaled(83),
-                          top: scaled(50),
-                          width: scaled(224),
-                          height: scaled(35),
-                          child: Text(
-                            'CHIFA ASIA',
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            textScaler: TextScaler.noScaling,
-                            style: TextStyle(
-                              color: gold,
-                              fontFamily: AppTypography.bodyFontFamily,
-                              fontSize: scaled(18),
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: scaled(3.2),
+                        // Logo and Name only
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            // KAIRO Seal Logo
+                            Container(
+                              width: scaled(68),
+                              height: scaled(68),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF6B1A24),
+                                borderRadius: BorderRadius.circular(scaled(19)),
+                                border: Border.all(
+                                  color: goldAccent,
+                                  width: 2.2,
+                                ),
+                                boxShadow: <BoxShadow>[
+                                  BoxShadow(
+                                    color: const Color(0xFFB52B3A).withValues(alpha: 0.35),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: goldAccent.withValues(alpha: 0.20),
+                                    blurRadius: 14,
+                                  ),
+                                ],
+                              ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    margin: EdgeInsets.all(scaled(4.5)),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(scaled(14)),
+                                      border: Border.all(
+                                        color: goldAccent.withValues(alpha: 0.50),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '凱',
+                                    style: TextStyle(
+                                      color: goldShimmer,
+                                      fontFamily: AppTypography.displayFontFamily,
+                                      fontSize: scaled(35),
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(49),
-                          top: scaled(81),
-                          width: scaled(292),
-                          height: scaled(12),
-                          child: Text(
-                            'COCINA CHIFA CONTEMPORÁNEA',
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            textScaler: TextScaler.noScaling,
-                            style: TextStyle(
-                              color: isDark
-                                  ? const Color(0xFFD6B9AE)
-                                  : const Color(0xFFFFE2CC),
-                              fontFamily: AppTypography.bodyFontFamily,
-                              fontSize: scaled(9),
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: scaled(2),
+                            SizedBox(height: scaled(12)),
+                            // KAIRO Brand Name
+                            Text(
+                              'KAIRO',
+                              style: TextStyle(
+                                color: goldShimmer,
+                                fontFamily: AppTypography.displayFontFamily,
+                                fontSize: scaled(27),
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: scaled(8.5),
+                                height: 1.1,
+                                shadows: <Shadow>[
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.45),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(99),
-                          top: scaled(103),
-                          width: scaled(192),
-                          height: scaled(144),
-                          child: SvgPicture.asset(
-                            'assets/images/m01/login_bowl_$suffix.svg',
-                          ),
-                        ),
-                        Positioned(
-                          left: scaled(35),
-                          top: scaled(256),
-                          width: scaled(320),
-                          height: scaled(34),
-                          child: Text(
-                            'Una tradición que enamora',
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            textScaler: TextScaler.noScaling,
-                            style: TextStyle(
-                              color: const Color(0xFFFFF8EC),
-                              fontFamily: AppTypography.displayFontFamily,
-                              fontSize: scaled(28),
-                              fontWeight: FontWeight.w600,
-                              height: 34 / 28,
-                            ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

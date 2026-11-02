@@ -501,7 +501,7 @@ class OrderDetailLoadingPage extends StatelessWidget {
       child: ChifaPageScaffold(
         pageKey: const Key('page-order-detail-loading'),
         title: 'Consultando pedido',
-        subtitle: 'Actualizando el estado desde Chifa ASIA.',
+        subtitle: 'Actualizando el estado desde KAIRO.',
         themeModeController: themeModeController,
         child: const ChifaStateView(
           kind: ChifaStateKind.loading,

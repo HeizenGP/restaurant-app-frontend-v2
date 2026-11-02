@@ -6,6 +6,55 @@ import '../../../../core/design_system/design_system.dart';
 import '../application/user_profile_controller.dart';
 import '../domain/profile_models.dart';
 
+class _PhoneNumberTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final String truncated = digits.length > 9 ? digits.substring(0, 9) : digits;
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < truncated.length; i++) {
+      if (i > 0 && i % 3 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(truncated[i]);
+    }
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class _CardNumberTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.contains('•')) {
+      return newValue;
+    }
+    final String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final String truncated = digits.length > 16 ? digits.substring(0, 16) : digits;
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < truncated.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(truncated[i]);
+    }
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
 class EditProfileDialog extends StatefulWidget {
   const EditProfileDialog({
     required this.controller,
@@ -44,7 +93,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
       text: widget.controller.displayName ?? widget.currentDisplayName,
     );
     _phoneController = TextEditingController(
-      text: widget.controller.phone ?? '',
+      text: widget.controller.phone != null
+          ? ProfileFormatters.formatPhone(widget.controller.phone!)
+          : '',
     );
     _selectedAvatar = widget.controller.avatarPath;
   }
@@ -185,12 +236,11 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(9),
+                  _PhoneNumberTextInputFormatter(),
                 ],
                 decoration: InputDecoration(
                   labelText: 'Número de celular (9 dígitos)',
-                  hintText: 'Ej. 987654321',
+                  hintText: 'Ej. 987 654 321',
                   prefixText: '+51 ',
                   labelStyle: TextStyle(
                     fontFamily: AppTypography.bodyFontFamily,
@@ -468,8 +518,7 @@ class _AddCardDialogState extends State<AddCardDialog> {
                 controller: _cardNumberController,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(16),
+                  _CardNumberTextInputFormatter(),
                 ],
                 decoration: InputDecoration(
                   labelText: 'Número de tarjeta (16 dígitos)',

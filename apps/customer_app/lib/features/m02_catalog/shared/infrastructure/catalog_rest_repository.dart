@@ -69,7 +69,7 @@ final class CatalogRestRepository implements CatalogRepository {
     } on Object {
       throw const CatalogFailure(
         CatalogFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
   }
@@ -108,7 +108,7 @@ final class CatalogRestRepository implements CatalogRepository {
       ),
       _ => const CatalogFailure(
         CatalogFailureKind.server,
-        'Chifa ASIA no está disponible por el momento. Inténtalo nuevamente.',
+        'KAIRO no está disponible por el momento. Inténtalo nuevamente.',
       ),
     };
   }

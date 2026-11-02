@@ -35,6 +35,15 @@ void main() {
       find.byKey(const ValueKey<String>('cart-product-product-one')),
     );
     await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('cart-item-notes-product-one')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('cart-item-notes-product-one')),
+      'Sin cebollita china',
+    );
+    await tester.pumpAndSettle();
+    expect(cartController.state.itemFor(productOne.id)?.notes, 'Sin cebollita china');
+
     await tester.tap(
       find.byKey(const ValueKey<String>('cart-increase-product-one')),
     );

@@ -25,6 +25,13 @@ class _SignInPageState extends State<SignInPage> {
   bool _showValidation = false;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(() => setState(() {}));
+    _passwordController.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -169,6 +176,7 @@ class _LoginFormContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final TextStyle hintStyle = TextStyle(
       color: palette.textSecondary,
       fontFamily: AppTypography.bodyFontFamily,
@@ -176,51 +184,95 @@ class _LoginFormContent extends StatelessWidget {
       fontWeight: FontWeight.w400,
     );
 
+    final bool isValidEmail = emailController.text.trim().isNotEmpty &&
+        RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(emailController.text.trim());
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Container(
-              width: 30,
-              height: 3,
-              decoration: BoxDecoration(
-                color: palette.accentGold,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'TU MESA TE ESPERA',
-                maxLines: 1,
-                style: TextStyle(
-                  color: palette.textAccent,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  height: 20 / 10,
-                  letterSpacing: 1.7,
+        // Modern Segmented Navigation Switcher
+        Container(
+          decoration: BoxDecoration(
+            color: palette.surfaceTint,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: palette.controlBorder, width: 1.0),
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2C1318) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFFD4AF37).withValues(alpha: 0.4) : Colors.transparent,
+                      width: 1,
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Iniciar sesión',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? const Color(0xFFE5C07B) : palette.brandRed,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 43),
-          child: Text(
-            'Bienvenido de nuevo',
-            style: Theme.of(context).textTheme.displayLarge
-                ?.copyWith(fontSize: 30, height: 43 / 30),
+              Expanded(
+                child: InkWell(
+                  key: const Key('go-register-tab'),
+                  onTap: onRegister,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    child: Center(
+                      child: Text(
+                        'Crear cuenta',
+                        style: TextStyle(
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 22),
-          child: Text(
-            'Inicia sesión y disfruta tus platos favoritos.',
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(fontSize: 12.5, height: 22 / 12.5),
+        const SizedBox(height: 18),
+        Text(
+          'Bienvenido de nuevo',
+          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+            fontFamily: AppTypography.displayFontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: palette.textPrimary,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Ingresa tus credenciales para acceder a tu cuenta',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: palette.textSecondary,
+            fontSize: 12.5,
+            height: 1.35,
           ),
         ),
         if (state.errorMessage != null) ...<Widget>[
@@ -231,12 +283,12 @@ class _LoginFormContent extends StatelessWidget {
           const SizedBox(height: 12),
           AccessMessageBanner(message: state.noticeMessage!),
         ],
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
         ChifaTextField(
           key: const Key('login-email'),
           controller: emailController,
           label: 'Correo electrónico',
-          hintText: 'ejemplo@correo.com',
+          hintText: 'cliente@ejemplo.com',
           leadingIcon: LucideIcons.mail,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
@@ -247,6 +299,16 @@ class _LoginFormContent extends StatelessWidget {
           enabled: !loading,
           autovalidateMode: autovalidateMode,
           validator: AccessValidators.email,
+          trailing: isValidEmail
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Icon(
+                    LucideIcons.checkCircle2,
+                    color: palette.success,
+                    size: 18,
+                  ),
+                )
+              : null,
           labelHeight: 18,
           labelGap: 5,
           contentPadding: const EdgeInsets.symmetric(
@@ -293,6 +355,10 @@ class _LoginFormContent extends StatelessWidget {
             ),
           ),
         ),
+        if (passwordController.text.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 6),
+          _PasswordStrengthIndicator(password: passwordController.text),
+        ],
         const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerRight,
@@ -329,23 +395,20 @@ class _LoginFormContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        SizedBox(
-          height: 18,
-          child: Row(
-            children: <Widget>[
-              Expanded(child: Divider(height: 1, color: palette.border)),
-              SizedBox(
-                width: 92,
-                child: Text(
-                  'o continúa como',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(fontSize: 11),
-                ),
+        Row(
+          children: <Widget>[
+            Expanded(child: Divider(height: 1, color: palette.border)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'o continúa como',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(fontSize: 11),
               ),
-              Expanded(child: Divider(height: 1, color: palette.border)),
-            ],
-          ),
+            ),
+            Expanded(child: Divider(height: 1, color: palette.border)),
+          ],
         ),
         const SizedBox(height: 13),
         ChifaButton(
@@ -387,7 +450,106 @@ class _LoginFormContent extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 5,
+          children: <Widget>[
+            Icon(
+              LucideIcons.shieldCheck,
+              size: 13,
+              color: palette.success,
+            ),
+            Text(
+              'Conexión segura cifrada de punto a punto',
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 10.5,
+                color: palette.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ],
     );
+  }
+}
+
+class _PasswordStrengthIndicator extends StatelessWidget {
+  const _PasswordStrengthIndicator({required this.password});
+
+  final String password;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    final int score = _calculateScore(password);
+
+    final String label;
+    final Color barColor;
+    final double percent;
+
+    if (score <= 1) {
+      label = 'Contraseña corta';
+      barColor = palette.brandRed;
+      percent = 0.33;
+    } else if (score == 2) {
+      label = 'Contraseña media';
+      barColor = palette.accentGold;
+      percent = 0.66;
+    } else {
+      label = 'Contraseña segura';
+      barColor = palette.success;
+      percent = 1.0;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const SizedBox(height: 4),
+        Row(
+          children: <Widget>[
+            for (int i = 1; i <= 3; i++) ...<Widget>[
+              if (i > 1) const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  height: 3.5,
+                  decoration: BoxDecoration(
+                    color: (i == 1 && percent >= 0.33) ||
+                            (i == 2 && percent >= 0.66) ||
+                            (i == 3 && percent >= 1.0)
+                        ? barColor
+                        : palette.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: AppTypography.bodyFontFamily,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: barColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  int _calculateScore(String val) {
+    if (val.length < 6) return 0;
+    int s = 1;
+    if (val.length >= 8) s++;
+    if (RegExp(r'\d').hasMatch(val) && RegExp(r'[a-zA-Z]').hasMatch(val)) s++;
+    return s;
   }
 }

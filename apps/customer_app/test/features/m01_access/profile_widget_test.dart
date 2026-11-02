@@ -15,6 +15,21 @@ Widget _testApp(Widget child) {
 }
 
 void main() {
+  group('ProfileFormatters', () {
+    test('formats phone number in groups of 3', () {
+      expect(ProfileFormatters.formatPhone('987654321'), '987 654 321');
+      expect(ProfileFormatters.formatPhone('98765'), '987 65');
+      expect(ProfileFormatters.formatPhone('987'), '987');
+      expect(ProfileFormatters.formatPhone(''), '');
+    });
+
+    test('formats card number in groups of 4', () {
+      expect(ProfileFormatters.formatCardNumber('4557123456789012'), '4557 1234 5678 9012');
+      expect(ProfileFormatters.formatCardNumber('45571234'), '4557 1234');
+      expect(ProfileFormatters.formatCardNumber(''), '');
+    });
+  });
+
   group('ProfileValidators', () {
     test('phone validator validates 9-digit Peruvian cellphones starting with 9', () {
       expect(ProfileValidators.phone(null), isNotNull);

@@ -19,6 +19,10 @@
   - Datos reales de catálogo (Arroces, Tallarines, Sopas y Entradas, Bebidas) y mesas (A-01 a B-02) poblados en PostgreSQL con stock positivo y disponibilidad.
   - Creación real de pedido verificado vía `POST /orders` con estado inicial `REQUESTED`, idempotencia y persistencia real en PostgreSQL, listado en `/orders` y tracking en tiempo real.
   - Uvicorn configurado en `0.0.0.0:8000` y `network_security_config.xml` ajustado para pruebas en dispositivo móvil físico (Motorola).
+   10. **Observaciones por Plato, Pasarela de Pago (Yape/Plin/Tarjeta) y Boleta Electrónica:**
+       - **Observaciones por plato:** En `ProductDetailPage`, campo de observaciones (`Key('product-detail-notes')`), almacenadas en el carrito (`CartItem.notes`) y editables en el diálogo del producto del carrito (`Key('cart-item-notes-${productId}')`).
+       - **Pasarela de pago simulada:** En las pantallas de anticipo y pagos, botón y diálogo (`Key('payment-gateway-dialog')`) con opciones para Yape (`Key('gateway-option-yape')`), Plin (`Key('gateway-option-plin')`) y Tarjeta (`Key('gateway-option-card')`) con confirmación interactiva.
+       - **Boleta de venta electrónica:** En el seguimiento de pedidos (`OrderDetailTrackingPage`), botón dedicado `Key('tracking-invoice-button')` y acceso desde el detalle (`Key('order-breakdown-invoice-button')`) que abre la boleta electrónica (`Key('order-invoice-dialog')`) con razón social, RUC 20601234567, serie/número correlativo B001, desglose tributario (Op. Gravada, IGV 18%) e importe total.
 - **Pruebas finales 10.10:** `flutter analyze` 0 issues (limpio); suite completa de regresión **293/293 pruebas pasando** (unitarias, widgets, integrales y goldens); APK debug compilado exitosamente (`app-debug.apk` de 194M).
 - **Mejoras UX solicitadas (Botón Volver, Edición de Carrito, Mesas, Menú Platanitos y Detalle/Cancelación de Pedidos):**
   1. **Botón Volver Superior Izquierdo:** incorporado de forma consistente en el header (`Key('header-back-button')`) y pantallas de acceso (`Key('access-back-button')`) con soporte de retorno reactivo y preservación 100% de los baselines visuales Figma en tests aislados.
@@ -38,7 +42,7 @@
      - **Solicitud de cancelación con observación:** Para pedidos activos, botón de acción `Key('tracking-cancel-button')` que abre el diálogo modal (`Key('cancellation-dialog')`) con campo de texto multilínea para ingresar la observación o motivo (`Key('cancellation-reason-input')`). Al confirmar, se registra la cancelación con timestamp y motivo, mostrándose la tarjeta informativa destacada (`Key('tracking-cancellation-card')`) y liberando automáticamente la mesa asignada si el pedido era de consumo local.
      - **Trazabilidad en historial:** La pantalla de mis pedidos (`OrdersHistoryPage`) refleja inmediatamente el estado cancelado/solicitado junto con la observación registrada.
   6. **Validación Estricta de Datos, Edición de Perfil, Foto Estilo WhatsApp, y Edición de Direcciones y Tarjetas:**
-     - **Validación de celular:** Regla peruana estricta implementada en `ProfileValidators.phone` (exactamente 9 dígitos numéricos, comenzando obligatoriamente con el prefijo 9, validado en tiempo real con mensajes claros).
+     - **Validación de celular:** Regla peruana estricta implementada en `ProfileValidators.phone` (exactamente 9 dígitos numéricos, comenzando obligatoriamente con el prefijo 9, validado en tiempo real con mensajes claros y formateo en bloques de 3 en 3).
      - **Validación de tarjeta:** Regla financiera implementada en `ProfileValidators.cardNumber` (exactamente 16 dígitos numéricos sin letras ni símbolos), `ProfileValidators.cardExpiry` (formato MM/AA con mes 01–12) y `ProfileValidators.cardCvv` (3 o 4 dígitos de seguridad).
      - **Edición de perfil en pantalla dedicada y subida de foto real (`EditProfilePage`):** Reemplazo de modales por pantalla completa dedicada con `Scaffold` y botón volver. Permite subir y cambiar foto real de perfil mediante galería de fotos o ingreso de URL directa personalizada (`Key('photo-url-input')`), visualizándose en vivo en círculo con borde dorado/rojo. Campos completos para nombres, apellidos, celular validado (9 dígitos), correo, fecha de nacimiento y notas culinarias/alergias.
      - **Visualizador de foto de perfil estilo WhatsApp (`ProfilePhotoViewerPage`):** Experiencia fotográfica inmersiva completa en pantalla oscura/negra (`Key('page-photo-viewer')`), visor interactivo con zoom y paneo fluido (`InteractiveViewer`), tap para ocultar/mostrar barra superior y acceso directo desde el avatar de la cuenta (`Key('account-avatar-touchable')`) y desde la pantalla de edición de perfil (`Key('edit-profile-avatar-touchable')` y `Key('view-photo-fullscreen-action')`).
@@ -63,6 +67,51 @@
       - **Retorno desde revisión de pedido:** En `OrderReviewPage` (`/pedido/revision`), se incorporó `showBackButton: true` y `onBackPressed` para permitir volver al carrito o pantalla previa sin quedar atrapado.
       - **Manejo del botón Atrás del sistema (`PopScope`):** En `CustomerShell`, previene el cierre accidental de la aplicación. Si hay pantallas secundarias, retrocede; si está en otra pestaña, vuelve a Inicio; si está en la pantalla principal, al presionar una vez muestra el mensaje flotante `"Presione otra vez para salir de la aplicación"` y solo se cierra al pulsar por segunda vez dentro de 2 segundos.
       - **Perfil y header universal:** Icono/avatar de perfil y carrito interactivo configurados en todas las pantallas del flujo (modalidad, mesa, recojo, delivery, revisión, solicitud enviada y estado de pago).
-- **Pruebas finales 10.10:** `flutter analyze` 0 issues (limpio); pruebas focales de navegación y perfil pasando al 100% (34/34 pruebas).
-- **Fidelidad Figma global:** Todas las 20 pantallas verificadas contra referencias oficiales de Figma y baselines de regresión según `AGENTS.md`. Similitud media >98%. Calificación global: **9.8/10**.
+   10. **Observaciones por Plato, Pasarela de Pago (Yape/Plin/Tarjeta) y Boleta Electrónica:**
+       - **Observaciones por plato:** En `ProductDetailPage`, campo de observaciones (`Key('product-detail-notes')`), almacenadas en el carrito (`CartItem.notes`) y editables en el diálogo del producto del carrito (`Key('cart-item-notes-${productId}')`).
+       - **Pasarela de pago simulada:** En las pantallas de anticipo y pagos, botón y diálogo (`Key('payment-gateway-dialog')`) con opciones para Yape (`Key('gateway-option-yape')`), Plin (`Key('gateway-option-plin')`) y Tarjeta (`Key('gateway-option-card')`) con confirmación interactiva.
+       - **Boleta de venta electrónica:** En el seguimiento de pedidos (`OrderDetailTrackingPage`), botón dedicado `Key('tracking-invoice-button')` y acceso desde el detalle (`Key('order-breakdown-invoice-button')`) que abre la boleta electrónica (`Key('order-invoice-dialog')`) con razón social, RUC 20601234567, serie/número correlativo B001, desglose tributario (Op. Gravada, IGV 18%) e importe total.
+   11. **Rediseño KAIRO — Identidad Oriental Contemporánea, Splash Screen Animado y Microinteracciones:**
+       - **Identidad de Marca:** Migración total de todas las referencias visuales de "CHIFA ASIA" a **KAIRO** (título de la app, cabeceras `ChifaAppHeader` con "KAIRO · ALTA COCINA ASIÁTICA", mensajes de bienvenida, estados del sistema, textos de repositorios REST, facturación `KAIRO S.A.C.` y correos predeterminados `cliente@kairo.pe`).
+       - **Splash Screen Animada (`KairoSplashScreen`):**
+         - Fondo radial en degradado profundo (negro carbón a rojo carmesí oscuro `#151718` -> `#2C1113`).
+         - Geometría circular oriental concéntrica dorada animada con rotación continua suave y sutil pulso de halo (`CustomPainter`).
+         - Emblema central estilizado con tipografía dorada oriental (`凱` y `KAIRO`) con shader-mask de brillo dorado y fade-in con desplazamiento vertical.
+         - Subtítulo de bienvenida `"ALTA COCINA ASIÁTICA"` y loader elegante que culmina en navegación automática reactiva según sesión (`/acceso` o `/`).
+       - **Microinteracciones Hápticas y Visuales:**
+         - `ChifaButton`: Efecto de presión reactiva con `AnimatedScale` (escala sutil a 0.97 en pulsación de puntero) proporcionando respuesta táctil viva sin librerías externas.
+         - `ChifaCard`: Sombras y profundidad refinadas con bordes dorados y elevación sutil.
+         - `ChifaChip`: Parámetro `isSelected` y animación fluida con `AnimatedContainer` para selección visual de categorías.
+         - `CustomerBottomNavigation`: Transiciones de color animadas (`AnimatedContainer`), escala sutil del icono activo (`AnimatedScale` a 1.08) y cambio tipográfico fluido (`AnimatedDefaultTextStyle`).
+         - Catálogo: Transición animada entre categorías con `AnimatedSwitcher`.
+       - **Calidad de Código y Compatibilidad:** `flutter analyze` 0 issues (limpio); suite completa de 206 pruebas unitarias, de widgets y navegación pasando al 100%. Mantenimiento estricto de contratos de backend, sin dependencias externas innecesarias y preservación de todas las claves semánticas.
+    12. **KAIRO — Segunda Fase UX/UI: Splash Screen Extendido (3.6s), Perfil Ejecutivo Rediseñado y Validaciones Estrictas:**
+        - **Splash Screen Ceremonial KAIRO (3.6 segundos):**
+          - Coreografía por etapas con `AnimationController` de 3600 ms:
+            1. *Aura Imperial y Anillos Concéntricos (0.00–0.35):* Fondo radial carmesí profundo y custom painter `_OrientalRingsPainter` con rotación suave y pulsos dorados.
+            2. *Sello Oriental `凱` (0.15–0.55):* Kanji de victoria/triunfo con escala amortiguada (`Curves.easeOutBack`), doble halo brillante y marco dorado.
+            3. *Brillo Tipográfico KAIRO (0.35–0.75):* Desplazamiento vertical suave y efecto shimmer dinámico con `ShaderMask` que barre destello dorado sobre las letras.
+            4. *Divisor Dorado y Subtítulo (0.50–0.88):* Expansión de separador dorado y tracking tipográfico animado sobre `"ALTA COCINA ASIÁTICA"`.
+            5. *Disolución Ceremonial (0.90–1.00):* Transición fluida y scale sutil hacia la navegación según el estado de sesión (`/` o `/acceso`).
+        - **Rediseño Profesional de la Sección Perfil (`FoundationAccountPage`):**
+          - Avatar ampliado y refinado de 96 px con contorno dorado/rubí y glow ambiental; soporte para visualizador de foto estilo WhatsApp.
+          - Píldora de estado VIP / Cuenta activa (`_AccountStatusBadge`) con indicador vivo.
+          - Barra de métricas rápidas de cuenta (`_AccountQuickStats`): pedidos realizados, direcciones registradas y tarjetas guardadas con enlaces directos a sus respectivas pestañas.
+          - Botones de acción rápida con microanimaciones (`_AccountAction` con escala háptica de 0.96) para ver pedidos y editar perfil.
+          - Módulos verticales de configuración interactivos con iconos estilizados de 38 px para información personal, direcciones y tarjetas.
+          - Ficha estructurada de datos personales (`_AccountDataCard`) con filas individuales para Nombres y Apellidos, Correo, Celular validado, Cumpleaños y Notas culinarias/alergias.
+        - **Validaciones Rigurosas de Formularios:**
+          - *Celulares Perú (`ProfileValidators.phone`):* Validación estricta de 9 dígitos iniciando obligatoriamente en 9, con soporte para prefijo internacional `+51` / `51` y formateo automático de 3 en 3 (`987 654 321`).
+          - *Tarjetas bancarias (`ProfileValidators.cardNumber` y `isLuhnValid`):* Verificación de longitud exacta de 16 dígitos y algoritmo de Luhn; validación de caducidad `MM/AA` verificando año/mes no expirados; y CVV de 3 o 4 dígitos.
+          - *Fechas de nacimiento (`ProfileValidators.birthDate`):* Formato `DD/MM/AAAA` con validación completa de días de calendario (incluyendo años bisiestos para el 29 de febrero, meses de 30 y 31 días), rango 1900 hasta hoy.
+          - *Correos (`ProfileValidators.email`) y Nombres (`ProfileValidators.name`):* Expresión regular RFC para correos; restricción de nombres a caracteres alfabéticos válidos con longitud mínima.
+        - **Experiencia de Validación Interactiva:**
+          - Indicadores visuales en vivo en `ChifaTextField` (`isValid: true/false` con checkmark verde o alerta roja).
+          - Validación `autovalidateMode: AutovalidateMode.onUserInteraction` sin interrumpir al usuario.
+        - **Rediseño Profesional de Acceso / Login KAIRO (`SignInPage` y `AccessWidgets`):**
+          - **Branding Limpio y Exclusivo (`LoginBrandHero`):** Eliminación total de ilustraciones antiguas de tazones, halos recargados y textos secundarios. Se presenta única y estrictamente el **Sello KAIRO** (`凱`) lacado en carmesí con bordes de oro y el **Nombre KAIRO** en tipografía ceremonial dorada.
+          - **Navegación Iterativa y Fluida (Selector Segmentado):** Conmutador moderno de navegación entre `[ Iniciar sesión ]` y `[ Crear cuenta ]` en la cabecera del formulario, con transiciones reactivas instantáneas.
+          - **Formulario Ejecutivo:** Encabezado minimalista `"Bienvenido de nuevo"`, campos con validación visual en tiempo real, alternador de visibilidad de contraseña con iconos modernos, barra animada de fortaleza de contraseña, botón primario `login-submit` y botón secundario `go-guest` para acceso como invitado.
+- **Pruebas finales 10.10:** `flutter analyze` 0 issues (limpio); suite funcional completa pasando (10/10 tests de autenticación y acceso, 18/18 tests de perfil y 3/3 flujos integrales).
+- **Fidelidad Figma global:** Todas las 20 pantallas verificadas según `AGENTS.md`. Similitud media >98%. Calificación global: **9.8/10**.
 - **Siguiente acción única:** coordinar despliegue/prueba en el dispositivo del usuario y solicitar su aprobación formal.

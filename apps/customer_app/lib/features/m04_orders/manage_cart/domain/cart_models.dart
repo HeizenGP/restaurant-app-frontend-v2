@@ -17,18 +17,27 @@ final class CartProductSnapshot {
 
 @immutable
 final class CartItem {
-  const CartItem({required this.product, required this.quantity})
-    : assert(quantity > 0);
+  const CartItem({
+    required this.product,
+    required this.quantity,
+    this.notes,
+  }) : assert(quantity > 0);
 
   final CartProductSnapshot product;
   final int quantity;
+  final String? notes;
 
   int get subtotalCents => product.unitPriceCents * quantity;
 
-  CartItem copyWith({CartProductSnapshot? product, int? quantity}) {
+  CartItem copyWith({
+    CartProductSnapshot? product,
+    int? quantity,
+    String? notes,
+  }) {
     return CartItem(
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
+      notes: notes ?? this.notes,
     );
   }
 }

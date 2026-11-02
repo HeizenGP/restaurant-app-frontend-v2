@@ -193,8 +193,24 @@ class AdvanceSummaryPage extends StatelessWidget {
               title: 'Sin pago electrónico',
               subtitle: 'Registro manual o simulado, sin pasarela',
               minimumHeight: 77,
+              onTap: () => _showPaymentGatewayDialog(context, summary.requiredAmount),
             ),
-            const SizedBox(height: 75),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('advance-pay-gateway-button'),
+              icon: const Icon(LucideIcons.creditCard, size: 18),
+              label: const Text('Simular pago (Yape, Plin o Tarjeta)'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.appPalette.brandRed,
+                side: BorderSide(color: context.appPalette.brandRed),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () => _showPaymentGatewayDialog(context, summary.requiredAmount),
+            ),
+            const SizedBox(height: 40),
             ChifaButton(
               key: const Key('advance-view-order'),
               label: 'Ver estado del pedido',
@@ -395,7 +411,22 @@ class PaymentSummaryPage extends StatelessWidget {
               subtitle: 'payment_status desde GET /payments',
               minimumHeight: 77,
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('payment-gateway-button'),
+              icon: const Icon(LucideIcons.creditCard, size: 18),
+              label: const Text('Simular pago (Yape, Plin o Tarjeta)'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.appPalette.brandRed,
+                side: BorderSide(color: context.appPalette.brandRed),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () => _showPaymentGatewayDialog(context, summary.balance),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               height: 46,
               child: Padding(
@@ -497,6 +528,348 @@ Color _figmaIconColor(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark
       ? const Color(0xFFE2BC75)
       : const Color(0xFF922832);
+}
+
+void _showPaymentGatewayDialog(BuildContext context, String amount) {
+  final AppPalette palette = context.appPalette;
+  int selectedGateway = 0; // 0: Yape, 1: Plin, 2: Tarjeta
+  final TextEditingController phoneController = TextEditingController(text: '987 654 321');
+  final TextEditingController cardController = TextEditingController(text: '4557 1234 5678 9012');
+  final TextEditingController expiryController = TextEditingController(text: '12/28');
+  final TextEditingController cvvController = TextEditingController(text: '123');
+  bool isPaid = false;
+
+  showDialog<void>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            key: const Key('payment-gateway-dialog'),
+            backgroundColor: palette.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: palette.border),
+            ),
+            title: Row(
+              children: <Widget>[
+                Icon(LucideIcons.creditCard, color: palette.accentGold, size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isPaid ? '¡Pago Simulado Exitoso!' : 'Pasarela de Pago',
+                    style: TextStyle(
+                      fontFamily: AppTypography.displayFontFamily,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: palette.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: isPaid
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(LucideIcons.circleCheck, color: Colors.green, size: 54),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Monto abonado: S/ $amount',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Tu comprobante ha sido registrado y el personal del restaurante podrá confirmarlo.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 12,
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: palette.surfaceTint,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Monto a pagar:',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.bodyFontFamily,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: palette.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'S/ $amount',
+                                style: TextStyle(
+                                  fontFamily: AppTypography.bodyFontFamily,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: palette.brandRed,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Selecciona el método de pago:',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: InkWell(
+                                key: const Key('gateway-option-yape'),
+                                onTap: () => setState(() => selectedGateway = 0),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: selectedGateway == 0
+                                        ? const Color(0xFF742284).withValues(alpha: 0.15)
+                                        : palette.surfaceTint,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selectedGateway == 0
+                                          ? const Color(0xFF742284)
+                                          : palette.border,
+                                      width: selectedGateway == 0 ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      const Icon(LucideIcons.smartphone, color: Color(0xFF742284), size: 20),
+                                      const SizedBox(height: 2),
+                                      const Text(
+                                        'Yape',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF742284),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: InkWell(
+                                key: const Key('gateway-option-plin'),
+                                onTap: () => setState(() => selectedGateway = 1),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: selectedGateway == 1
+                                        ? const Color(0xFF00B4D8).withValues(alpha: 0.15)
+                                        : palette.surfaceTint,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selectedGateway == 1
+                                          ? const Color(0xFF00B4D8)
+                                          : palette.border,
+                                      width: selectedGateway == 1 ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      const Icon(LucideIcons.qrCode, color: Color(0xFF00B4D8), size: 20),
+                                      const SizedBox(height: 2),
+                                      const Text(
+                                        'Plin',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF00B4D8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: InkWell(
+                                key: const Key('gateway-option-card'),
+                                onTap: () => setState(() => selectedGateway = 2),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: selectedGateway == 2
+                                        ? palette.brandRed.withValues(alpha: 0.15)
+                                        : palette.surfaceTint,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selectedGateway == 2
+                                          ? palette.brandRed
+                                          : palette.border,
+                                      width: selectedGateway == 2 ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Icon(LucideIcons.creditCard, color: palette.brandRed, size: 20),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Tarjeta',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: palette.brandRed,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        if (selectedGateway == 0 || selectedGateway == 1) ...<Widget>[
+                          Text(
+                            selectedGateway == 0
+                                ? 'Yapear al número de KAIRO:'
+                                : 'Transferir por Plin al número:',
+                            style: TextStyle(
+                              fontFamily: AppTypography.bodyFontFamily,
+                              fontSize: 12,
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: palette.surfaceTint,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                const Icon(LucideIcons.phone, size: 16),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  '999 888 777 (KAIRO)',
+                                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            key: const Key('gateway-phone-input'),
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              labelText: 'Tu número de celular remitente',
+                              hintText: '987 654 321',
+                              prefixIcon: const Icon(LucideIcons.phone, size: 16),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ] else ...<Widget>[
+                          TextField(
+                            key: const Key('gateway-card-input'),
+                            controller: cardController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Número de tarjeta',
+                              hintText: '4557 0000 0000 0000',
+                              prefixIcon: const Icon(LucideIcons.creditCard, size: 16),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: TextField(
+                                  controller: expiryController,
+                                  decoration: InputDecoration(
+                                    labelText: 'MM/AA',
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: cvvController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'CVV',
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(
+                  isPaid ? 'Aceptar' : 'Cancelar',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ),
+              if (!isPaid)
+                ElevatedButton(
+                  key: const Key('gateway-confirm-button'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: palette.brandRed,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isPaid = true;
+                    });
+                  },
+                  child: const Text('Confirmar pago'),
+                ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
 
 class _PaymentFrame extends StatelessWidget {

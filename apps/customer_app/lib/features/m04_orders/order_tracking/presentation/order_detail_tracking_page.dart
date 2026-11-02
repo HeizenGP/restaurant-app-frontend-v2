@@ -304,6 +304,15 @@ class _TrackingContentPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
+            ChifaButton(
+              key: const Key('tracking-invoice-button'),
+              label: 'Ver boleta electrónica',
+              height: 46,
+              borderRadius: 14,
+              variant: ChifaButtonVariant.secondary,
+              onPressed: () => _showInvoiceDialog(context, order),
+            ),
+            const SizedBox(height: 8),
             if (canCancel) ...<Widget>[
               ChifaButton(
                 key: const Key('tracking-cancel-button'),
@@ -486,6 +495,272 @@ class _TrackingContentPage extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                Divider(height: 1, color: palette.border),
+                const SizedBox(height: 16),
+                Center(
+                  child: OutlinedButton.icon(
+                    key: const Key('order-breakdown-invoice-button'),
+                    icon: const Icon(LucideIcons.fileText, size: 16),
+                    label: const Text('Ver boleta electrónica'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: palette.brandRed,
+                      side: BorderSide(color: palette.brandRed),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      _showInvoiceDialog(context, order);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cerrar',
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontWeight: FontWeight.w600,
+                  color: palette.brandRed,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showInvoiceDialog(BuildContext context, OrderSnapshot order) {
+    final AppPalette palette = context.appPalette;
+    final double total = double.tryParse(order.totalAmount) ?? 0.0;
+    final double opGravada = total / 1.18;
+    final double igv = total - opGravada;
+    final String formattedDate = _formatDate(order.createdAt);
+    final String serial = 'B001-${order.id.replaceAll(RegExp(r'\D'), '').padLeft(8, '0').substring(0, 8)}';
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          key: const Key('order-invoice-dialog'),
+          backgroundColor: palette.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: palette.border),
+          ),
+          title: Column(
+            children: <Widget>[
+              Icon(LucideIcons.receipt, color: palette.accentGold, size: 28),
+              const SizedBox(height: 6),
+              Text(
+                'KAIRO S.A.C.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppTypography.displayFontFamily,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: palette.textPrimary,
+                ),
+              ),
+              Text(
+                'RUC: 20601234567\nBOLETA DE VENTA ELECTRÓNICA',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppTypography.bodyFontFamily,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: palette.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: palette.surfaceTint,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  serial,
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: palette.brandRed,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Divider(height: 1, color: palette.border),
+                const SizedBox(height: 8),
+                Text(
+                  'Fecha de emisión: $formattedDate',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 11,
+                    color: palette.textSecondary,
+                  ),
+                ),
+                Text(
+                  'Cliente: ${order.contactName ?? 'Cliente General'}',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 11,
+                    color: palette.textSecondary,
+                  ),
+                ),
+                if (order.contactPhone != null)
+                  Text(
+                    'Teléfono: ${order.contactPhone}',
+                    style: TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 11,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                Text(
+                  'Modalidad: ${_modalityTitle(order.modality)}',
+                  style: TextStyle(
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 11,
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Divider(height: 1, color: palette.border),
+                const SizedBox(height: 8),
+                for (final OrderLineSnapshot line in order.lines) ...<Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${line.quantity}x ',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: palette.brandRed,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            line.productName,
+                            style: TextStyle(
+                              fontFamily: AppTypography.bodyFontFamily,
+                              fontSize: 12,
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'S/ ${_calculateSubtotal(line)}',
+                          style: TextStyle(
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Divider(height: 1, color: palette.border),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Op. Gravada:',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 12,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      'S/ ${opGravada.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 12,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'I.G.V. (18%):',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 12,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      'S/ ${igv.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 12,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'TOTAL:',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'S/ ${order.totalAmount}',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: palette.brandRed,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    'Representación impresa de la Boleta Electrónica\n¡Gracias por su preferencia!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 10,
+                      fontStyle: FontStyle.italic,
+                      color: palette.textSecondary,
+                    ),
+                  ),
                 ),
               ],
             ),

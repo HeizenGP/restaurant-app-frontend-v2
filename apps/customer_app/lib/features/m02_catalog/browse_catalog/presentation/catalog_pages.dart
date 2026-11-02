@@ -457,11 +457,17 @@ class _BrowseCatalogContent extends StatelessWidget {
             message: 'No hay productos disponibles en esta categoría',
           )
         else
-          _ProductList(
-            products: state.products,
-            onOpenProduct: onOpenProduct,
-            useGrid: useGrid,
-            onAddProduct: onAddProduct,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: _ProductList(
+              key: ValueKey<String>('product-list-${state.selectedCategoryId}'),
+              products: state.products,
+              onOpenProduct: onOpenProduct,
+              useGrid: useGrid,
+              onAddProduct: onAddProduct,
+            ),
           ),
         const SizedBox(height: 29),
         Text(
@@ -479,6 +485,7 @@ class _ProductList extends StatelessWidget {
     required this.onOpenProduct,
     this.useGrid = false,
     this.onAddProduct,
+    super.key,
   });
 
   final List<CatalogProduct> products;
@@ -554,6 +561,8 @@ class _GridProductCard extends StatelessWidget {
       child: Material(
         key: ValueKey<String>('catalog-product-${product.id}'),
         color: palette.surface,
+        elevation: available ? 1.5 : 0.0,
+        shadowColor: palette.border.withValues(alpha: 0.35),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
@@ -780,12 +789,14 @@ class _CategoryStrip extends StatelessWidget {
             },
             itemBuilder: (BuildContext context, int index) {
               final CatalogCategory category = categories[index];
+              final bool isSelected = category.id == selectedCategoryId;
               return Semantics(
-                selected: category.id == selectedCategoryId,
+                selected: isSelected,
                 child: ChifaChip(
                   key: ValueKey<String>('catalog-category-${category.id}'),
                   label: category.name,
                   width: itemWidth,
+                  isSelected: isSelected,
                   onPressed: () => onSelected(category.id),
                 ),
               );

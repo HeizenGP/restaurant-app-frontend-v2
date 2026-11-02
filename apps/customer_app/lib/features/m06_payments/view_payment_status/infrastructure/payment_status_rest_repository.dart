@@ -91,7 +91,7 @@ final class PaymentStatusRestRepository implements PaymentStatusRepository {
     } on Object {
       throw const PaymentStatusFailure(
         PaymentStatusFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
   }
@@ -151,7 +151,7 @@ final class PaymentStatusRestRepository implements PaymentStatusRepository {
       ),
       _ => const PaymentStatusFailure(
         PaymentStatusFailureKind.server,
-        'Chifa ASIA no está disponible por el momento. Inténtalo nuevamente.',
+        'KAIRO no está disponible por el momento. Inténtalo nuevamente.',
       ),
     };
   }

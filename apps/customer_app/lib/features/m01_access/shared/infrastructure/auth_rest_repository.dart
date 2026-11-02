@@ -134,7 +134,7 @@ class AuthRestRepository implements AuthRepository {
     } on Object {
       throw const AuthFailure(
         AuthFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
   }
@@ -161,7 +161,7 @@ class AuthRestRepository implements AuthRepository {
     } on Object {
       throw const AuthFailure(
         AuthFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
   }
@@ -234,7 +234,7 @@ class AuthRestRepository implements AuthRepository {
     }
     return const AuthFailure(
       AuthFailureKind.server,
-      'Chifa ASIA no está disponible por el momento. Inténtalo nuevamente.',
+      'KAIRO no está disponible por el momento. Inténtalo nuevamente.',
     );
   }
 }

@@ -42,8 +42,8 @@ class FoundationHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChifaPageScaffold(
       pageKey: const Key('page-inicio'),
-      title: 'El sabor nos reúne',
-      subtitle: 'Una tradición china con alma peruana.',
+      title: 'KAIRO · Sabores del Oriente',
+      subtitle: 'Una experiencia gastronómica contemporánea y exótica.',
       contentGap: 15,
       themeModeController: themeModeController,
       onBackPressed: onBackPressed,
@@ -98,8 +98,8 @@ class FoundationCatalogPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChifaPageScaffold(
       pageKey: const Key('page-menu'),
-      title: 'Nuestro menú',
-      subtitle: 'Elige una categoría y descubre los platos.',
+      title: 'Carta KAIRO',
+      subtitle: 'Elige una categoría y descubre creaciones asiáticas únicas.',
       contentGap: 14,
       themeModeController: themeModeController,
       onBackPressed: onBackPressed,
@@ -331,7 +331,7 @@ class FoundationAccountPage extends StatelessWidget {
                   cartItemCount: cartItemCount,
                   tableLabel: tableLabel,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _ProfileVisual(
                   palette: palette,
                   isDark: isDark,
@@ -382,7 +382,7 @@ class FoundationAccountPage extends StatelessWidget {
                               style: TextStyle(
                                 color: palette.textPrimary,
                                 fontFamily: AppTypography.displayFontFamily,
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 height: 1.2,
                               ),
@@ -414,16 +414,16 @@ class FoundationAccountPage extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         identityDetail,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: palette.textSecondary,
-                          fontSize: 13,
+                          fontSize: 12.5,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 5),
                       _AccountStatusBadge(
                         isGuest: isGuest,
                         palette: palette,
@@ -431,9 +431,9 @@ class FoundationAccountPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _AccountActions(
                     isGuest: isGuest,
                     onOpenOrders: onOpenOrders,
@@ -453,7 +453,7 @@ class FoundationAccountPage extends StatelessWidget {
                         : null,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 _buildConfigItem(
                   context: context,
                   palette: palette,
@@ -463,7 +463,7 @@ class FoundationAccountPage extends StatelessWidget {
                   subtitle: isGuest ? 'Sesión de invitado' : 'Nombre, correo y contacto',
                   isSelected: (profileController?.selectedTabIndex ?? 0) == 0,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _buildConfigItem(
                   context: context,
                   palette: palette,
@@ -477,7 +477,7 @@ class FoundationAccountPage extends StatelessWidget {
                           : 'Gestionar direcciones'),
                   isSelected: !isGuest && profileController?.selectedTabIndex == 1,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _buildConfigItem(
                   context: context,
                   palette: palette,
@@ -491,8 +491,29 @@ class FoundationAccountPage extends StatelessWidget {
                           : 'Gestionar tarjetas'),
                   isSelected: !isGuest && profileController?.selectedTabIndex == 2,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 _buildTabSection(context, palette, identityName, identityDetail),
+                if (onLogout != null) ...<Widget>[
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    key: const Key('account-logout-button'),
+                    icon: const Icon(LucideIcons.logOut, size: 16),
+                    label: const Text('Cerrar sesión'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+                        width: 1.2,
+                      ),
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () => _confirmLogout(context),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ],
             ),
           ),
@@ -511,86 +532,103 @@ class FoundationAccountPage extends StatelessWidget {
     required bool isSelected,
   }) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: Key('profile-tab-$index'),
-        onTap: (profileController != null && !isGuest)
-            ? () => profileController!.setTabIndex(index)
-            : null,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          decoration: BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected
+              ? (isDark ? const Color(0xFFD4AF37) : palette.brandRed)
+              : palette.controlBorder,
+          width: isSelected ? 1.5 : 1,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
             color: isSelected
                 ? (isDark
-                    ? palette.accentGold.withValues(alpha: 0.12)
+                    ? const Color(0xFFD4AF37).withValues(alpha: 0.12)
                     : palette.brandRed.withValues(alpha: 0.08))
-                : palette.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isSelected
-                  ? (isDark ? palette.accentGold : palette.brandRed)
-                  : palette.controlBorder,
-              width: isSelected ? 1.5 : 1,
-            ),
+                : Colors.black.withValues(alpha: 0.03),
+            blurRadius: isSelected ? 8 : 4,
+            offset: const Offset(0, 2),
           ),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark
-                          ? palette.accentGold.withValues(alpha: 0.2)
-                          : palette.brandRed.withValues(alpha: 0.15))
-                      : palette.surfaceTint,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 17,
-                  color: isSelected
-                      ? (isDark ? palette.accentGold : palette.brandRed)
-                      : palette.textPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: palette.textPrimary,
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: Key('profile-tab-$index'),
+          onTap: (profileController != null && !isGuest)
+              ? () => profileController!.setTabIndex(index)
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? (isDark
+                            ? const Color(0xFF382A1C)
+                            : const Color(0xFFFBECEB))
+                        : palette.surfaceTint,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected
+                          ? (isDark
+                              ? const Color(0xFFD4AF37).withValues(alpha: 0.5)
+                              : palette.brandRed.withValues(alpha: 0.3))
+                          : Colors.transparent,
                     ),
-                    const SizedBox(height: 1),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: palette.textSecondary,
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected
+                        ? (isDark ? const Color(0xFFE5C07B) : palette.brandRed)
+                        : palette.textPrimary,
+                  ),
                 ),
-              ),
-              Icon(
-                isSelected ? LucideIcons.chevronDown : LucideIcons.chevronRight,
-                size: 18,
-                color: isSelected
-                    ? (isDark ? palette.accentGold : palette.brandRed)
-                    : palette.textSecondary,
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: 14.5,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: palette.textSecondary,
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  isSelected ? LucideIcons.chevronDown : LucideIcons.chevronRight,
+                  size: 20,
+                  color: isSelected
+                      ? (isDark ? const Color(0xFFE5C07B) : palette.brandRed)
+                      : palette.textSecondary,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -624,6 +662,23 @@ class FoundationAccountPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        if (!isGuest) ...<Widget>[
+          _AccountQuickStats(
+            isGuest: isGuest,
+            palette: palette,
+            ordersCount: onOpenOrders != null ? 1 : 0,
+            addressesCount: profileController?.addresses.length ?? 0,
+            cardsCount: profileController?.cards.length ?? 0,
+            onTapOrders: onOpenOrders,
+            onTapAddresses: (profileController != null && !isGuest)
+                ? () => profileController!.setTabIndex(1)
+                : null,
+            onTapCards: (profileController != null && !isGuest)
+                ? () => profileController!.setTabIndex(2)
+                : null,
+          ),
+          const SizedBox(height: 16),
+        ],
         Padding(
           padding: const EdgeInsets.only(left: 5),
           child: Text(
@@ -969,10 +1024,10 @@ class _ProfileVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double avatarSize = 120.0;
+    const double avatarSize = 96.0;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 10),
+        padding: const EdgeInsets.only(top: 2, bottom: 6),
         child: _ProfileAvatar(
           dimension: avatarSize,
           isDark: isDark,
@@ -1049,12 +1104,14 @@ class _ProfileAvatar extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isDark ? const Color(0xFFD4AF37) : const Color(0xFFC53030),
-                  width: 3,
+                  width: 3.2,
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 8,
+                    color: (isDark ? const Color(0xFFD4AF37) : const Color(0xFF8E292E))
+                        .withValues(alpha: 0.24),
+                    blurRadius: 16,
+                    spreadRadius: 2,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -1091,18 +1148,18 @@ class _ProfileAvatar extends StatelessWidget {
                 right: 4,
                 bottom: 4,
                 child: Container(
-                  padding: const EdgeInsets.all(7),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF25D366),
+                    color: isDark ? const Color(0xFFD4AF37) : const Color(0xFF8E292E),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      color: isDark ? const Color(0xFF151718) : Colors.white,
                       width: 2.5,
                     ),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 5,
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -1142,47 +1199,200 @@ class _AccountStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color statusColor = isGuest ? palette.textAccent : palette.success;
-    final String label = isGuest ? 'SESIÓN DE INVITADO' : 'CUENTA REGISTRADA';
+    final String label = isGuest ? 'SESIÓN DE INVITADO' : 'CLIENTE VIP · KAIRO CLUB';
 
     return Semantics(
       label: label,
       excludeSemantics: true,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 157, minHeight: 22),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: palette.surfaceTint,
-            borderRadius: BorderRadius.circular(AppRadii.chip),
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 160, minHeight: 26),
+        decoration: BoxDecoration(
+          color: isGuest
+              ? palette.surfaceTint
+              : (isDark ? const Color(0xFF261D13) : const Color(0xFFFBF4E8)),
+          borderRadius: BorderRadius.circular(AppRadii.chip),
+          border: Border.all(
+            color: isGuest
+                ? palette.controlBorder
+                : (isDark
+                    ? const Color(0xFFD4AF37).withValues(alpha: 0.4)
+                    : const Color(0xFFC3934F).withValues(alpha: 0.5)),
+            width: 1.2,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
+          boxShadow: isGuest
+              ? null
+              : <BoxShadow>[
+                  BoxShadow(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                isGuest ? LucideIcons.user : LucideIcons.crown,
+                size: 13,
+                color: isGuest
+                    ? statusColor
+                    : (isDark ? const Color(0xFFD4AF37) : const Color(0xFF95692A)),
+              ),
+              const SizedBox(width: 7),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isGuest
+                        ? statusColor
+                        : (isDark ? const Color(0xFFF3E5AB) : const Color(0xFF8E292E)),
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
                   ),
                 ),
-                const SizedBox(width: 9),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontFamily: AppTypography.bodyFontFamily,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountQuickStats extends StatelessWidget {
+  const _AccountQuickStats({
+    required this.isGuest,
+    required this.palette,
+    required this.ordersCount,
+    required this.addressesCount,
+    required this.cardsCount,
+    this.onTapOrders,
+    this.onTapAddresses,
+    this.onTapCards,
+  });
+
+  final bool isGuest;
+  final AppPalette palette;
+  final int ordersCount;
+  final int addressesCount;
+  final int cardsCount;
+  final VoidCallback? onTapOrders;
+  final VoidCallback? onTapAddresses;
+  final VoidCallback? onTapCards;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.controlBorder),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: _buildStatItem(
+                  context: context,
+                  icon: LucideIcons.utensilsCrossed,
+                  count: '$ordersCount',
+                  label: 'Pedidos',
+                  onTap: onTapOrders,
+                ),
+              ),
+              Container(width: 1, height: 32, color: palette.controlBorder),
+              Expanded(
+                child: _buildStatItem(
+                  context: context,
+                  icon: LucideIcons.mapPin,
+                  count: isGuest ? '-' : '$addressesCount',
+                  label: 'Direcciones',
+                  onTap: onTapAddresses,
+                ),
+              ),
+              Container(width: 1, height: 32, color: palette.controlBorder),
+              Expanded(
+                child: _buildStatItem(
+                  context: context,
+                  icon: LucideIcons.creditCard,
+                  count: isGuest ? '-' : '$cardsCount',
+                  label: 'Métodos Pago',
+                  onTap: onTapCards,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required BuildContext context,
+    required IconData icon,
+    required String count,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  icon,
+                  size: 15,
+                  color: isDark ? const Color(0xFFD4AF37) : palette.brandRed,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  count,
+                  style: TextStyle(
+                    fontFamily: AppTypography.displayFontFamily,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: palette.textPrimary,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: AppTypography.bodyFontFamily,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: palette.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1207,15 +1417,17 @@ class _AccountActions extends StatelessWidget {
         final Widget primary = _AccountAction(
           key: const Key('account-orders-action'),
           label: 'Ver mis pedidos',
-          icon: onOpenOrders != null ? LucideIcons.receipt : null,
+          icon: onOpenOrders != null ? LucideIcons.receiptText : null,
           onPressed: onOpenOrders,
+          isPrimary: true,
         );
         final Widget secondary = onEditProfile != null && !isGuest
             ? _AccountAction(
                 key: const Key('account-edit-profile-action'),
                 label: 'Editar perfil',
-                icon: LucideIcons.pencil,
+                icon: LucideIcons.userPen,
                 onPressed: onEditProfile,
+                isPrimary: false,
               )
             : _DisabledAccountAction(
                 label: isGuest ? 'Perfil no disponible' : 'Editar perfil',
@@ -1234,7 +1446,7 @@ class _AccountActions extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(child: primary),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(child: secondary),
             ],
           ),
@@ -1244,72 +1456,108 @@ class _AccountActions extends StatelessWidget {
   }
 }
 
-class _AccountAction extends StatelessWidget {
+class _AccountAction extends StatefulWidget {
   const _AccountAction({
     required this.label,
     this.icon,
     this.onPressed,
+    this.isPrimary = true,
     super.key,
   });
 
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
+  final bool isPrimary;
+
+  @override
+  State<_AccountAction> createState() => _AccountActionState();
+}
+
+class _AccountActionState extends State<_AccountAction> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
-    final Widget content = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 47),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: icon == null
-            ? Center(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.onBrand,
-                    fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(icon, size: 16, color: AppColors.onBrand),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.onBrand,
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
+    final AppPalette palette = context.appPalette;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final Color bgColor = widget.isPrimary
+        ? palette.brandSurface
+        : (isDark ? const Color(0xFF26201A) : const Color(0xFFFBF6EE));
+    final Color textColor = widget.isPrimary
+        ? AppColors.onBrand
+        : (isDark ? const Color(0xFFE5C07B) : palette.brandRed);
+    final Border? border = widget.isPrimary
+        ? null
+        : Border.all(
+            color: isDark
+                ? const Color(0xFFD4AF37).withValues(alpha: 0.5)
+                : palette.brandRed.withValues(alpha: 0.4),
+            width: 1.4,
+          );
 
     return Semantics(
       button: true,
-      label: label,
-      child: Material(
-        color: context.appPalette.brandSurface,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: onPressed == null
-            ? content
-            : InkWell(onTap: onPressed, child: content),
+      label: widget.label,
+      child: AnimatedScale(
+        scale: _pressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: Container(
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: border,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: widget.isPrimary
+                    ? palette.brandSurface.withValues(alpha: 0.25)
+                    : Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onPressed,
+              onHighlightChanged: (bool h) => setState(() => _pressed = h),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      if (widget.icon != null) ...<Widget>[
+                        Icon(widget.icon, size: 17, color: textColor),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: Text(
+                          widget.label,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: textColor,
+                            fontFamily: AppTypography.bodyFontFamily,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1330,11 +1578,11 @@ class _DisabledAccountAction extends StatelessWidget {
       label: '$label. $detail',
       excludeSemantics: true,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 47),
+        constraints: const BoxConstraints(minHeight: 44),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: palette.surfaceTint,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: palette.controlBorder, width: 1.2),
           ),
           child: Padding(
@@ -1395,31 +1643,34 @@ class _AccountDataCard extends StatelessWidget {
         ? '${controller!.displayName ?? displayName} ${controller!.lastName}'
         : (controller?.displayName ?? displayName);
 
+    final String? phone = controller?.phone;
+    final String? birthDate = controller?.birthDate;
+    final String? dietary = controller?.dietaryPreferences;
+
     return Container(
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: palette.controlBorder),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // Item 1: Nombre (estilo WhatsApp)
-          _buildWhatsAppTile(
+          // Item 1: Nombre completo
+          _buildExecutiveRow(
             context: context,
             palette: palette,
             icon: LucideIcons.user,
-            label: 'Nombre',
+            label: 'Nombre completo',
             value: effectiveName,
-            helper:
-                'Visible para el restaurante y en tus pedidos.',
+            helper: 'Visible para el restaurante y en tus pedidos.',
             trailing: onEdit != null
                 ? IconButton(
                     key: const Key('account-name-edit-icon'),
@@ -1433,15 +1684,15 @@ class _AccountDataCard extends StatelessWidget {
                   )
                 : null,
           ),
-          Divider(height: 1, indent: 56, endIndent: 16, color: palette.controlBorder),
+          Divider(height: 1, indent: 62, endIndent: 16, color: palette.controlBorder),
           // Item 2: Correo electrónico
-          _buildWhatsAppTile(
+          _buildExecutiveRow(
             context: context,
             palette: palette,
             icon: LucideIcons.mail,
             label: 'Correo electrónico',
             value: email,
-            helper: 'Cuenta principal vinculada.',
+            helper: 'Cuenta principal vinculada con seguridad TLS.',
             trailing: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Icon(
@@ -1451,12 +1702,62 @@ class _AccountDataCard extends StatelessWidget {
               ),
             ),
           ),
+          if (phone != null && phone.isNotEmpty) ...<Widget>[
+            Divider(height: 1, indent: 62, endIndent: 16, color: palette.controlBorder),
+            _buildExecutiveRow(
+              context: context,
+              palette: palette,
+              icon: LucideIcons.phone,
+              label: 'Celular de contacto',
+              value: '+51 ${ProfileFormatters.formatPhone(phone)}',
+              helper: 'Validado para entregas y notificaciones.',
+              trailing: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Icon(
+                  LucideIcons.circleCheck,
+                  size: 18,
+                  color: palette.success,
+                ),
+              ),
+            ),
+          ],
+          if (birthDate != null && birthDate.isNotEmpty) ...<Widget>[
+            Divider(height: 1, indent: 62, endIndent: 16, color: palette.controlBorder),
+            _buildExecutiveRow(
+              context: context,
+              palette: palette,
+              icon: LucideIcons.cake,
+              label: 'Fecha de cumpleaños',
+              value: birthDate,
+              helper: 'Beneficios y sorpresas en KAIRO.',
+              trailing: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Icon(
+                  LucideIcons.gift,
+                  size: 18,
+                  color: isDark ? const Color(0xFFD4AF37) : palette.brandRed,
+                ),
+              ),
+            ),
+          ],
+          if (dietary != null && dietary.isNotEmpty) ...<Widget>[
+            Divider(height: 1, indent: 62, endIndent: 16, color: palette.controlBorder),
+            _buildExecutiveRow(
+              context: context,
+              palette: palette,
+              icon: LucideIcons.utensilsCrossed,
+              label: 'Preferencias culinarias',
+              value: dietary,
+              helper: 'Notas automáticas para cocina en cada pedido.',
+              trailing: null,
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildWhatsAppTile({
+  Widget _buildExecutiveRow({
     required BuildContext context,
     required AppPalette palette,
     required IconData icon,
@@ -1465,21 +1766,31 @@ class _AccountDataCard extends StatelessWidget {
     required String helper,
     Widget? trailing,
   }) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            width: 32,
-            height: 32,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: palette.surfaceTint,
+              color: isDark ? const Color(0xFF2C2219) : palette.surfaceTint,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFFD4AF37).withValues(alpha: 0.25)
+                    : palette.controlBorder,
+              ),
             ),
-            child: Icon(icon, size: 16, color: palette.textSecondary),
+            child: Icon(
+              icon,
+              size: 17,
+              color: isDark ? const Color(0xFFE5C07B) : palette.brandRed,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1491,7 +1802,8 @@ class _AccountDataCard extends StatelessWidget {
                     color: palette.textSecondary,
                     fontFamily: AppTypography.bodyFontFamily,
                     fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1500,17 +1812,17 @@ class _AccountDataCard extends StatelessWidget {
                   style: TextStyle(
                     color: palette.textPrimary,
                     fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   helper,
                   style: TextStyle(
-                    color: palette.textSecondary.withValues(alpha: 0.8),
+                    color: palette.textSecondary.withValues(alpha: 0.85),
                     fontFamily: AppTypography.bodyFontFamily,
-                    fontSize: 10,
+                    fontSize: 10.5,
                     height: 1.2,
                   ),
                 ),

@@ -93,11 +93,14 @@ class ChifaAppHeader extends StatelessWidget {
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            'CHIFA ASIA',
+                            'KAIRO',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             softWrap: false,
-                            style: Theme.of(context).textTheme.headlineLarge,
+                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                              letterSpacing: 2.5,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         if (tableLabel != null && tableLabel!.trim().isNotEmpty) ...<Widget>[
@@ -148,7 +151,7 @@ class ChifaAppHeader extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'EL SABOR NOS UNE',
+                      'ALTA COCINA ASIÁTICA',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
@@ -157,6 +160,7 @@ class ChifaAppHeader extends StatelessWidget {
                         fontFamily: AppTypography.bodyFontFamily,
                         fontSize: 8,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
                         height: 1.2,
                       ),
                     ),

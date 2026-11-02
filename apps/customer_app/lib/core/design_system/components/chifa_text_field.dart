@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../foundations/app_colors.dart';
 import '../foundations/app_spacing.dart';
+import '../foundations/app_typography.dart';
 
 class ChifaTextField extends StatelessWidget {
   const ChifaTextField({
@@ -20,6 +23,7 @@ class ChifaTextField extends StatelessWidget {
     this.autovalidateMode,
     this.autofillHints,
     this.focusNode,
+    this.inputFormatters,
     this.labelGap = AppSpacing.sm,
     this.labelHeight,
     this.borderRadius,
@@ -28,6 +32,8 @@ class ChifaTextField extends StatelessWidget {
     this.inputStyle,
     this.fieldHeight,
     this.fillColor,
+    this.errorText,
+    this.isValid,
     super.key,
   });
 
@@ -46,6 +52,7 @@ class ChifaTextField extends StatelessWidget {
   final AutovalidateMode? autovalidateMode;
   final Iterable<String>? autofillHints;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
   final double labelGap;
   final double? labelHeight;
   final double? borderRadius;
@@ -54,6 +61,8 @@ class ChifaTextField extends StatelessWidget {
   final TextStyle? inputStyle;
   final double? fieldHeight;
   final Color? fillColor;
+  final String? errorText;
+  final bool? isValid;
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +101,7 @@ class ChifaTextField extends StatelessWidget {
               autovalidateMode: autovalidateMode,
               autofillHints: autofillHints,
               focusNode: focusNode,
+              inputFormatters: inputFormatters,
               style: inputStyle ?? Theme.of(context).textTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: hintText,
@@ -133,10 +143,36 @@ class ChifaTextField extends StatelessWidget {
                           width: 1.4,
                         ),
                       ),
+                errorText: errorText,
+                errorMaxLines: 2,
+                errorStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 11.5,
+                  fontFamily: AppTypography.bodyFontFamily,
+                ),
                 prefixIcon: leadingIcon == null
                     ? null
                     : Icon(leadingIcon, color: palette.textSecondary, size: 20),
-                suffixIcon: trailing,
+                suffixIcon: trailing ??
+                    (isValid == true
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(
+                              LucideIcons.circleCheck,
+                              color: palette.success,
+                              size: 18,
+                            ),
+                          )
+                        : (isValid == false || errorText != null)
+                            ? Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: Icon(
+                                  LucideIcons.circleAlert,
+                                  color: Theme.of(context).colorScheme.error,
+                                  size: 18,
+                                ),
+                              )
+                            : null),
               ),
             ),
           ),

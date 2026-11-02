@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -8,6 +9,58 @@ import '../../../../app/theme/theme_mode_controller.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../application/user_profile_controller.dart';
 import '../domain/profile_models.dart';
+
+class PhoneNumberTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('51') && digits.length > 9) {
+      digits = digits.substring(2);
+    }
+    final String truncated = digits.length > 9 ? digits.substring(0, 9) : digits;
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < truncated.length; i++) {
+      if (i > 0 && i % 3 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(truncated[i]);
+    }
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class CardNumberTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.contains('•')) {
+      return newValue;
+    }
+    final String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final String truncated = digits.length > 16 ? digits.substring(0, 16) : digits;
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < truncated.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(truncated[i]);
+    }
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 const List<String> kSampleProfilePhotos = <String>[
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
@@ -64,7 +117,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       text: widget.controller.lastName ?? '',
     );
     _phoneController = TextEditingController(
-      text: widget.controller.phone ?? '',
+      text: widget.controller.phone != null
+          ? ProfileFormatters.formatPhone(widget.controller.phone!)
+          : '',
     );
     _emailController = TextEditingController(
       text: widget.currentEmail,
@@ -76,6 +131,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
       text: widget.controller.dietaryPreferences ?? '',
     );
     _customPhotoUrlController = TextEditingController();
+
+    _nameController.addListener(() => setState(() {}));
+    _lastNameController.addListener(() => setState(() {}));
+    _phoneController.addListener(() => setState(() {}));
+    _birthDateController.addListener(() => setState(() {}));
   }
 
   @override
@@ -473,12 +533,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Nombre completo',
               hintText: 'Ej. Roberto',
               keyboardType: TextInputType.name,
-              validator: (String? val) {
-                if (val == null || val.trim().isEmpty) {
-                  return 'Ingresa tu nombre completo.';
-                }
-                return null;
-              },
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (String? val) => ProfileValidators.name(val, label: 'nombre completo'),
+              isValid: _nameController.text.trim().isNotEmpty &&
+                  ProfileValidators.name(_nameController.text) == null,
             ),
             const SizedBox(height: 12),
 
@@ -489,6 +547,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Apellidos',
               hintText: 'Ej. Wong Chang',
               keyboardType: TextInputType.name,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (String? val) =>
+                  val != null && val.trim().isNotEmpty ? ProfileValidators.name(val, label: 'apellidos') : null,
+              isValid: _lastNameController.text.trim().isNotEmpty &&
+                  ProfileValidators.name(_lastNameController.text, label: 'apellidos') == null,
             ),
             const SizedBox(height: 12),
 
@@ -500,6 +563,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               hintText: 'correo@ejemplo.com',
               keyboardType: TextInputType.emailAddress,
               enabled: false,
+              isValid: true,
             ),
 
             const SizedBox(height: 18),
@@ -517,9 +581,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
               controller: _phoneController,
               leadingIcon: LucideIcons.phone,
               label: 'Celular de contacto (Perú - 9 dígitos)',
-              hintText: 'Ej. 987654321',
+              hintText: 'Ej. 987 654 321',
               keyboardType: TextInputType.phone,
+              inputFormatters: <TextInputFormatter>[
+                PhoneNumberTextInputFormatter(),
+              ],
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: ProfileValidators.phone,
+              isValid: _phoneController.text.trim().isNotEmpty &&
+                  ProfileValidators.phone(_phoneController.text) == null,
             ),
             const SizedBox(height: 12),
 
@@ -530,6 +600,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Fecha de nacimiento (Promociones)',
               hintText: 'DD/MM/AAAA (ej. 15/08/1995)',
               keyboardType: TextInputType.datetime,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: ProfileValidators.birthDate,
+              isValid: _birthDateController.text.trim().isNotEmpty &&
+                  ProfileValidators.birthDate(_birthDateController.text) == null,
             ),
 
             const SizedBox(height: 18),
@@ -680,8 +754,16 @@ class _AddAddressPageState extends State<AddAddressPage> {
     _addressController = TextEditingController(text: existing?.address ?? '');
     _deptController = TextEditingController(text: existing?.department ?? '');
     _referenceController = TextEditingController(text: existing?.reference ?? '');
-    _phoneController = TextEditingController(text: existing?.recipientPhone ?? '');
+    _phoneController = TextEditingController(
+      text: existing?.recipientPhone != null
+          ? ProfileFormatters.formatPhone(existing!.recipientPhone!)
+          : '',
+    );
     _isDefault = existing?.isDefault ?? false;
+
+    _labelController.addListener(() => setState(() {}));
+    _addressController.addListener(() => setState(() {}));
+    _phoneController.addListener(() => setState(() {}));
   }
 
   @override
@@ -806,7 +888,10 @@ class _AddAddressPageState extends State<AddAddressPage> {
               controller: _labelController,
               label: 'Nombre / Alias de la dirección',
               hintText: 'Ej. Casa, Depa Surco, Trabajo',
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: ProfileValidators.addressLabel,
+              isValid: _labelController.text.trim().isNotEmpty &&
+                  ProfileValidators.addressLabel(_labelController.text) == null,
             ),
             const SizedBox(height: 16),
 
@@ -816,7 +901,10 @@ class _AddAddressPageState extends State<AddAddressPage> {
               label: 'Dirección completa (Calle y Nro)',
               hintText: 'Ej. Av. Javier Prado Este 2450, San Borja',
               keyboardType: TextInputType.streetAddress,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: ProfileValidators.address,
+              isValid: _addressController.text.trim().isNotEmpty &&
+                  ProfileValidators.address(_addressController.text) == null,
             ),
             const SizedBox(height: 16),
 
@@ -841,8 +929,16 @@ class _AddAddressPageState extends State<AddAddressPage> {
               key: const Key('address-phone-input'),
               controller: _phoneController,
               label: 'Teléfono de contacto en recepción (opcional)',
-              hintText: 'Ej. 987111222',
+              hintText: 'Ej. 987 111 222',
               keyboardType: TextInputType.phone,
+              inputFormatters: <TextInputFormatter>[
+                PhoneNumberTextInputFormatter(),
+              ],
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (String? v) =>
+                  v != null && v.trim().isNotEmpty ? ProfileValidators.phone(v) : null,
+              isValid: _phoneController.text.trim().isNotEmpty &&
+                  ProfileValidators.phone(_phoneController.text) == null,
             ),
             const SizedBox(height: 12),
 
@@ -933,6 +1029,7 @@ class _AddCardPageState extends State<AddCardPage> {
     _cardNumberController.addListener(() => setState(() {}));
     _cardHolderController.addListener(() => setState(() {}));
     _expiryController.addListener(() => setState(() {}));
+    _cvvController.addListener(() => setState(() {}));
   }
 
   @override
@@ -1040,12 +1137,19 @@ class _AddCardPageState extends State<AddCardPage> {
               label: 'Número de tarjeta (16 dígitos)',
               hintText: '4557 0000 0000 0000',
               keyboardType: TextInputType.number,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              inputFormatters: <TextInputFormatter>[
+                CardNumberTextInputFormatter(),
+              ],
               validator: (String? value) {
                 if (widget.existingCard != null && value != null && value.contains('•')) {
                   return null;
                 }
                 return ProfileValidators.cardNumber(value);
               },
+              isValid: _cardNumberController.text.isNotEmpty &&
+                  (widget.existingCard != null && _cardNumberController.text.contains('•') ||
+                      ProfileValidators.cardNumber(_cardNumberController.text) == null),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -1055,7 +1159,10 @@ class _AddCardPageState extends State<AddCardPage> {
               controller: _cardHolderController,
               label: 'Nombre del titular',
               hintText: 'NOMBRE COMO FIGURA EN LA TARJETA',
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: ProfileValidators.cardHolder,
+              isValid: _cardHolderController.text.trim().isNotEmpty &&
+                  ProfileValidators.cardHolder(_cardHolderController.text) == null,
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -1069,7 +1176,10 @@ class _AddCardPageState extends State<AddCardPage> {
                     label: 'Vencimiento',
                     hintText: 'MM/AA',
                     keyboardType: TextInputType.number,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: ProfileValidators.cardExpiry,
+                    isValid: _expiryController.text.trim().isNotEmpty &&
+                        ProfileValidators.cardExpiry(_expiryController.text) == null,
                     textInputAction: TextInputAction.next,
                   ),
                 ),
@@ -1082,12 +1192,16 @@ class _AddCardPageState extends State<AddCardPage> {
                     hintText: '123',
                     keyboardType: TextInputType.number,
                     obscureText: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (String? value) {
                       if (widget.existingCard != null && value != null && value.contains('•')) {
                         return null;
                       }
                       return ProfileValidators.cardCvv(value);
                     },
+                    isValid: _cvvController.text.isNotEmpty &&
+                        (widget.existingCard != null && _cvvController.text.contains('•') ||
+                            ProfileValidators.cardCvv(_cvvController.text) == null),
                     textInputAction: TextInputAction.next,
                   ),
                 ),
@@ -1206,7 +1320,7 @@ class _LiveCreditCardPreview extends StatelessWidget {
             ? 'MASTERCARD'
             : (digits.startsWith('3')
                 ? 'AMEX'
-                : (rawNumber.contains('•') ? 'TARJETA' : 'CHIFA ASIA')));
+                : (rawNumber.contains('•') ? 'TARJETA' : 'KAIRO')));
 
     // Format into 4 chunks
     final StringBuffer formattedNumber = StringBuffer();
@@ -1421,7 +1535,7 @@ class _ProfilePhotoViewerPageState extends State<ProfilePhotoViewerPage> {
                     ),
                   ),
                   const Text(
-                    'Chifa ASIA · Perfil de cliente',
+                    'KAIRO · Perfil de cliente',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 11,

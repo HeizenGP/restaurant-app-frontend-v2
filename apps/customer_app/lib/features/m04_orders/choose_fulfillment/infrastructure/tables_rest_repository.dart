@@ -46,7 +46,7 @@ final class TablesRestRepository implements TablesRepository {
     } on Object {
       throw const TablesFailure(
         TablesFailureKind.network,
-        'No pudimos conectar con Chifa ASIA. Revisa tu conexión.',
+        'No pudimos conectar con KAIRO. Revisa tu conexión.',
       );
     }
 
@@ -85,7 +85,7 @@ final class TablesRestRepository implements TablesRepository {
       ),
       _ => const TablesFailure(
         TablesFailureKind.server,
-        'Chifa ASIA no está disponible por el momento. Inténtalo nuevamente.',
+        'KAIRO no está disponible por el momento. Inténtalo nuevamente.',
       ),
     };
   }

@@ -41,24 +41,23 @@ class GuestAccessPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const AccessKicker(),
-                const SizedBox(height: 30),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 42),
-                  child: Text(
-                    'Bienvenido, invitado',
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.displayLarge
-                        ?.copyWith(fontSize: 31, height: 42 / 31),
+                Text(
+                  'Modo Invitado',
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                    fontFamily: AppTypography.displayFontFamily,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: context.appPalette.textPrimary,
+                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 6),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 37),
-                  child: Text(
-                    'Explora el catálogo sin crear una cuenta.',
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(fontSize: 12, height: 20 / 12),
+                const SizedBox(height: 4),
+                Text(
+                  'Explora nuestra carta y platos exclusivos de KAIRO sin registro previo',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: context.appPalette.textSecondary,
+                    fontSize: 12.5,
+                    height: 1.35,
                   ),
                 ),
                 if (state.errorMessage != null) ...<Widget>[

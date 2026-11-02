@@ -8,10 +8,7 @@ import '../../../../core/design_system/design_system.dart';
 import '../../shared/domain/catalog_models.dart';
 import '../application/product_detail_controller.dart';
 
-typedef AddSelectedProduct = bool Function(
-  CatalogProduct product,
-  int quantity,
-);
+typedef AddSelectedProduct = Function;
 
 class CatalogProductDetailPage extends StatefulWidget {
   const CatalogProductDetailPage({
@@ -53,6 +50,13 @@ class CatalogProductDetailPage extends StatefulWidget {
 
 class _CatalogProductDetailPageState extends State<CatalogProductDetailPage> {
   int _quantity = 1;
+  final TextEditingController _notesController = TextEditingController();
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +89,28 @@ class _CatalogProductDetailPageState extends State<CatalogProductDetailPage> {
                 themeModeController: widget.themeModeController,
                 product: product,
                 quantity: _quantity,
+                notesController: _notesController,
                 onDecrease: _quantity > 1
                     ? () => setState(() => _quantity -= 1)
                     : null,
                 onIncrease: () => setState(() => _quantity += 1),
                 onAddToCart: () {
-                  final bool added = widget.onAddProduct(product, _quantity);
+                  final String? notes = _notesController.text.trim().isNotEmpty
+                      ? _notesController.text.trim()
+                      : null;
+                  bool added = false;
+                  final dynamic fn = widget.onAddProduct;
+                  try {
+                    added = fn(product, _quantity, notes) as bool;
+                  } on NoSuchMethodError {
+                    added = fn(product, _quantity) as bool;
+                  } catch (_) {
+                    try {
+                      added = fn(product, _quantity) as bool;
+                    } catch (_) {
+                      added = false;
+                    }
+                  }
                   if (added) {
                     if (widget.onProductAdded != null) {
                       widget.onProductAdded!();
@@ -118,6 +138,7 @@ class FoundationProductDetailPage extends StatelessWidget {
     required this.themeModeController,
     required this.product,
     this.quantity = 1,
+    this.notesController,
     this.onDecrease,
     this.onIncrease,
     this.onAddToCart,
@@ -135,6 +156,7 @@ class FoundationProductDetailPage extends StatelessWidget {
   final ThemeModeController themeModeController;
   final CatalogProduct product;
   final int quantity;
+  final TextEditingController? notesController;
   final VoidCallback? onDecrease;
   final VoidCallback? onIncrease;
   final VoidCallback? onAddToCart;
@@ -176,18 +198,18 @@ class FoundationProductDetailPage extends StatelessWidget {
             excludeSemantics: true,
             child: Container(
               key: const Key('product-visual-placeholder'),
-              height: 190,
+              height: 140,
               decoration: BoxDecoration(
                 color: palette.surfaceTint,
                 borderRadius: BorderRadius.circular(AppRadii.hero),
               ),
               alignment: Alignment.center,
               child: Transform.translate(
-                offset: const Offset(0, -16),
+                offset: const Offset(0, -8),
                 child: SvgPicture.asset(
                   'assets/images/m02/food_glyph.svg',
-                  width: 79,
-                  height: 78,
+                  width: 68,
+                  height: 68,
                   colorFilter: ColorFilter.mode(
                     palette.accentGold,
                     BlendMode.srcIn,
@@ -196,7 +218,7 @@ class FoundationProductDetailPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 31),
+          const SizedBox(height: 16),
           ConstrainedBox(
             key: const Key('product-detail-name'),
             constraints: const BoxConstraints(minHeight: 34),
@@ -205,7 +227,7 @@ class FoundationProductDetailPage extends StatelessWidget {
               style: Theme.of(context).textTheme.displayMedium,
             ),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: 8),
           ConstrainedBox(
             key: const Key('product-detail-price'),
             constraints: const BoxConstraints(minHeight: 28),
@@ -220,7 +242,7 @@ class FoundationProductDetailPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           ConstrainedBox(
             key: const Key('product-detail-availability'),
             constraints: const BoxConstraints(minHeight: 26),
@@ -229,14 +251,23 @@ class FoundationProductDetailPage extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
-          const SizedBox(height: 21),
+          const SizedBox(height: 14),
           _QuantityCard(
             available: available,
             quantity: quantity,
             onDecrease: available ? onDecrease : null,
             onIncrease: available ? onIncrease : null,
           ),
-          const SizedBox(height: 39),
+          const SizedBox(height: 12),
+          ChifaTextField(
+            key: const Key('product-detail-notes'),
+            controller: notesController,
+            label: 'Observaciones para el plato (opcional)',
+            hintText: 'Ej. Sin cebollita china, salsa tamarindo aparte',
+            leadingIcon: LucideIcons.messageSquare,
+            enabled: available,
+          ),
+          const SizedBox(height: 16),
           Semantics(
             button: true,
             enabled: available && onAddToCart != null,
