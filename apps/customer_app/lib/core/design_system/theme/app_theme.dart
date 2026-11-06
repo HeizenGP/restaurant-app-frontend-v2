@@ -33,7 +33,7 @@ abstract final class AppTheme {
 
     final OutlineInputBorder inputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppRadii.control),
-      borderSide: BorderSide(color: palette.controlBorder),
+      borderSide: BorderSide(color: palette.controlBorder, width: 1.0),
     );
 
     return ThemeData(
@@ -44,6 +44,29 @@ abstract final class AppTheme {
       canvasColor: palette.background,
       dividerColor: palette.border,
       fontFamily: AppTypography.bodyFontFamily,
+      appBarTheme: AppBarTheme(
+        backgroundColor: palette.background,
+        foregroundColor: palette.textPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: palette.textPrimary,
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          fontFamily: AppTypography.bodyFontFamily,
+        ),
+        iconTheme: IconThemeData(color: palette.textPrimary, size: 20),
+      ),
+      cardTheme: CardThemeData(
+        color: palette.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.card),
+          side: BorderSide(color: palette.border, width: 1.0),
+        ),
+      ),
       textTheme: AppTypography.textTheme(
         primary: palette.textPrimary,
         secondary: palette.textSecondary,
@@ -54,23 +77,23 @@ abstract final class AppTheme {
         fillColor: palette.controlSurface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 15,
+          vertical: 16,
         ),
         enabledBorder: inputBorder,
         disabledBorder: inputBorder.copyWith(
           borderSide: BorderSide(color: palette.disabled),
         ),
         focusedBorder: inputBorder.copyWith(
-          borderSide: BorderSide(color: palette.brandRed, width: 1.4),
+          borderSide: BorderSide(color: palette.brandRed, width: 1.5),
         ),
         errorBorder: inputBorder.copyWith(
-          borderSide: BorderSide(color: colorScheme.error),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.2),
         ),
         focusedErrorBorder: inputBorder.copyWith(
-          borderSide: BorderSide(color: colorScheme.error, width: 1.4),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.5),
         ),
         hintStyle: TextStyle(color: palette.textSecondary, fontSize: 14),
-        labelStyle: TextStyle(color: palette.textPrimary),
+        labelStyle: TextStyle(color: palette.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -78,14 +101,14 @@ abstract final class AppTheme {
           foregroundColor: palette.onBrand,
           disabledBackgroundColor: palette.disabled,
           disabledForegroundColor: palette.textSecondary,
-          minimumSize: const Size(48, 54),
+          minimumSize: const Size(48, 52),
           padding: const EdgeInsets.symmetric(horizontal: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadii.control),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.bodyFontFamily,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -94,15 +117,15 @@ abstract final class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: palette.textPrimary,
           backgroundColor: palette.secondarySurface,
-          minimumSize: const Size(48, 49),
+          minimumSize: const Size(48, 52),
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          side: BorderSide(color: palette.controlBorder, width: 1.2),
+          side: BorderSide(color: palette.controlBorder, width: 1.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadii.control),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.bodyFontFamily,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
