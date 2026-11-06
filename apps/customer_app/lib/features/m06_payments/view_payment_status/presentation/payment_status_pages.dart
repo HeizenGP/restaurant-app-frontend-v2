@@ -802,6 +802,10 @@ void _showPaymentGatewayDialog(BuildContext context, String amount) {
                             key: const Key('gateway-card-input'),
                             controller: cardController,
                             keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly,
+                              _PaymentCardNumberFormatter(),
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Número de tarjeta',
                               hintText: '4557 0000 0000 0000',
@@ -815,6 +819,10 @@ void _showPaymentGatewayDialog(BuildContext context, String amount) {
                               Expanded(
                                 child: TextField(
                                   controller: expiryController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: <TextInputFormatter>[
+                                    _PaymentCardExpiryFormatter(),
+                                  ],
                                   decoration: InputDecoration(
                                     labelText: 'MM/AA',
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -825,7 +833,12 @@ void _showPaymentGatewayDialog(BuildContext context, String amount) {
                               Expanded(
                                 child: TextField(
                                   controller: cvvController,
+                                  keyboardType: TextInputType.number,
                                   obscureText: true,
+                                  inputFormatters: <TextInputFormatter>[
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(4),
+                                  ],
                                   decoration: InputDecoration(
                                     labelText: 'CVV',
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -892,6 +905,71 @@ class _PaymentFrame extends StatelessWidget {
             : Brightness.dark,
       ),
       child: Scaffold(body: child),
+    );
+  }
+}
+
+class _PaymentCardNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final String truncated = digits.length > 16 ? digits.substring(0, 16) : digits;
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < truncated.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(truncated[i]);
+    }
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class _PaymentCardExpiryFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String oldText = oldValue.text;
+    final String newText = newValue.text;
+
+    String digits = newText.replaceAll(RegExp(r'\D'), '');
+    if (oldText.endsWith('/') && newText.length < oldText.length) {
+      if (digits.isNotEmpty) {
+        digits = digits.substring(0, digits.length - 1);
+      }
+    }
+
+    if (digits.length > 4) {
+      digits = digits.substring(0, 4);
+    }
+
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 2) {
+        buffer.write('/');
+      }
+      buffer.write(digits[i]);
+    }
+
+    if (digits.length == 2 &&
+        !oldText.endsWith('/') &&
+        newText.length > oldText.length) {
+      buffer.write('/');
+    }
+
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

@@ -29,6 +29,48 @@ class _PhoneNumberTextInputFormatter extends TextInputFormatter {
   }
 }
 
+class _CardExpiryTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String oldText = oldValue.text;
+    final String newText = newValue.text;
+
+    String digits = newText.replaceAll(RegExp(r'\D'), '');
+    if (oldText.endsWith('/') && newText.length < oldText.length) {
+      if (digits.isNotEmpty) {
+        digits = digits.substring(0, digits.length - 1);
+      }
+    }
+
+    if (digits.length > 4) {
+      digits = digits.substring(0, 4);
+    }
+
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 2) {
+        buffer.write('/');
+      }
+      buffer.write(digits[i]);
+    }
+
+    if (digits.length == 2 &&
+        !oldText.endsWith('/') &&
+        newText.length > oldText.length) {
+      buffer.write('/');
+    }
+
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
 class _CardNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -518,6 +560,7 @@ class _AddCardDialogState extends State<AddCardDialog> {
                 controller: _cardNumberController,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d\s•]')),
                   _CardNumberTextInputFormatter(),
                 ],
                 decoration: InputDecoration(
@@ -555,7 +598,7 @@ class _AddCardDialogState extends State<AddCardDialog> {
                       controller: _expiryController,
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
-                        LengthLimitingTextInputFormatter(5),
+                        _CardExpiryTextInputFormatter(),
                       ],
                       decoration: InputDecoration(
                         labelText: 'Vencimiento',

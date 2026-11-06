@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../shared/domain/auth_models.dart';
 import '../domain/profile_models.dart';
 
-typedef RemoteProfileUpdater = Future<void> Function({
+typedef RemoteProfileUpdater = Future<bool> Function({
   String? displayName,
   String? phone,
   String? avatarUrl,
@@ -80,6 +80,8 @@ class UserProfileController extends ChangeNotifier {
   int _selectedTabIndex = 0;
   final List<CustomerAddress> _addresses;
   final List<SavedPaymentCard> _cards;
+  bool _isSyncing = false;
+  String? _lastSyncError;
 
   String? get userId => _userId;
   String? get displayName => _displayName;
@@ -91,6 +93,16 @@ class UserProfileController extends ChangeNotifier {
   int get selectedTabIndex => _selectedTabIndex;
   List<CustomerAddress> get addresses => List<CustomerAddress>.unmodifiable(_addresses);
   List<SavedPaymentCard> get cards => List<SavedPaymentCard>.unmodifiable(_cards);
+  bool get isSyncing => _isSyncing;
+  String? get lastSyncError => _lastSyncError;
+
+  String? get initials {
+    final String? name = _displayName?.trim();
+    if (name != null && name.isNotEmpty) {
+      return name[0].toUpperCase();
+    }
+    return null;
+  }
 
   Future<void> loadForUser(String? userId) async {
     _userId = userId;
@@ -290,45 +302,61 @@ class UserProfileController extends ChangeNotifier {
     unawaited(saveToStorage());
   }
 
-  void _syncRemote() {
-    if (_onRemoteUpdate == null || _userId == null) return;
-    final List<Map<String, dynamic>> cardsData = _cards.map((SavedPaymentCard c) => <String, dynamic>{
-      'id': c.id,
-      'card_number_masked': c.cardNumberMasked,
-      'card_holder': c.cardHolder,
-      'expiry': c.expiry,
-      'brand': c.brand,
-      if (c.documentType != null) 'document_type': c.documentType,
-      if (c.documentNumber != null) 'document_number': c.documentNumber,
-    }).toList();
+  Future<bool> syncRemote() async {
+    if (_onRemoteUpdate == null || _userId == null) return true;
+    _isSyncing = true;
+    _lastSyncError = null;
+    notifyListeners();
 
-    final List<Map<String, dynamic>> addressesData = _addresses.map((CustomerAddress a) => <String, dynamic>{
-      'id': a.id,
-      'label': a.label,
-      'address': a.address,
-      if (a.reference != null) 'reference': a.reference,
-      if (a.department != null) 'department': a.department,
-      if (a.recipientPhone != null) 'recipient_phone': a.recipientPhone,
-      'is_default': a.isDefault,
-    }).toList();
+    try {
+      final List<Map<String, dynamic>> cardsData = _cards.map((SavedPaymentCard c) => <String, dynamic>{
+        'id': c.id,
+        'card_number_masked': c.cardNumberMasked,
+        'card_holder': c.cardHolder,
+        'expiry': c.expiry,
+        'brand': c.brand,
+        if (c.documentType != null) 'document_type': c.documentType,
+        if (c.documentNumber != null) 'document_number': c.documentNumber,
+      }).toList();
 
-    unawaited(_onRemoteUpdate!(
-      displayName: _displayName,
-      phone: _phone,
-      avatarUrl: _avatarPath,
-      savedCards: cardsData,
-      savedAddresses: addressesData,
-    ));
+      final List<Map<String, dynamic>> addressesData = _addresses.map((CustomerAddress a) => <String, dynamic>{
+        'id': a.id,
+        'label': a.label,
+        'address': a.address,
+        if (a.reference != null) 'reference': a.reference,
+        if (a.department != null) 'department': a.department,
+        if (a.recipientPhone != null) 'recipient_phone': a.recipientPhone,
+        'is_default': a.isDefault,
+      }).toList();
+
+      final bool ok = await _onRemoteUpdate!(
+        displayName: _displayName,
+        phone: _phone,
+        avatarUrl: _avatarPath,
+        savedCards: cardsData,
+        savedAddresses: addressesData,
+      );
+      if (!ok) {
+        _lastSyncError = 'No se pudo sincronizar el perfil con el servidor.';
+      }
+      return ok;
+    } catch (e) {
+      _lastSyncError = 'Error de conexión al sincronizar perfil: $e';
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
   }
 
-  void updateProfile({
+  Future<bool> updateProfile({
     required String displayName,
     String? lastName,
     String? phone,
     String? avatarPath,
     String? birthDate,
     String? dietaryPreferences,
-  }) {
+  }) async {
     _displayName = displayName.trim();
     if (lastName != null) {
       _lastName = lastName.trim();
@@ -344,8 +372,8 @@ class UserProfileController extends ChangeNotifier {
       _dietaryPreferences = dietaryPreferences.trim();
     }
     notifyListeners();
-    unawaited(saveToStorage());
-    _syncRemote();
+    await saveToStorage();
+    return syncRemote();
   }
 
   void addAddress({
@@ -386,14 +414,14 @@ class UserProfileController extends ChangeNotifier {
     );
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 
   void removeAddress(String id) {
     _addresses.removeWhere((CustomerAddress a) => a.id == id);
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 
   void updateAddress(CustomerAddress updated) {
@@ -418,7 +446,7 @@ class UserProfileController extends ChangeNotifier {
     _addresses[index] = updated;
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 
   void addCard({
@@ -451,14 +479,14 @@ class UserProfileController extends ChangeNotifier {
     );
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 
   void removeCard(String id) {
     _cards.removeWhere((SavedPaymentCard c) => c.id == id);
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 
   void updateCard(SavedPaymentCard updated) {
@@ -467,6 +495,6 @@ class UserProfileController extends ChangeNotifier {
     _cards[index] = updated;
     notifyListeners();
     unawaited(saveToStorage());
-    _syncRemote();
+    unawaited(syncRemote());
   }
 }

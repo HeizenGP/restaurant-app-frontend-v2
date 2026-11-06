@@ -13,6 +13,12 @@ abstract interface class OrderTrackingRepository {
     String orderId, {
     required String accessToken,
   });
+
+  Future<OrderSnapshot> requestCancellation(
+    String orderId, {
+    required String reason,
+    required String accessToken,
+  });
 }
 
 typedef OrderAccessTokenProvider = String? Function();

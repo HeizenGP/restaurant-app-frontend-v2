@@ -28,6 +28,72 @@ void main() {
       expect(ProfileFormatters.formatCardNumber('45571234'), '4557 1234');
       expect(ProfileFormatters.formatCardNumber(''), '');
     });
+
+    test('CardExpiryTextInputFormatter automatically places slash and limits to 4 digits', () {
+      final CardExpiryTextInputFormatter formatter = CardExpiryTextInputFormatter();
+      // Typing 1 digit
+      var result = formatter.formatEditUpdate(
+        const TextEditingValue(text: ''),
+        const TextEditingValue(text: '1'),
+      );
+      expect(result.text, '1');
+
+      // Typing 2nd digit -> auto slash
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '1'),
+        const TextEditingValue(text: '12'),
+      );
+      expect(result.text, '12/');
+
+      // Typing month and year digits
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '12/'),
+        const TextEditingValue(text: '12/28'),
+      );
+      expect(result.text, '12/28');
+
+      // Attempting to type more than 4 digits -> strictly capped
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '12/28'),
+        const TextEditingValue(text: '12/2899'),
+      );
+      expect(result.text, '12/28');
+
+      // Backspacing across slash
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '12/'),
+        const TextEditingValue(text: '12'),
+      );
+      expect(result.text, '1');
+    });
+
+    test('DateTextInputFormatter automatically places slashes and limits to 8 digits', () {
+      final DateTextInputFormatter formatter = DateTextInputFormatter();
+      var result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '1'),
+        const TextEditingValue(text: '15'),
+      );
+      expect(result.text, '15/');
+
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '15/0'),
+        const TextEditingValue(text: '15/08'),
+      );
+      expect(result.text, '15/08/');
+
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '15/08/'),
+        const TextEditingValue(text: '15/08/1995'),
+      );
+      expect(result.text, '15/08/1995');
+
+      // Attempting to type more than 8 digits
+      result = formatter.formatEditUpdate(
+        const TextEditingValue(text: '15/08/1995'),
+        const TextEditingValue(text: '15/08/199599'),
+      );
+      expect(result.text, '15/08/1995');
+    });
   });
 
   group('ProfileValidators', () {
@@ -242,6 +308,7 @@ void main() {
       await tester.enterText(find.byKey(const Key('edit-profile-birthdate')), '12/04/1992');
       await tester.enterText(find.byKey(const Key('edit-profile-dietary')), 'Sin cebolla china');
 
+      await tester.ensureVisible(find.byKey(const Key('edit-profile-save-button')));
       await tester.tap(find.byKey(const Key('edit-profile-save-button')));
       await tester.pumpAndSettle();
 
@@ -386,9 +453,10 @@ void main() {
       await tester.tap(find.byKey(const Key('header-back-button')));
       await tester.pumpAndSettle();
 
-      // Go to tab 1: Direcciones
+      // Go to tab 1: Direcciones -> opens addresses page
       await tester.tap(find.byKey(const Key('profile-tab-1')));
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('page-addresses')), findsOneWidget);
 
       // Tap '+ Agregar dirección' -> opens full AddAddressPage
       await tester.tap(find.byKey(const Key('account-add-address-button')));
@@ -396,13 +464,18 @@ void main() {
 
       expect(find.byKey(const Key('page-add-address')), findsOneWidget);
 
-      // Pop back
+      // Pop back from AddAddressPage to addresses page
       await tester.tap(find.byKey(const Key('header-back-button')));
       await tester.pumpAndSettle();
 
-      // Go to tab 2: Tarjetas
+      // Pop back from addresses page to Account page
+      await tester.tap(find.byKey(const Key('header-back-button')));
+      await tester.pumpAndSettle();
+
+      // Go to tab 2: Tarjetas -> opens cards page
       await tester.tap(find.byKey(const Key('profile-tab-2')));
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('page-cards')), findsOneWidget);
 
       // Tap '+ Agregar tarjeta' -> opens full AddCardPage
       await tester.tap(find.byKey(const Key('account-add-card-button')));
@@ -410,7 +483,11 @@ void main() {
 
       expect(find.byKey(const Key('page-add-card')), findsOneWidget);
 
-      // Pop back
+      // Pop back from AddCardPage to cards page
+      await tester.tap(find.byKey(const Key('header-back-button')));
+      await tester.pumpAndSettle();
+
+      // Pop back from cards page to Account page
       await tester.tap(find.byKey(const Key('header-back-button')));
       await tester.pumpAndSettle();
 

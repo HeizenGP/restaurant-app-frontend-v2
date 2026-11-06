@@ -82,88 +82,64 @@ class ChifaAppHeader extends StatelessWidget {
               const SizedBox(width: 6),
             ],
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 2),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(
-                            'KAIRO',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: false,
-                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                              letterSpacing: 2.5,
-                              fontWeight: FontWeight.w700,
+                    const KairoBrandSeal(size: 34),
+                    if (tableLabel != null && tableLabel!.trim().isNotEmpty) ...<Widget>[
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? palette.accentGold.withValues(alpha: 0.15)
+                                : palette.brandRed.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDarkMode
+                                  ? palette.accentGold
+                                  : palette.brandRed,
+                              width: 1,
                             ),
                           ),
-                        ),
-                        if (tableLabel != null && tableLabel!.trim().isNotEmpty) ...<Widget>[
-                          const SizedBox(width: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isDarkMode
-                                  ? palette.accentGold.withValues(alpha: 0.15)
-                                  : palette.brandRed.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Icon(
+                                LucideIcons.mapPin,
+                                size: 10,
                                 color: isDarkMode
                                     ? palette.accentGold
                                     : palette.brandRed,
-                                width: 1,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Icon(
-                                  LucideIcons.mapPin,
-                                  size: 9,
-                                  color: isDarkMode
-                                      ? palette.accentGold
-                                      : palette.brandRed,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
                                   tableLabel!.trim(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
                                   style: TextStyle(
                                     fontFamily: AppTypography.bodyFontFamily,
-                                    fontSize: 8,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                     color: isDarkMode
                                         ? palette.accentGold
                                         : palette.brandRed,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      'ALTA COCINA ASIÁTICA',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: TextStyle(
-                        color: palette.textAccent,
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                        height: 1.2,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -412,3 +388,67 @@ class _HeaderTile extends StatelessWidget {
     );
   }
 }
+
+/// The KAIRO seal (凱). Elegant corporate red squircle with subtle gold border.
+class KairoBrandSeal extends StatelessWidget {
+  const KairoBrandSeal({this.size = 38, super.key});
+
+  final double size;
+
+  static const Color _kGoldLight = Color(0xFFFBE4C2);
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    return SizedBox.square(
+      dimension: size,
+      child: FittedBox(
+        child: SizedBox.square(
+          dimension: 60,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: palette.brandRed,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: palette.accentGold, width: 1.5),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: palette.brandRed.withValues(alpha: 0.16),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: palette.accentGold.withValues(alpha: 0.35),
+                      width: 0.8,
+                    ),
+                  ),
+                ),
+                const Text(
+                  '凱',
+                  textScaler: TextScaler.noScaling,
+                  style: TextStyle(
+                    color: _kGoldLight,
+                    fontFamily: AppTypography.displayFontFamily,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

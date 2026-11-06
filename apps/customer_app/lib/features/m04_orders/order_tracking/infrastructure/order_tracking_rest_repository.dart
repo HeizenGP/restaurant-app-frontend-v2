@@ -78,6 +78,39 @@ final class OrderTrackingRestRepository implements OrderTrackingRepository {
     return OrderTrackingJsonMapper.decodeTracking(_decodeJson(response));
   }
 
+  @override
+  Future<OrderSnapshot> requestCancellation(
+    String orderId, {
+    required String reason,
+    required String accessToken,
+  }) async {
+    _requireAccessToken(accessToken);
+    final String normalizedId = orderId.trim();
+    if (normalizedId.isEmpty) {
+      throw const OrderFailure(
+        OrderFailureKind.validation,
+        'El pedido indicado no es válido.',
+      );
+    }
+    final http.Response response = await _send(
+      () => _client.post(
+        _endpoint(<String>['orders', normalizedId, 'decision']),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'approved': false,
+        }),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw _failureForCancellation(response.statusCode);
+    }
+    return OrderJsonMapper.decodeOrder(_decodeJson(response));
+  }
+
   Future<http.Response> _get(
     List<String> pathSegments, {
     required String accessToken,
@@ -143,6 +176,35 @@ final class OrderTrackingRestRepository implements OrderTrackingRepository {
         'Tu sesión terminó. Inicia sesión nuevamente.',
       );
     }
+  }
+
+  OrderFailure _failureForCancellation(int statusCode) {
+    return switch (statusCode) {
+      401 => const OrderFailure(
+        OrderFailureKind.unauthorized,
+        'Tu sesión terminó. Inicia sesión nuevamente.',
+      ),
+      403 => const OrderFailure(
+        OrderFailureKind.forbidden,
+        'La cancelación directa requiere aprobación del personal de KAIRO.',
+      ),
+      404 => const OrderFailure(
+        OrderFailureKind.notFound,
+        'No encontramos el pedido solicitado.',
+      ),
+      409 => const OrderFailure(
+        OrderFailureKind.conflict,
+        'El pedido no puede ser cancelado en su estado actual.',
+      ),
+      400 || 422 => const OrderFailure(
+        OrderFailureKind.validation,
+        'No pudimos procesar la cancelación del pedido.',
+      ),
+      _ => const OrderFailure(
+        OrderFailureKind.server,
+        'KAIRO no pudo procesar la cancelación en este momento.',
+      ),
+    };
   }
 
   OrderFailure _failureFor(int statusCode) {

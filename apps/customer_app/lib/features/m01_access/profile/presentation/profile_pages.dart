@@ -62,6 +62,90 @@ class CardNumberTextInputFormatter extends TextInputFormatter {
   }
 }
 
+class CardExpiryTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String oldText = oldValue.text;
+    final String newText = newValue.text;
+
+    String digits = newText.replaceAll(RegExp(r'\D'), '');
+    if (oldText.endsWith('/') && newText.length < oldText.length) {
+      if (digits.isNotEmpty) {
+        digits = digits.substring(0, digits.length - 1);
+      }
+    }
+
+    if (digits.length > 4) {
+      digits = digits.substring(0, 4);
+    }
+
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 2) {
+        buffer.write('/');
+      }
+      buffer.write(digits[i]);
+    }
+
+    if (digits.length == 2 &&
+        !oldText.endsWith('/') &&
+        newText.length > oldText.length) {
+      buffer.write('/');
+    }
+
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class DateTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String oldText = oldValue.text;
+    final String newText = newValue.text;
+
+    String digits = newText.replaceAll(RegExp(r'\D'), '');
+    if (oldText.endsWith('/') && newText.length < oldText.length) {
+      if (digits.isNotEmpty) {
+        digits = digits.substring(0, digits.length - 1);
+      }
+    }
+
+    if (digits.length > 8) {
+      digits = digits.substring(0, 8);
+    }
+
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 2 || i == 4) {
+        buffer.write('/');
+      }
+      buffer.write(digits[i]);
+    }
+
+    if ((digits.length == 2 || digits.length == 4) &&
+        !oldText.endsWith('/') &&
+        newText.length > oldText.length) {
+      buffer.write('/');
+    }
+
+    final String formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
 const List<String> kSampleProfilePhotos = <String>[
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
@@ -176,30 +260,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  void _save() {
+  Future<void> _save() async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    widget.controller.updateProfile(
-      displayName: _nameController.text,
-      lastName: _lastNameController.text,
-      phone: _phoneController.text,
+    final bool ok = await widget.controller.updateProfile(
+      displayName: _nameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phone: _phoneController.text.replaceAll(RegExp(r'\s+'), ''),
       avatarPath: _currentPhotoPath,
-      birthDate: _birthDateController.text,
-      dietaryPreferences: _dietaryController.text,
+      birthDate: _birthDateController.text.trim(),
+      dietaryPreferences: _dietaryController.text.trim(),
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil actualizado correctamente.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (!mounted) return;
 
-    if (widget.onBackPressed != null) {
-      widget.onBackPressed!();
-    } else if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Perfil actualizado correctamente.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      if (widget.onBackPressed != null) {
+        widget.onBackPressed!();
+      } else if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.controller.lastSyncError ??
+                'No se pudo sincronizar el perfil con el servidor. Revisa tu conexión.',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -211,8 +310,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       body: ChifaPageScaffold(
         pageKey: const Key('page-edit-profile'),
-        title: 'Editar perfil',
-        subtitle: 'Actualiza tus datos personales y foto de perfil.',
+        title: 'Información personal',
+        subtitle: widget.currentEmail,
         themeModeController: widget.themeModeController,
         onBackPressed: widget.onBackPressed,
         showBackButton: widget.showBackButton,
@@ -244,20 +343,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       alignment: Alignment.bottomRight,
                       children: <Widget>[
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 104,
+                          height: 104,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: palette.surfaceTint,
                             border: Border.all(
                               color: isDark ? palette.accentGold : palette.brandRed,
-                              width: 3,
+                              width: 2.5,
                             ),
                             boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.12),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 10,
-                                offset: const Offset(0, 4),
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
@@ -266,25 +365,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(7),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF25D366),
+                            color: palette.brandRed,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                              width: 2.5,
+                              width: 2.2,
                             ),
                           ),
                           child: const Icon(
                             LucideIcons.camera,
-                            size: 18,
+                            size: 16,
                             color: Colors.white,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${_nameController.text.trim()} ${_lastNameController.text.trim()}'.trim().isNotEmpty
+                        ? '${_nameController.text.trim()} ${_lastNameController.text.trim()}'.trim()
+                        : widget.currentDisplayName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   TextButton.icon(
                     key: const Key('view-photo-fullscreen-action'),
                     icon: const Icon(LucideIcons.maximize2, size: 14),
@@ -533,12 +645,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Nombre completo',
               hintText: 'Ej. Roberto',
               keyboardType: TextInputType.name,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (String? val) => ProfileValidators.name(val, label: 'nombre completo'),
               isValid: _nameController.text.trim().isNotEmpty &&
                   ProfileValidators.name(_nameController.text) == null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
             ChifaTextField(
               key: const Key('edit-profile-lastname'),
@@ -547,13 +661,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Apellidos',
               hintText: 'Ej. Wong Chang',
               keyboardType: TextInputType.name,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (String? val) =>
                   val != null && val.trim().isNotEmpty ? ProfileValidators.name(val, label: 'apellidos') : null,
               isValid: _lastNameController.text.trim().isNotEmpty &&
                   ProfileValidators.name(_lastNameController.text, label: 'apellidos') == null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
             ChifaTextField(
               key: const Key('edit-profile-email'),
@@ -562,11 +678,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Correo electrónico (Cuenta principal)',
               hintText: 'correo@ejemplo.com',
               keyboardType: TextInputType.emailAddress,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               enabled: false,
               isValid: true,
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
             // Section 2: Contacto y Promociones
             _buildSectionHeader(
@@ -583,6 +701,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Celular de contacto (Perú - 9 dígitos)',
               hintText: 'Ej. 987 654 321',
               keyboardType: TextInputType.phone,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               inputFormatters: <TextInputFormatter>[
                 PhoneNumberTextInputFormatter(),
               ],
@@ -591,7 +711,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               isValid: _phoneController.text.trim().isNotEmpty &&
                   ProfileValidators.phone(_phoneController.text) == null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
             ChifaTextField(
               key: const Key('edit-profile-birthdate'),
@@ -600,13 +720,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Fecha de nacimiento (Promociones)',
               hintText: 'DD/MM/AAAA (ej. 15/08/1995)',
               keyboardType: TextInputType.datetime,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              inputFormatters: <TextInputFormatter>[
+                DateTextInputFormatter(),
+              ],
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: ProfileValidators.birthDate,
               isValid: _birthDateController.text.trim().isNotEmpty &&
                   ProfileValidators.birthDate(_birthDateController.text) == null,
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
             // Section 3: Notas de Cocina
             _buildSectionHeader(
@@ -623,9 +748,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               label: 'Preferencias culinarias / Alergias',
               hintText: 'Ej. Sin picante, poco sillao, alérgico a mariscos',
               keyboardType: TextInputType.multiline,
+              borderRadius: 16,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             ChifaButton(
               key: const Key('edit-profile-save-button'),
@@ -634,6 +761,106 @@ class _EditProfilePageState extends State<EditProfilePage> {
               height: 52,
               borderRadius: 14,
               onPressed: _save,
+            ),
+
+            const SizedBox(height: 24),
+
+            // Danger zone card (as shown in design reference)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF281416) : const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Icon(
+                        LucideIcons.triangleAlert,
+                        size: 18,
+                        color: Color(0xFFDC2626),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Zona de peligro',
+                        style: TextStyle(
+                          color: Color(0xFFDC2626),
+                          fontFamily: AppTypography.bodyFontFamily,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Una vez eliminada tu cuenta, no podrás recuperarla. Todos tus datos serán eliminados permanentemente.',
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : const Color(0xFF991B1B),
+                      fontFamily: AppTypography.bodyFontFamily,
+                      fontSize: 12.5,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (BuildContext ctx) => AlertDialog(
+                          title: const Text('Eliminar cuenta'),
+                          content: const Text(
+                            '¿Estás seguro de que deseas eliminar tu cuenta de forma permanente?',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                                widget.controller.clear();
+                                if (widget.onBackPressed != null) {
+                                  widget.onBackPressed!();
+                                } else if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              child: const Text(
+                                'Eliminar',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFDC2626),
+                      side: const BorderSide(color: Color(0xFFDC2626), width: 1.1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      minimumSize: const Size.fromHeight(44),
+                    ),
+                    child: const Text(
+                      'Eliminar mi cuenta',
+                      style: TextStyle(
+                        fontFamily: AppTypography.bodyFontFamily,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -704,6 +931,139 @@ class _EditProfilePageState extends State<EditProfilePage> {
           fontSize: 42,
           fontWeight: FontWeight.w700,
           color: palette.brandRed,
+        ),
+      ),
+    );
+  }
+}
+
+class CustomerAddressesPage extends StatelessWidget {
+  const CustomerAddressesPage({
+    required this.themeModeController,
+    required this.controller,
+    this.onBackPressed,
+    this.showBackButton = true,
+    super.key,
+  });
+
+  final ThemeModeController themeModeController;
+  final UserProfileController controller;
+  final VoidCallback? onBackPressed;
+  final bool showBackButton;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    final List<CustomerAddress> addresses = controller.addresses;
+
+    return Scaffold(
+      body: ChifaPageScaffold(
+        pageKey: const Key('page-addresses'),
+        title: 'Direcciones de entrega',
+        subtitle: 'Gestiona tus direcciones para entregas rápidas.',
+        themeModeController: themeModeController,
+        onBackPressed: onBackPressed,
+        showBackButton: showBackButton,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (addresses.isEmpty)
+              const ChifaStateView(
+                key: Key('addresses-empty-state'),
+                kind: ChifaStateKind.empty,
+                title: 'Sin direcciones guardadas',
+                message: 'Agrega una dirección para pedir por delivery más rápido',
+              )
+            else
+              for (final CustomerAddress addr in addresses) ...<Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ChifaCard(
+                    key: ValueKey<String>('address-card-${addr.id}'),
+                    icon: switch (addr.label.toLowerCase()) {
+                      'casa' => LucideIcons.home,
+                      'trabajo' || 'oficina' => LucideIcons.briefcase,
+                      'pareja' => LucideIcons.heart,
+                      _ => LucideIcons.mapPin,
+                    },
+                    title: addr.label + (addr.isDefault ? ' (Predeterminada)' : ''),
+                    subtitle: addr.address +
+                        (addr.department != null && addr.department!.isNotEmpty
+                            ? ', Dpto ${addr.department}'
+                            : '') +
+                        (addr.reference != null && addr.reference!.isNotEmpty
+                            ? '\nRef: ${addr.reference}'
+                            : ''),
+                    subtitleMaxLines: 3,
+                    minimumHeight: 70,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => AddAddressPage(
+                            themeModeController: themeModeController,
+                            controller: controller,
+                            existingAddress: addr,
+                          ),
+                        ),
+                      );
+                    },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          key: ValueKey<String>('edit-address-${addr.id}'),
+                          icon: Icon(
+                            LucideIcons.pencil,
+                            size: 16,
+                            color: palette.brandRed,
+                          ),
+                          tooltip: 'Editar dirección',
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => AddAddressPage(
+                                  themeModeController: themeModeController,
+                                  controller: controller,
+                                  existingAddress: addr,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          key: ValueKey<String>('delete-address-${addr.id}'),
+                          icon: Icon(
+                            LucideIcons.trash2,
+                            size: 16,
+                            color: palette.textSecondary,
+                          ),
+                          tooltip: 'Eliminar dirección',
+                          onPressed: () => controller.removeAddress(addr.id),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            const SizedBox(height: 16),
+            ChifaButton(
+              key: const Key('account-add-address-button'),
+              label: '+ Agregar dirección',
+              leading: LucideIcons.plus,
+              height: 52,
+              borderRadius: 14,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AddAddressPage(
+                      themeModeController: themeModeController,
+                      controller: controller,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -984,6 +1344,128 @@ class _AddAddressPageState extends State<AddAddressPage> {
 }
 }
 
+class CustomerPaymentMethodsPage extends StatelessWidget {
+  const CustomerPaymentMethodsPage({
+    required this.themeModeController,
+    required this.controller,
+    this.onBackPressed,
+    this.showBackButton = true,
+    super.key,
+  });
+
+  final ThemeModeController themeModeController;
+  final UserProfileController controller;
+  final VoidCallback? onBackPressed;
+  final bool showBackButton;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppPalette palette = context.appPalette;
+    final List<SavedPaymentCard> cards = controller.cards;
+
+    return Scaffold(
+      body: ChifaPageScaffold(
+        pageKey: const Key('page-cards'),
+        title: 'Métodos de pago',
+        subtitle: 'Tarjetas y medios de pago guardados.',
+        themeModeController: themeModeController,
+        onBackPressed: onBackPressed,
+        showBackButton: showBackButton,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (cards.isEmpty)
+              const ChifaStateView(
+                key: Key('cards-empty-state'),
+                kind: ChifaStateKind.empty,
+                title: 'Sin tarjetas registradas',
+                message: 'Agrega una tarjeta de débito o crédito para tus pedidos',
+              )
+            else
+              for (final SavedPaymentCard card in cards) ...<Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ChifaCard(
+                    key: ValueKey<String>('card-item-${card.id}'),
+                    icon: LucideIcons.creditCard,
+                    title: '${card.brand} · ${card.cardNumberMasked}',
+                    subtitle: 'Titular: ${card.cardHolder}\nVence: ${card.expiry}',
+                    subtitleMaxLines: 2,
+                    minimumHeight: 70,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => AddCardPage(
+                            themeModeController: themeModeController,
+                            controller: controller,
+                            existingCard: card,
+                          ),
+                        ),
+                      );
+                    },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          key: ValueKey<String>('edit-card-${card.id}'),
+                          icon: Icon(
+                            LucideIcons.pencil,
+                            size: 16,
+                            color: palette.brandRed,
+                          ),
+                          tooltip: 'Editar tarjeta',
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => AddCardPage(
+                                  themeModeController: themeModeController,
+                                  controller: controller,
+                                  existingCard: card,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          key: ValueKey<String>('delete-card-${card.id}'),
+                          icon: Icon(
+                            LucideIcons.trash2,
+                            size: 16,
+                            color: palette.textSecondary,
+                          ),
+                          tooltip: 'Eliminar tarjeta',
+                          onPressed: () => controller.removeCard(card.id),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            const SizedBox(height: 16),
+            ChifaButton(
+              key: const Key('account-add-card-button'),
+              label: '+ Agregar tarjeta',
+              leading: LucideIcons.plus,
+              height: 52,
+              borderRadius: 14,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AddCardPage(
+                      themeModeController: themeModeController,
+                      controller: controller,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class AddCardPage extends StatefulWidget {
   const AddCardPage({
     required this.themeModeController,
@@ -1079,6 +1561,22 @@ class _AddCardPageState extends State<AddCardPage> {
         ),
       );
     } else {
+      if (!_saveForFuture) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'La tarjeta no se guardó porque el interruptor de guardado está desactivado.',
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        if (widget.onBackPressed != null) {
+          widget.onBackPressed!();
+        } else if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+        return;
+      }
       widget.controller.addCard(
         rawCardNumber: _cardNumberController.text,
         cardHolder: _cardHolderController.text,
@@ -1139,6 +1637,7 @@ class _AddCardPageState extends State<AddCardPage> {
               keyboardType: TextInputType.number,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'[\d\s•]')),
                 CardNumberTextInputFormatter(),
               ],
               validator: (String? value) {
@@ -1177,6 +1676,9 @@ class _AddCardPageState extends State<AddCardPage> {
                     hintText: 'MM/AA',
                     keyboardType: TextInputType.number,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    inputFormatters: <TextInputFormatter>[
+                      CardExpiryTextInputFormatter(),
+                    ],
                     validator: ProfileValidators.cardExpiry,
                     isValid: _expiryController.text.trim().isNotEmpty &&
                         ProfileValidators.cardExpiry(_expiryController.text) == null,
@@ -1193,6 +1695,10 @@ class _AddCardPageState extends State<AddCardPage> {
                     keyboardType: TextInputType.number,
                     obscureText: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4),
+                    ],
                     validator: (String? value) {
                       if (widget.existingCard != null && value != null && value.contains('•')) {
                         return null;
@@ -1242,6 +1748,10 @@ class _AddCardPageState extends State<AddCardPage> {
                     label: 'N° Documento del titular',
                     hintText: 'Ej. 72345678',
                     keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(12),
+                    ],
                   ),
                 ),
               ],

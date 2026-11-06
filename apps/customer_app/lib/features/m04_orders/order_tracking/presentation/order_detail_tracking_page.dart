@@ -906,7 +906,17 @@ class _TrackingContentPage extends StatelessWidget {
                       return;
                     }
                     Navigator.of(dialogContext).pop();
-                    await controller.requestCancellation(reason: text);
+                    final bool ok = await controller.requestCancellation(reason: text);
+                    if (!context.mounted) return;
+                    if (!ok && controller.state.failure != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(controller.state.failure!.message),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
                   },
                   child: const Text(
                     'Confirmar cancelación',

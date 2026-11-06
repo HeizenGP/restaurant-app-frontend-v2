@@ -4,7 +4,9 @@ Monorepo Flutter de Chifa ASIA. `customer_app` conserva la línea base técnica 
 
 - `apps/customer_app`: Cliente e Invitado en Android.
 - `apps/staff_app`: personal en Android y panel administrativo en Flutter Web.
-- Configuración de API: `--dart-define=API_BASE_URL=<url-absoluta>`.
+- Configuración de API mediante flags booleanas excluyentes:
+  - Para Render (Backend en la nube): `--dart-define=USE_RENDER=true --dart-define=USE_LOCAL=false`
+  - Para Local (Backend en localhost:8000): `--dart-define=USE_RENDER=false --dart-define=USE_LOCAL=true`
 
 ## Verificación
 
@@ -16,16 +18,22 @@ flutter analyze
 flutter test
 ```
 
+Para ejecutar `customer_app` contra Render:
+
+```powershell
+flutter run --dart-define=USE_RENDER=true --dart-define=USE_LOCAL=false
+```
+
 Para comprobar el destino Web de `staff_app`:
 
 ```powershell
-flutter build web --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+flutter build web --dart-define=USE_LOCAL=true --dart-define=USE_RENDER=false
 ```
 
 Para comprobar Android en cualquiera de las dos aplicaciones:
 
 ```powershell
-flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
+flutter build apk --debug --dart-define=USE_RENDER=true --dart-define=USE_LOCAL=false
 ```
 
 La compilación Android requiere Flutter y un Android SDK configurado. En el

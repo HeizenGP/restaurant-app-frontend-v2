@@ -3,12 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/design_system/foundations/app_colors.dart';
+import '../../features/m01_access/profile/application/user_profile_controller.dart';
 import 'customer_bottom_navigation.dart';
 
 class CustomerShell extends StatefulWidget {
-  const CustomerShell({required this.navigationShell, super.key});
+  const CustomerShell({
+    required this.navigationShell,
+    this.profileController,
+    super.key,
+  });
 
   final StatefulNavigationShell navigationShell;
+  final UserProfileController? profileController;
 
   @override
   State<CustomerShell> createState() => _CustomerShellState();
@@ -76,15 +82,34 @@ class _CustomerShellState extends State<CustomerShell> {
             color: palette.background,
             child: SafeArea(
               top: false,
-              child: CustomerBottomNavigation(
-                currentIndex: widget.navigationShell.currentIndex,
-                onDestinationSelected: (int index) {
-                  widget.navigationShell.goBranch(
-                    index,
-                    initialLocation: index == widget.navigationShell.currentIndex,
-                  );
-                },
-              ),
+              child: widget.profileController != null
+                  ? AnimatedBuilder(
+                      animation: widget.profileController!,
+                      builder: (BuildContext context, _) {
+                        return CustomerBottomNavigation(
+                          currentIndex: widget.navigationShell.currentIndex,
+                          avatarPath: widget.profileController?.avatarPath,
+                          initials: widget.profileController?.initials,
+                          onDestinationSelected: (int index) {
+                            widget.navigationShell.goBranch(
+                              index,
+                              initialLocation:
+                                  index == widget.navigationShell.currentIndex,
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : CustomerBottomNavigation(
+                      currentIndex: widget.navigationShell.currentIndex,
+                      onDestinationSelected: (int index) {
+                        widget.navigationShell.goBranch(
+                          index,
+                          initialLocation:
+                              index == widget.navigationShell.currentIndex,
+                        );
+                      },
+                    ),
             ),
           ),
         ),

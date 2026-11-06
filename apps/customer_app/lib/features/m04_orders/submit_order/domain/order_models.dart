@@ -211,6 +211,38 @@ final class OrderSnapshot {
 
   bool get isRequested => status == 'REQUESTED';
 
+  OrderSnapshot copyWith({
+    String? id,
+    FulfillmentMode? modality,
+    String? channel,
+    String? status,
+    String? totalAmount,
+    List<OrderLineSnapshot>? lines,
+    DateTime? createdAt,
+    String? tableId,
+    String? deliveryAddress,
+    String? contactName,
+    String? contactPhone,
+    DateTime? decidedAt,
+    DateTime? tableVerifiedAt,
+  }) {
+    return OrderSnapshot(
+      id: id ?? this.id,
+      modality: modality ?? this.modality,
+      channel: channel ?? this.channel,
+      status: status ?? this.status,
+      totalAmount: totalAmount ?? this.totalAmount,
+      lines: lines ?? this.lines,
+      createdAt: createdAt ?? this.createdAt,
+      tableId: tableId ?? this.tableId,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      contactName: contactName ?? this.contactName,
+      contactPhone: contactPhone ?? this.contactPhone,
+      decidedAt: decidedAt ?? this.decidedAt,
+      tableVerifiedAt: tableVerifiedAt ?? this.tableVerifiedAt,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

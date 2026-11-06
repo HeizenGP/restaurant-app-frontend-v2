@@ -210,22 +210,31 @@ GoRouter createCustomerRouter({
       GoRoute(
         path: '/acceso',
         name: CustomerRoutes.access,
-        builder: (BuildContext context, GoRouterState state) {
-          return SignInPage(authController: authController);
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _accessTransitionPage(
+            state,
+            SignInPage(authController: authController),
+          );
         },
       ),
       GoRoute(
         path: '/registro',
         name: CustomerRoutes.registration,
-        builder: (BuildContext context, GoRouterState state) {
-          return RegistrationPage(authController: authController);
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _accessTransitionPage(
+            state,
+            RegistrationPage(authController: authController),
+          );
         },
       ),
       GoRoute(
         path: '/invitado',
         name: CustomerRoutes.guest,
-        builder: (BuildContext context, GoRouterState state) {
-          return GuestAccessPage(authController: authController);
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _accessTransitionPage(
+            state,
+            GuestAccessPage(authController: authController),
+          );
         },
       ),
       StatefulShellRoute.indexedStack(
@@ -235,7 +244,10 @@ GoRouter createCustomerRouter({
               GoRouterState state,
               StatefulNavigationShell navigationShell,
             ) {
-              return CustomerShell(navigationShell: navigationShell);
+              return CustomerShell(
+                navigationShell: navigationShell,
+                profileController: profileController,
+              );
             },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
@@ -996,4 +1008,40 @@ class _UiResetPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(body: SizedBox.shrink());
   }
+}
+
+/// Fade + gentle rise used across the access flow (Login, Registro, Invitado)
+/// so the shared KAIRO logo and tabs glide between screens.
+CustomTransitionPage<void> _accessTransitionPage(
+  GoRouterState state,
+  Widget child,
+) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 420),
+    reverseTransitionDuration: const Duration(milliseconds: 340),
+    transitionsBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+    ) {
+      final Animation<double> curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.035),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
 }

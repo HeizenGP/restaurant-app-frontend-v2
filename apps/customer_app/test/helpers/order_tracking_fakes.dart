@@ -19,10 +19,14 @@ final class FakeOrderTrackingRepository implements OrderTrackingRepository {
   final List<String> listTokens = <String>[];
   final List<String> orderIds = <String>[];
   final List<String> trackingIds = <String>[];
+  final List<String> cancelTokens = <String>[];
+  final List<String> cancelReasons = <String>[];
 
   Object? listError;
   Object? orderError;
   Object? trackingError;
+  Object? cancelError;
+  OrderSnapshot? cancelResponse;
 
   @override
   Future<List<OrderSnapshot>> listOrders({required String accessToken}) async {
@@ -49,6 +53,21 @@ final class FakeOrderTrackingRepository implements OrderTrackingRepository {
     trackingIds.add(orderId);
     if (trackingError != null) throw trackingError!;
     return trackingResponse;
+  }
+
+  @override
+  Future<OrderSnapshot> requestCancellation(
+    String orderId, {
+    required String reason,
+    required String accessToken,
+  }) async {
+    cancelTokens.add(accessToken);
+    cancelReasons.add(reason);
+    if (cancelError != null) throw cancelError!;
+    return cancelResponse ??
+        orderResponse.copyWith(
+          status: 'REJECTED',
+        );
   }
 }
 

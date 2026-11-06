@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../shared/application/auth_session_controller.dart';
@@ -25,6 +26,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   bool _showValidation = false;
 
   @override
@@ -35,16 +37,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
+  void _goToLogin() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/acceso');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final TextStyle hintStyle = TextStyle(
-      color: palette.textSecondary,
-      fontFamily: AppTypography.bodyFontFamily,
-      fontSize: 13,
-      fontWeight: FontWeight.w400,
-    );
 
     return PopScope(
       canPop: !widget.authController.state.isBusy,
@@ -53,16 +56,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
           widget.authController.clearMessages();
         }
       },
-      child: AccessSimpleScaffold(
+      child: KairoAuthScaffold(
         pageKey: const Key('page-registro'),
+        scrollKey: const Key('access-scroll'),
         showBackButton: widget.showBackButton,
-        onBackPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/acceso');
-          }
-        },
+        onBackPressed: _goToLogin,
         child: AutofillGroup(
           child: Form(
             key: _formKey,
@@ -78,208 +76,132 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    // Modern Segmented Navigation Switcher
-                    Container(
-                      decoration: BoxDecoration(
-                        color: palette.surfaceTint,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: palette.controlBorder, width: 1.0),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: InkWell(
-                              key: const Key('go-login-tab'),
-                              onTap: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go('/acceso');
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 9),
-                                child: Center(
-                                  child: Text(
-                                    'Iniciar sesión',
-                                    style: TextStyle(
-                                      fontFamily: AppTypography.bodyFontFamily,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: palette.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 9),
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF2C1318) : Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isDark
-                                      ? const Color(0xFFD4AF37).withValues(alpha: 0.4)
-                                      : Colors.transparent,
-                                  width: 1,
-                                ),
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Crear cuenta',
-                                  style: TextStyle(
-                                    fontFamily: AppTypography.bodyFontFamily,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? const Color(0xFFE5C07B)
-                                        : palette.brandRed,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Únete a KAIRO',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontFamily: AppTypography.displayFontFamily,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: palette.textPrimary,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Crea tu cuenta para disfrutar de todos nuestros servicios',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: palette.textSecondary,
-                        fontSize: 12.5,
-                        height: 1.35,
+                    const KairoReveal(
+                      order: 0,
+                      child: KairoAuthTitle(
+                        title: 'Crear cuenta',
+                        subtitle:
+                            'Regístrate para disfrutar de nuestra carta y servicios.',
                       ),
                     ),
                     if (state.errorMessage != null) ...<Widget>[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       AccessMessageBanner(
                         message: state.errorMessage!,
                         isError: true,
                       ),
                     ],
-                    const SizedBox(height: 32),
-                    ChifaTextField(
-                      key: const Key('registration-name'),
-                      controller: _nameController,
-                      label: 'Nombre completo',
-                      hintText: '¿Cómo debemos llamarte?',
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const <String>[AutofillHints.name],
-                      enabled: !loading,
-                      autovalidateMode: autovalidateMode,
-                      validator: AccessValidators.displayName,
-                      labelHeight: 18,
-                      labelGap: 6,
-                      borderRadius: 12,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 15,
-                      ),
-                      hintStyle: hintStyle,
-                      inputStyle: hintStyle.copyWith(
-                        color: palette.textPrimary,
-                      ),
-                      fieldHeight: 53,
-                    ),
-                    const SizedBox(height: 21),
-                    ChifaTextField(
-                      key: const Key('registration-email'),
-                      controller: _emailController,
-                      label: 'Correo electrónico',
-                      hintText: 'correo@ejemplo.com',
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const <String>[AutofillHints.email],
-                      enabled: !loading,
-                      autovalidateMode: autovalidateMode,
-                      validator: AccessValidators.email,
-                      labelHeight: 18,
-                      labelGap: 6,
-                      borderRadius: 12,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 15,
-                      ),
-                      hintStyle: hintStyle,
-                      inputStyle: hintStyle.copyWith(
-                        color: palette.textPrimary,
-                      ),
-                      fieldHeight: 53,
-                    ),
-                    const SizedBox(height: 21),
-                    ChifaTextField(
-                      key: const Key('registration-password'),
-                      controller: _passwordController,
-                      label: 'Contraseña',
-                      hintText: 'Mínimo 8 caracteres',
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const <String>[AutofillHints.newPassword],
-                      enabled: !loading,
-                      autovalidateMode: autovalidateMode,
-                      validator: AccessValidators.registrationPassword,
-                      onFieldSubmitted: (_) => _submit(),
-                      labelHeight: 18,
-                      labelGap: 6,
-                      borderRadius: 12,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 15,
-                      ),
-                      hintStyle: hintStyle,
-                      inputStyle: hintStyle.copyWith(
-                        color: palette.textPrimary,
-                      ),
-                      fieldHeight: 53,
-                    ),
-                    const SizedBox(height: 63),
-                    ChifaButton(
-                      key: const Key('registration-submit'),
-                      label: 'Crear cuenta',
-                      isLoading: loading,
-                      onPressed: state.isBusy ? null : _submit,
-                      height: 54,
-                      borderRadius: 14,
-                      textStyle: const TextStyle(
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(height: 20),
+                    KairoReveal(
+                      order: 2,
+                      child: KairoAuthField(
+                        key: const Key('registration-name'),
+                        controller: _nameController,
+                        label: 'Nombre y apellidos',
+                        hintText: 'Ingresa tu nombre completo',
+                        icon: LucideIcons.user,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const <String>[AutofillHints.name],
+                        enabled: !loading,
+                        autovalidateMode: autovalidateMode,
+                        validator: AccessValidators.displayName,
                       ),
                     ),
-                    const SizedBox(height: 25),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: SizedBox(
-                        height: 35,
-                        child: Text(
-                          'Al registrarte podrás iniciar sesión.',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(fontSize: 12, height: 20 / 12),
+                    const SizedBox(height: 14),
+                    KairoReveal(
+                      order: 3,
+                      child: KairoAuthField(
+                        key: const Key('registration-email'),
+                        controller: _emailController,
+                        label: 'Correo electrónico',
+                        hintText: 'cliente@ejemplo.com',
+                        icon: LucideIcons.mail,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const <String>[AutofillHints.email],
+                        enabled: !loading,
+                        autovalidateMode: autovalidateMode,
+                        validator: AccessValidators.email,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    KairoReveal(
+                      order: 4,
+                      child: KairoAuthField(
+                        key: const Key('registration-password'),
+                        controller: _passwordController,
+                        label: 'Contraseña',
+                        hintText: 'Mínimo 8 caracteres',
+                        icon: LucideIcons.lock,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const <String>[AutofillHints.newPassword],
+                        enabled: !loading,
+                        autovalidateMode: autovalidateMode,
+                        validator: AccessValidators.registrationPassword,
+                        onFieldSubmitted: (_) => _submit(),
+                        trailing: IconButton(
+                          key: const Key('registration-password-toggle'),
+                          tooltip: _obscurePassword
+                              ? 'Mostrar contraseña'
+                              : 'Ocultar contraseña',
+                          onPressed: loading
+                              ? null
+                              : () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            child: Icon(
+                              _obscurePassword
+                                  ? LucideIcons.eye
+                                  : LucideIcons.eyeOff,
+                              key: ValueKey<bool>(_obscurePassword),
+                              size: 20,
+                              color: palette.textSecondary,
+                            ),
+                          ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          LucideIcons.info,
+                          size: 14,
+                          color: palette.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Al registrarte podrás iniciar sesión con tu cuenta.',
+                            style: TextStyle(
+                              color: palette.textSecondary,
+                              fontFamily: AppTypography.bodyFontFamily,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    KairoReveal(
+                      order: 5,
+                      child: KairoPrimaryButton(
+                        key: const Key('registration-submit'),
+                        label: 'Crear cuenta',
+                        isLoading: loading,
+                        onPressed: state.isBusy ? null : _submit,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    KairoAuthLinkRow(
+                      question: '¿Ya tienes una cuenta?',
+                      action: 'Inicia sesión',
+                      actionKey: const Key('go-login-link'),
+                      onPressed: state.isBusy ? null : _goToLogin,
                     ),
                   ],
                 );

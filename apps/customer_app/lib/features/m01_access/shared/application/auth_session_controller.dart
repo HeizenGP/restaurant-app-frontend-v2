@@ -351,9 +351,15 @@ class AuthSessionController extends ChangeNotifier {
         user: updated,
       );
       await _sessionStore.write(newSession);
-      _setState(_state.copyWith(session: newSession));
+      _setState(_state.copyWith(session: newSession, clearError: true));
       return true;
+    } on AuthFailure catch (e) {
+      _setState(_state.copyWith(errorMessage: e.message));
+      return false;
     } on Object {
+      _setState(_state.copyWith(
+        errorMessage: 'No pudimos conectar con KAIRO. Revisa tu conexión.',
+      ));
       return false;
     }
   }

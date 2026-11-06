@@ -149,21 +149,46 @@ final class OrderTrackingController extends ChangeNotifier {
     final String? id = _state.orderId;
     if (id == null) return false;
 
-    final DateTime now = DateTime.now();
-    _cancellations[id] = (trimmed, now);
+    _operationInFlight = true;
+    try {
+      final OrderSnapshot updated = await _withOneAuthRefresh<OrderSnapshot>(
+        (String token) => _repository.requestCancellation(
+          id,
+          reason: trimmed,
+          accessToken: token,
+        ),
+      );
+      final DateTime now = DateTime.now();
+      _cancellations[id] = (trimmed, now);
 
-    _emit(
-      OrderTrackingState(
-        phase: _state.phase,
-        orderId: id,
-        order: _state.order,
-        tracking: _state.tracking,
-        failure: _state.failure,
-        cancellationObservation: trimmed,
-        cancellationRequestedAt: now,
-      ),
-    );
-    return true;
+      _emit(
+        OrderTrackingState(
+          phase: _state.phase,
+          orderId: id,
+          order: updated,
+          tracking: _state.tracking,
+          failure: null,
+          cancellationObservation: trimmed,
+          cancellationRequestedAt: now,
+        ),
+      );
+      return true;
+    } on Object catch (error) {
+      _emit(
+        OrderTrackingState(
+          phase: OrderTrackingPhase.failure,
+          orderId: id,
+          order: _state.order,
+          tracking: _state.tracking,
+          failure: _safeFailure(error),
+          cancellationObservation: _state.cancellationObservation,
+          cancellationRequestedAt: _state.cancellationRequestedAt,
+        ),
+      );
+      return false;
+    } finally {
+      _operationInFlight = false;
+    }
   }
 
   Future<bool> retry() async {

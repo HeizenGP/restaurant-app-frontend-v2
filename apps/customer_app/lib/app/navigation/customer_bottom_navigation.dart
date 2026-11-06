@@ -1,145 +1,160 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../core/design_system/foundations/app_colors.dart';
-import '../../core/design_system/foundations/app_radii.dart';
 import 'customer_destination.dart';
 
 class CustomerBottomNavigation extends StatelessWidget {
   const CustomerBottomNavigation({
     required this.currentIndex,
     required this.onDestinationSelected,
+    this.avatarPath,
+    this.initials,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
+  final String? avatarPath;
+  final String? initials;
 
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color selectedColor = isDark ? palette.accentGold : palette.brandRed;
+    final Color unselectedColor =
+        isDark ? Colors.white.withValues(alpha: 0.45) : const Color(0xFF8E8E93);
+
     final double heightGrowth = math.max(
       0,
       MediaQuery.textScalerOf(context).scale(12) - 12,
     );
-    final double itemHeight = 57 + heightGrowth;
+    final double totalHeight = 68 + heightGrowth;
 
     return SizedBox(
-      height: 84 + heightGrowth,
+      height: totalHeight,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: palette.surface,
-          border: Border(top: BorderSide(color: palette.border)),
+          border: Border(
+            top: BorderSide(
+              color: isDark ? palette.border : const Color(0xFFE5E7EB),
+              width: 0.8,
+            ),
+          ),
         ),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final double rowWidth = math.min(
-              358,
-              math.max(0, constraints.maxWidth - 30),
-            );
-            final double itemWidth = (rowWidth - 6) / 4;
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: List<Widget>.generate(
+            customerDestinations.length,
+            (int index) {
+              final CustomerDestination destination = customerDestinations[index];
+              final bool selected = index == currentIndex;
+              final Color foreground = selected ? selectedColor : unselectedColor;
 
-            return Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: SizedBox(
-                  width: rowWidth,
-                  height: itemHeight,
-                  child: Row(
-                    children: List<Widget>.generate(
-                      customerDestinations.length * 2 - 1,
-                      (int slot) {
-                        if (slot.isOdd) {
-                          return const SizedBox(width: 2);
-                        }
-                        final int index = slot ~/ 2;
-                        final CustomerDestination destination =
-                            customerDestinations[index];
-                        final bool selected = index == currentIndex;
-                        final Color foreground = selected
-                            ? palette.selectedForeground
-                            : palette.cardTextSecondary;
-
-                        return SizedBox(
-                          width: itemWidth,
-                          height: itemHeight,
-                          child: Semantics(
-                            button: true,
-                            selected: selected,
-                            label: destination.label,
-                            onTap: () => onDestinationSelected(index),
-                            excludeSemantics: true,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOutCubic,
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? palette.iconTile
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadii.navigationItem,
-                                ),
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadii.navigationItem,
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: InkWell(
-                                  key: destination.semanticKey,
-                                  onTap: () => onDestinationSelected(index),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 5,
-                                      bottom: 4,
+              return Expanded(
+                child: Semantics(
+                  button: true,
+                  selected: selected,
+                  label: destination.label,
+                  onTap: () => onDestinationSelected(index),
+                  excludeSemantics: true,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      key: destination.semanticKey,
+                      onTap: () => onDestinationSelected(index),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          AnimatedScale(
+                            scale: selected ? 1.05 : 1.0,
+                            duration: const Duration(milliseconds: 180),
+                            curve: Curves.easeOutCubic,
+                            child: (index == 3 &&
+                                    avatarPath != null &&
+                                    avatarPath!.trim().isNotEmpty)
+                                ? Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: selected
+                                            ? selectedColor
+                                            : unselectedColor.withValues(alpha: 0.6),
+                                        width: selected ? 2.0 : 1.2,
+                                      ),
                                     ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        AnimatedScale(
-                                          scale: selected ? 1.08 : 1.0,
-                                          duration: const Duration(milliseconds: 200),
-                                          curve: Curves.easeOutBack,
-                                          child: Icon(
-                                            destination.icon,
-                                            color: foreground,
-                                            size: 21,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        AnimatedDefaultTextStyle(
-                                          duration: const Duration(milliseconds: 200),
-                                          style: (Theme.of(context).textTheme.labelMedium ?? const TextStyle()).copyWith(
-                                            color: foreground,
-                                            fontWeight: selected
-                                                ? FontWeight.w600
-                                                : FontWeight.w400,
-                                          ),
-                                          child: Text(
-                                            destination.label,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.fade,
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                      ],
+                                    child: ClipOval(
+                                      child: avatarPath!.startsWith('http')
+                                          ? Image.network(
+                                              avatarPath!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, _, _) => Icon(
+                                                destination.icon,
+                                                color: foreground,
+                                                size: 20,
+                                              ),
+                                            )
+                                          : (avatarPath!.startsWith('/') ||
+                                                  avatarPath!.startsWith('file:'))
+                                              ? Image.file(
+                                                  File(avatarPath!.replaceFirst('file://', '')),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, _, _) => Icon(
+                                                    destination.icon,
+                                                    color: foreground,
+                                                    size: 20,
+                                                  ),
+                                                )
+                                              : Image.asset(
+                                                  avatarPath!,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, _, _) => Icon(
+                                                    destination.icon,
+                                                    color: foreground,
+                                                    size: 20,
+                                                  ),
+                                                ),
                                     ),
+                                  )
+                                : Icon(
+                                    destination.icon,
+                                    color: foreground,
+                                    size: 22,
                                   ),
-                                ),
-                              ),
+                          ),
+                          const SizedBox(height: 3),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 180),
+                            style: TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 11,
+                              color: foreground,
+                              fontWeight: selected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              letterSpacing: 0.1,
+                            ),
+                            child: Text(
+                              destination.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.fade,
+                              softWrap: false,
                             ),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

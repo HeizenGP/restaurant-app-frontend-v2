@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -40,85 +39,39 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    final AppPalette palette = context.appPalette;
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: palette.background,
-        systemNavigationBarIconBrightness: isDark
-            ? Brightness.light
-            : Brightness.dark,
-      ),
-      child: Scaffold(
-        key: const Key('page-acceso'),
-        body: SingleChildScrollView(
-          key: const Key('login-scroll'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const LoginBrandHero(),
-              Transform.translate(
-                offset: const Offset(0, -20),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 556),
-                  child: DecoratedBox(
-                    key: const Key('login-sheet'),
-                    decoration: BoxDecoration(
-                      color: palette.background,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(28),
-                      ),
-                    ),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: AppSpacing.mobilePageMaxWidth,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(28, 25, 28, 22),
-                          child: AutofillGroup(
-                            child: Form(
-                              key: _formKey,
-                              child: AnimatedBuilder(
-                                animation: widget.authController,
-                                builder: (BuildContext context, Widget? child) {
-                                  final AuthState state =
-                                      widget.authController.state;
-                                  final bool loading =
-                                      state.operation == AuthOperation.signIn;
-                                  return _LoginFormContent(
-                                    state: state,
-                                    loading: loading,
-                                    emailController: _emailController,
-                                    passwordController: _passwordController,
-                                    obscurePassword: _obscurePassword,
-                                    autovalidateMode: _showValidation
-                                        ? AutovalidateMode.onUserInteraction
-                                        : AutovalidateMode.disabled,
-                                    onTogglePassword: () {
-                                      setState(() {
-                                        _obscurePassword = !_obscurePassword;
-                                      });
-                                    },
-                                    onSubmit: _submit,
-                                    onGuest: _openGuest,
-                                    onRegister: _openRegistration,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    return KairoAuthScaffold(
+      pageKey: const Key('page-acceso'),
+      scrollKey: const Key('login-scroll'),
+      contentKey: const Key('login-sheet'),
+      heroKey: const Key('login-hero'),
+      canvasKey: const Key('login-artwork-canvas'),
+      compactHeader: false,
+      showBackButton: false,
+      child: AutofillGroup(
+        child: Form(
+          key: _formKey,
+          child: AnimatedBuilder(
+            animation: widget.authController,
+            builder: (BuildContext context, Widget? child) {
+              final AuthState state = widget.authController.state;
+              final bool loading = state.operation == AuthOperation.signIn;
+              return _LoginFormContent(
+                state: state,
+                loading: loading,
+                emailController: _emailController,
+                passwordController: _passwordController,
+                obscurePassword: _obscurePassword,
+                autovalidateMode: _showValidation
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
+                onTogglePassword: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+                onSubmit: _submit,
+                onGuest: _openGuest,
+                onRegister: _openRegistration,
+              );
+            },
           ),
         ),
       ),
@@ -176,296 +129,198 @@ class _LoginFormContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.appPalette;
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final TextStyle hintStyle = TextStyle(
-      color: palette.textSecondary,
-      fontFamily: AppTypography.bodyFontFamily,
-      fontSize: 13,
-      fontWeight: FontWeight.w400,
-    );
+    final Color accent = kairoAccent(context);
 
     final bool isValidEmail = emailController.text.trim().isNotEmpty &&
-        RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(emailController.text.trim());
+        RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+            .hasMatch(emailController.text.trim());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // Modern Segmented Navigation Switcher
-        Container(
-          decoration: BoxDecoration(
-            color: palette.surfaceTint,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: palette.controlBorder, width: 1.0),
+        const KairoReveal(
+          order: 0,
+          child: KairoAuthTitle(
+            title: 'Bienvenido de nuevo',
+            subtitle: 'Ingresa tus credenciales para acceder a tu cuenta.',
           ),
-          padding: const EdgeInsets.all(4),
-          child: Row(
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOut,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 9),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF2C1318) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark ? const Color(0xFFD4AF37).withValues(alpha: 0.4) : Colors.transparent,
-                      width: 1,
-                    ),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Iniciar sesión',
-                      style: TextStyle(
-                        fontFamily: AppTypography.bodyFontFamily,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? const Color(0xFFE5C07B) : palette.brandRed,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: InkWell(
-                  key: const Key('go-register-tab'),
-                  onTap: onRegister,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 9),
-                    child: Center(
-                      child: Text(
-                        'Crear cuenta',
-                        style: TextStyle(
-                          fontFamily: AppTypography.bodyFontFamily,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              if (state.errorMessage != null) ...<Widget>[
+                const SizedBox(height: 16),
+                AccessMessageBanner(message: state.errorMessage!, isError: true),
+              ],
+              if (state.noticeMessage != null) ...<Widget>[
+                const SizedBox(height: 16),
+                AccessMessageBanner(message: state.noticeMessage!),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 18),
-        Text(
-          'Bienvenido de nuevo',
-          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-            fontFamily: AppTypography.displayFontFamily,
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: palette.textPrimary,
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Ingresa tus credenciales para acceder a tu cuenta',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: palette.textSecondary,
-            fontSize: 12.5,
-            height: 1.35,
-          ),
-        ),
-        if (state.errorMessage != null) ...<Widget>[
-          const SizedBox(height: 12),
-          AccessMessageBanner(message: state.errorMessage!, isError: true),
-        ],
-        if (state.noticeMessage != null) ...<Widget>[
-          const SizedBox(height: 12),
-          AccessMessageBanner(message: state.noticeMessage!),
-        ],
-        const SizedBox(height: 16),
-        ChifaTextField(
-          key: const Key('login-email'),
-          controller: emailController,
-          label: 'Correo electrónico',
-          hintText: 'cliente@ejemplo.com',
-          leadingIcon: LucideIcons.mail,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          autofillHints: const <String>[
-            AutofillHints.email,
-            AutofillHints.username,
-          ],
-          enabled: !loading,
-          autovalidateMode: autovalidateMode,
-          validator: AccessValidators.email,
-          trailing: isValidEmail
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Icon(
-                    LucideIcons.checkCircle2,
-                    color: palette.success,
-                    size: 18,
-                  ),
-                )
-              : null,
-          labelHeight: 18,
-          labelGap: 5,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 14,
-          ),
-          hintStyle: hintStyle,
-          inputStyle: hintStyle.copyWith(color: palette.textPrimary),
-          fieldHeight: 52,
-        ),
-        const SizedBox(height: 16),
-        ChifaTextField(
-          key: const Key('login-password'),
-          controller: passwordController,
-          label: 'Contraseña',
-          hintText: 'Ingresa tu contraseña',
-          leadingIcon: LucideIcons.lock,
-          obscureText: obscurePassword,
-          textInputAction: TextInputAction.done,
-          autofillHints: const <String>[AutofillHints.password],
-          enabled: !loading,
-          autovalidateMode: autovalidateMode,
-          validator: AccessValidators.loginPassword,
-          onFieldSubmitted: (_) => onSubmit(),
-          labelHeight: 18,
-          labelGap: 5,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 14,
-          ),
-          hintStyle: hintStyle,
-          inputStyle: hintStyle.copyWith(color: palette.textPrimary),
-          fieldHeight: 52,
-          trailing: IconButton(
-            key: const Key('login-password-toggle'),
-            tooltip: obscurePassword
-                ? 'Mostrar contraseña'
-                : 'Ocultar contraseña',
-            onPressed: loading ? null : onTogglePassword,
-            icon: Icon(
-              obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
-              size: 20,
-              color: palette.textSecondary,
+        const SizedBox(height: 22),
+        KairoReveal(
+          order: 2,
+          child: KairoAuthField(
+            key: const Key('login-email'),
+            controller: emailController,
+            label: 'Correo electrónico',
+            hintText: 'cliente@ejemplo.com',
+            icon: LucideIcons.mail,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const <String>[
+              AutofillHints.email,
+              AutofillHints.username,
+            ],
+            enabled: !loading,
+            autovalidateMode: autovalidateMode,
+            validator: AccessValidators.email,
+            trailing: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (Widget child, Animation<double> a) =>
+                  ScaleTransition(scale: a, child: child),
+              child: isValidEmail
+                  ? Icon(
+                      LucideIcons.circleCheck,
+                      key: const ValueKey<bool>(true),
+                      color: palette.success,
+                      size: 19,
+                    )
+                  : const SizedBox.shrink(key: ValueKey<bool>(false)),
             ),
           ),
         ),
-        if (passwordController.text.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 6),
-          _PasswordStrengthIndicator(password: passwordController.text),
-        ],
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
+        KairoReveal(
+          order: 3,
+          child: KairoAuthField(
+            key: const Key('login-password'),
+            controller: passwordController,
+            label: 'Contraseña',
+            hintText: 'Ingresa tu contraseña',
+            icon: LucideIcons.lock,
+            obscureText: obscurePassword,
+            textInputAction: TextInputAction.done,
+            autofillHints: const <String>[AutofillHints.password],
+            enabled: !loading,
+            autovalidateMode: autovalidateMode,
+            validator: AccessValidators.loginPassword,
+            onFieldSubmitted: (_) => onSubmit(),
+            trailing: IconButton(
+              key: const Key('login-password-toggle'),
+              tooltip:
+                  obscurePassword ? 'Mostrar contraseña' : 'Ocultar contraseña',
+              onPressed: loading ? null : onTogglePassword,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: Icon(
+                  obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                  key: ValueKey<bool>(obscurePassword),
+                  size: 20,
+                  color: palette.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          child: passwordController.text.isNotEmpty
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                  child: _PasswordStrengthIndicator(
+                    password: passwordController.text,
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
         Align(
           alignment: Alignment.centerRight,
           child: Semantics(
             enabled: false,
             label: 'Recuperación de contraseña no disponible',
             child: ExcludeSemantics(
-              child: Text(
-                '¿Olvidaste tu contraseña?',
-                style: TextStyle(
-                  color: palette.brandSurface,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  height: 21 / 12,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 4, right: 4),
+                child: Text(
+                  '¿Olvidaste tu contraseña?',
+                  style: TextStyle(
+                    color: accent,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 19),
-        ChifaButton(
-          key: const Key('login-submit'),
-          label: 'Iniciar sesión',
-          trailing: LucideIcons.arrowRight,
-          trailingAtEdge: true,
-          isLoading: loading,
-          onPressed: state.isBusy ? null : onSubmit,
-          borderRadius: 13,
-          textStyle: const TextStyle(
-            fontFamily: AppTypography.bodyFontFamily,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
+        const SizedBox(height: 18),
+        KairoReveal(
+          order: 4,
+          child: KairoPrimaryButton(
+            key: const Key('login-submit'),
+            label: 'Iniciar sesión',
+            isLoading: loading,
+            onPressed: state.isBusy ? null : onSubmit,
           ),
         ),
-        const SizedBox(height: 20),
-        Row(
-          children: <Widget>[
-            Expanded(child: Divider(height: 1, color: palette.border)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                'o continúa como',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(fontSize: 11),
-              ),
-            ),
-            Expanded(child: Divider(height: 1, color: palette.border)),
-          ],
-        ),
-        const SizedBox(height: 13),
-        ChifaButton(
-          key: const Key('go-guest'),
-          label: 'Explorar como invitado',
-          variant: ChifaButtonVariant.secondary,
-          trailing: LucideIcons.chevronRight,
-          trailingAtEdge: true,
-          iconSize: 17,
-          onPressed: state.isBusy ? null : onGuest,
-        ),
-        const SizedBox(height: 4),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: <Widget>[
-            Text(
-              '¿Eres nuevo aquí?',
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(fontSize: 12),
-            ),
-            TextButton(
-              key: const Key('go-register'),
-              onPressed: state.isBusy ? null : onRegister,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 40),
-                padding: const EdgeInsets.only(left: 7, right: 7),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'Crea tu cuenta',
-                style: TextStyle(
-                  color: palette.brandSurface,
-                  fontFamily: AppTypography.bodyFontFamily,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+        const SizedBox(height: 22),
+        KairoReveal(
+          order: 5,
+          child: Row(
+            children: <Widget>[
+              Expanded(child: Divider(height: 1, color: palette.border)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'o',
+                  style: TextStyle(
+                    color: palette.textSecondary,
+                    fontFamily: AppTypography.bodyFontFamily,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-            ),
-          ],
+              Expanded(child: Divider(height: 1, color: palette.border)),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        KairoReveal(
+          order: 6,
+          child: KairoSecondaryButton(
+            key: const Key('go-guest'),
+            label: 'Explorar como invitado',
+            icon: LucideIcons.compass,
+            onPressed: state.isBusy ? null : onGuest,
+          ),
+        ),
+        const SizedBox(height: 18),
+        KairoAuthLinkRow(
+          question: '¿No tienes una cuenta?',
+          action: 'Crear cuenta',
+          actionKey: const Key('go-register'),
+          onPressed: state.isBusy ? null : onRegister,
+        ),
+        const SizedBox(height: 8),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 5,
+          spacing: 6,
           children: <Widget>[
-            Icon(
-              LucideIcons.shieldCheck,
-              size: 13,
-              color: palette.success,
-            ),
+            Icon(LucideIcons.shieldCheck, size: 14, color: palette.success),
             Text(
               'Conexión segura cifrada de punto a punto',
               style: TextStyle(
                 fontFamily: AppTypography.bodyFontFamily,
-                fontSize: 10.5,
+                fontSize: 12,
                 color: palette.textSecondary,
               ),
             ),
@@ -488,57 +343,45 @@ class _PasswordStrengthIndicator extends StatelessWidget {
 
     final String label;
     final Color barColor;
-    final double percent;
+    final int filled;
 
     if (score <= 1) {
       label = 'Contraseña corta';
       barColor = palette.brandRed;
-      percent = 0.33;
+      filled = 1;
     } else if (score == 2) {
       label = 'Contraseña media';
       barColor = palette.accentGold;
-      percent = 0.66;
+      filled = 2;
     } else {
       label = 'Contraseña segura';
       barColor = palette.success;
-      percent = 1.0;
+      filled = 3;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: <Widget>[
-        const SizedBox(height: 4),
-        Row(
-          children: <Widget>[
-            for (int i = 1; i <= 3; i++) ...<Widget>[
-              if (i > 1) const SizedBox(width: 4),
-              Expanded(
-                child: Container(
-                  height: 3.5,
-                  decoration: BoxDecoration(
-                    color: (i == 1 && percent >= 0.33) ||
-                            (i == 2 && percent >= 0.66) ||
-                            (i == 3 && percent >= 1.0)
-                        ? barColor
-                        : palette.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+        for (int i = 1; i <= 3; i++) ...<Widget>[
+          if (i > 1) const SizedBox(width: 5),
+          Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              height: 4,
+              decoration: BoxDecoration(
+                color: i <= filled ? barColor : palette.border,
+                borderRadius: BorderRadius.circular(2),
               ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: AppTypography.bodyFontFamily,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: barColor,
             ),
+          ),
+        ],
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: AppTypography.bodyFontFamily,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: barColor,
           ),
         ),
       ],

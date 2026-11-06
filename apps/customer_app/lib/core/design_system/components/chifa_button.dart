@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum ChifaButtonVariant { primary, secondary }
 
-class ChifaButton extends StatefulWidget {
+class ChifaButton extends StatelessWidget {
   const ChifaButton({
     required this.label,
     required this.onPressed,
@@ -33,65 +33,58 @@ class ChifaButton extends StatefulWidget {
   final bool trailingAtEdge;
 
   @override
-  State<ChifaButton> createState() => _ChifaButtonState();
-}
-
-class _ChifaButtonState extends State<ChifaButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    final VoidCallback? effectiveOnPressed = widget.isLoading ? null : widget.onPressed;
-    final Widget child = widget.trailingAtEdge && widget.trailing != null && !widget.isLoading
+    final VoidCallback? effectiveOnPressed = isLoading ? null : onPressed;
+    final Widget child = trailingAtEdge && trailing != null && !isLoading
         ? Stack(
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: <Widget>[
               Center(
                 child: Text(
-                  widget.label,
+                  label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Positioned(right: 0, child: Icon(widget.trailing, size: widget.iconSize)),
+              Positioned(right: 0, child: Icon(trailing, size: iconSize)),
             ],
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (widget.isLoading)
+              if (isLoading)
                 const SizedBox.square(
                   dimension: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              else if (widget.leading != null)
-                Icon(widget.leading, size: widget.iconSize),
-              if (widget.isLoading || widget.leading != null) const SizedBox(width: 10),
-              Flexible(child: Text(widget.label, overflow: TextOverflow.ellipsis)),
-              if (!widget.isLoading && widget.trailing != null) const SizedBox(width: 10),
-              if (!widget.isLoading && widget.trailing != null)
-                Icon(widget.trailing, size: widget.iconSize),
+              else if (leading != null)
+                Icon(leading, size: iconSize),
+              if (isLoading || leading != null) const SizedBox(width: 10),
+              Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+              if (!isLoading && trailing != null) const SizedBox(width: 10),
+              if (!isLoading && trailing != null)
+                Icon(trailing, size: iconSize),
             ],
           );
 
-    final ButtonStyle? localStyle = widget.borderRadius == null && widget.textStyle == null
+    final ButtonStyle? localStyle = borderRadius == null && textStyle == null
         ? null
         : ButtonStyle(
-            shape: widget.borderRadius == null
+            shape: borderRadius == null
                 ? null
                 : WidgetStatePropertyAll<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(widget.borderRadius!),
+                      borderRadius: BorderRadius.circular(borderRadius!),
                     ),
                   ),
-            textStyle: widget.textStyle == null
+            textStyle: textStyle == null
                 ? null
-                : WidgetStatePropertyAll<TextStyle>(widget.textStyle!),
+                : WidgetStatePropertyAll<TextStyle>(textStyle!),
           );
 
-    final Widget button = switch (widget.variant) {
+    final Widget button = switch (variant) {
       ChifaButtonVariant.primary => FilledButton(
         onPressed: effectiveOnPressed,
         style: localStyle,
@@ -104,39 +97,23 @@ class _ChifaButtonState extends State<ChifaButton> {
       ),
     };
 
-    final Widget animatedButton = AnimatedScale(
-      scale: _isPressed ? 0.97 : 1.0,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
-      child: Listener(
-        onPointerDown: (_) {
-          if (effectiveOnPressed != null) setState(() => _isPressed = true);
-        },
-        onPointerUp: (_) {
-          if (_isPressed) setState(() => _isPressed = false);
-        },
-        onPointerCancel: (_) {
-          if (_isPressed) setState(() => _isPressed = false);
-        },
-        child: SizedBox(
-          width: widget.fullWidth ? double.infinity : null,
-          height: widget.height ?? (widget.variant == ChifaButtonVariant.primary ? 54 : 49),
-          child: button,
-        ),
-      ),
+    final Widget sizedButton = SizedBox(
+      width: fullWidth ? double.infinity : null,
+      height: height ?? (variant == ChifaButtonVariant.primary ? 54 : 49),
+      child: button,
     );
 
-    if (!widget.isLoading) {
-      return animatedButton;
+    if (!isLoading) {
+      return sizedButton;
     }
 
     return Semantics(
       button: true,
       enabled: false,
       liveRegion: true,
-      label: '${widget.label}, cargando',
+      label: '$label, cargando',
       excludeSemantics: true,
-      child: animatedButton,
+      child: sizedButton,
     );
   }
 }
