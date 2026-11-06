@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "flutter-accessibility": {
+      "source": "thienqo/flutter-skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-accessibility/SKILL.md",
+      "computedHash": "e30ee550c68803f9d1325e20cab337ab2f5826d37c95581f28067225ae07867a"
+    },
     "flutter-animation": {
       "source": "thienqo/flutter-skills",
       "sourceType": "github",
@@ -24,6 +30,24 @@
       "sourceType": "github",
       "skillPath": "flutter-improve-design/SKILL.md",
       "computedHash": "f952ffe353f3c86e1f5f36b1f1fe5020c297c4aa7fc6867fde3754c167e3c0c7"
+    },
+    "flutter-navigation": {
+      "source": "thienqo/flutter-skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-navigation/SKILL.md",
+      "computedHash": "f9cedaa982fee43b7ea173e696723deed79d13b5f19a7be53b967829c7b8ac97"
+    },
+    "flutter-ui-design": {
+      "source": "thienqo/flutter-skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-ui-design/SKILL.md",
+      "computedHash": "8ee8fab55536d4a25213ecd43551ac49836db503dbd627d2bcb2bcd1438949ec"
+    },
+    "flutter-ui-patterns": {
+      "source": "thienqo/flutter-skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-ui-patterns/SKILL.md",
+      "computedHash": "39b7861aa768cfa9ad30da696818a7006f74da229eb43c74bddc603b5e75a66c"
     }
   }
 }

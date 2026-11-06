@@ -5,11 +5,15 @@
 - El usuario aprueba etapas y cambios funcionales. No inferir aprobaciones ni alterar reglas de negocio.
 - Fuentes: `docs/etapas/README.md` para el índice y `docs/etapas/etapa-10-progreso-clientes.md` para el estado mutable.
 - Antes de actuar: confirmar repositorio, rama `develop` y cambios existentes. Leer este archivo, el checkpoint y los archivos afectados.
-- Para el desarrollo visual y técnico de Flutter, aplicar los skills instalados:
-  - `.agents/skills/flutter-improve-design/SKILL.md`: Criterios avanzados de diseño UI/UX y mejora de interfaces móviles.
-  - `.agents/skills/flutter-custom-design-system/SKILL.md`: Tokens de diseño atómicos (`AppPalette`, `AppColors`, `AppTypography`, `AppRadii`), componentes reutilizables y consistencia temática.
+- Para el desarrollo visual y técnico de Flutter, aplicar los 8 skills instalados:
+  - `.agents/skills/flutter-improve-design/SKILL.md`: Auditoría, revisión heurística y criterios avanzados de UI/UX para interfaces móviles.
+  - `.agents/skills/flutter-custom-design-system/SKILL.md`: Tokens de diseño atómicos (`AsiaPalette`, `AsiaColors`, `AsiaTypography`, `AsiaRadii`), ThemeExtension y componentes de sistema.
   - `.agents/skills/flutter-build-responsive-layout/SKILL.md`: Adaptabilidad y ergonomía en layouts móviles y pantallas amplias (`MediaQuery.sizeOf`, `LayoutBuilder`, `SafeArea`).
-  - `.agents/skills/flutter-animation/SKILL.md`: Animaciones implícitas, micro-interacciones interactivas, transiciones fluidas y curvas de aceleración naturales.
+  - `.agents/skills/flutter-animation/SKILL.md`: Animaciones implícitas, micro-interacciones interactivas, transiciones fluidas y curvas naturales.
+  - `.agents/skills/flutter-ui-design/SKILL.md`: Dirección de arte, identidad visual del producto, jerarquía visual, composición de pantallas y estados completos.
+  - `.agents/skills/flutter-ui-patterns/SKILL.md`: Arquitectura de widgets declarativos, separación de responsabilidades, límites de estado UI y manejo robusto de formularios.
+  - `.agents/skills/flutter-navigation/SKILL.md`: Enrutamiento declarativo (GoRouter), navegación anidada por tabs/shells, deep links y back-stack determinista.
+  - `.agents/skills/flutter-accessibility/SKILL.md`: Accesibilidad semántica, soporte a lectores de pantalla, contraste cromático, escalabilidad tipográfica y áreas táctiles ergonómicas.
 
 ## Alcance seguro
 
