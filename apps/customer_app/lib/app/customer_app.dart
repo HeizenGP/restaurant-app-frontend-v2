@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/api_environment.dart';
-import '../core/design_system/theme/app_theme.dart';
+import '../core/design_system/theme/asia_theme.dart';
 import '../features/m01_access/profile/application/user_profile_controller.dart';
 import '../features/m01_access/shared/application/auth_contracts.dart';
 import '../features/m01_access/shared/application/auth_session_controller.dart';
@@ -252,9 +252,9 @@ class _CustomerAppState extends State<CustomerApp> {
       builder: (BuildContext context, ThemeMode themeMode, Widget? child) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'KAIRO',
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
+          title: 'Chifa ASIA',
+          theme: AsiaAppTheme.light,
+          darkTheme: AsiaAppTheme.dark,
           themeMode: themeMode,
           routerConfig: _router,
         );

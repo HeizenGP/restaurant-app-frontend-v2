@@ -1,70 +1,62 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/m01_access/continue_as_guest/presentation/guest_access_page.dart';
+import '../../core/design_system/design_system.dart';
+import '../../features/m01_access/presentation/guest_access_page.dart';
+import '../../features/m01_access/presentation/profile_pages.dart';
+import '../../features/m01_access/presentation/registration_page.dart';
+import '../../features/m01_access/presentation/sign_in_page.dart';
 import '../../features/m01_access/profile/application/user_profile_controller.dart';
-import '../../features/m01_access/profile/domain/profile_models.dart';
-import '../../features/m01_access/profile/presentation/profile_pages.dart';
-import '../../features/m01_access/register_account/presentation/registration_page.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
-import '../../features/m01_access/sign_in/presentation/sign_in_page.dart';
 import '../../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
-import '../../features/m02_catalog/browse_catalog/presentation/catalog_pages.dart';
+import '../../features/m02_catalog/presentation/catalog_pages.dart';
 import '../../features/m02_catalog/shared/domain/catalog_models.dart';
 import '../../features/m02_catalog/view_product/application/product_detail_controller.dart';
-import '../../features/m02_catalog/view_product/presentation/product_detail_page.dart';
 import '../../features/m04_orders/choose_fulfillment/application/fulfillment_controller.dart';
 import '../../features/m04_orders/choose_fulfillment/domain/fulfillment_models.dart';
-import '../../features/m04_orders/choose_fulfillment/presentation/fulfillment_pages.dart';
 import '../../features/m04_orders/manage_cart/application/cart_controller.dart';
 import '../../features/m04_orders/manage_cart/domain/cart_models.dart';
-import '../../features/m04_orders/manage_cart/presentation/cart_page.dart';
 import '../../features/m04_orders/order_tracking/application/order_history_controller.dart';
 import '../../features/m04_orders/order_tracking/application/order_tracking_controller.dart';
-import '../../features/m04_orders/order_tracking/domain/order_tracking_models.dart';
-import '../../features/m04_orders/order_tracking/presentation/order_detail_tracking_page.dart';
-import '../../features/m04_orders/order_tracking/presentation/orders_history_page.dart';
-import '../../features/m04_orders/submit_order/application/order_contracts.dart';
+import '../../features/m04_orders/presentation/cart_page.dart';
+import '../../features/m04_orders/presentation/fulfillment_pages.dart';
+import '../../features/m04_orders/presentation/order_detail_tracking_page.dart';
+import '../../features/m04_orders/presentation/order_submission_pages.dart';
+import '../../features/m04_orders/presentation/orders_history_page.dart';
 import '../../features/m04_orders/submit_order/application/submit_order_controller.dart';
 import '../../features/m04_orders/submit_order/domain/order_models.dart';
-import '../../features/m04_orders/submit_order/presentation/order_submission_pages.dart';
+import '../../features/m06_payments/presentation/payment_status_pages.dart';
 import '../../features/m06_payments/view_payment_status/application/payment_status_controller.dart';
-import '../../features/m06_payments/view_payment_status/domain/payment_models.dart';
-import '../../features/m06_payments/view_payment_status/presentation/payment_status_pages.dart';
-import '../../features/ui_foundation/presentation/foundation_pages.dart';
-import '../../features/ui_foundation/presentation/kairo_splash_screen.dart';
 import '../theme/theme_mode_controller.dart';
-import 'customer_shell.dart';
 
 abstract final class CustomerRoutes {
-  static const String home = 'home';
-  static const String menu = 'menu';
-  static const String orders = 'orders';
-  static const String account = 'account';
-  static const String access = 'access';
-  static const String registration = 'registration';
-  static const String guest = 'guest';
-  static const String splash = 'splash';
-  static const String productDetail = 'product-detail';
-  static const String cart = 'cart';
-  static const String fulfillmentMode = 'fulfillment-mode';
-  static const String tableSelection = 'table-selection';
-  static const String pickupDetails = 'pickup-details';
-  static const String deliveryDetails = 'delivery-details';
-  static const String orderReview = 'order-review';
-  static const String orderSubmitted = 'order-submitted';
-  static const String orderException = 'order-exception';
-  static const String orderAdvance = 'order-advance';
-  static const String orderPayments = 'order-payments';
-  static const String orderTracking = 'order-tracking';
-  static const String editProfile = 'edit-profile';
-  static const String addAddress = 'add-address';
-  static const String editAddress = 'edit-address';
-  static const String addCard = 'add-card';
-  static const String editCard = 'edit-card';
-  static const String photoViewer = 'photo-viewer';
+  static const String home = '/';
+  static const String menu = '/menu';
+  static const String orders = '/pedidos';
+  static const String account = '/cuenta';
+
+  static const String signIn = '/acceso';
+  static const String registration = '/registro';
+  static const String guest = '/invitado';
+
+  static const String productDetail = '/menu/producto/:productId';
+  static const String cart = '/carrito';
+
+  static const String fulfillmentMode = '/pedido/modalidad';
+  static const String tableSelection = '/pedido/mesa';
+  static const String deliveryDetails = '/pedido/delivery';
+  static const String pickupDetails = '/pedido/pickup';
+  static const String orderReview = '/pedido/revisar';
+  static const String orderSubmitted = '/pedido/confirmado';
+  static const String orderException = '/pedido/error';
+
+  static const String orderTracking = '/seguimiento/:orderId';
+  static const String advanceStatus = '/anticipo/:orderId';
+  static const String paymentStatus = '/pagos/:orderId';
+
+  static const String personalInfo = '/cuenta/perfil';
+  static const String addresses = '/cuenta/direcciones';
+  static const String paymentMethods = '/cuenta/pagos';
 }
 
 GoRouter createCustomerRouter({
@@ -79,969 +71,506 @@ GoRouter createCustomerRouter({
   OrderTrackingController? orderTrackingController,
   UserProfileController? profileController,
 }) {
-  bool prepareOrderReview(FulfillmentDraft draft) {
-    if (cartController.state.isEmpty) return false;
-    try {
-      return submitOrderController.startNewLogicalRequest(
-        CreateOrderCommand(
-          items: cartController.state.items.map(
-            (CartItem item) => CreateOrderItem(
-              productId: item.product.id,
-              quantity: item.quantity,
-            ),
-          ),
-          fulfillment: draft,
-        ),
-      );
-    } on ArgumentError {
-      return false;
-    }
-  }
-
-  void finishPreparation(BuildContext context, FulfillmentDraft draft) {
-    if (prepareOrderReview(draft)) {
-      context.goNamed(CustomerRoutes.orderReview);
-    } else {
-      context.goNamed(CustomerRoutes.cart);
-    }
-  }
-
-  void finishSuccessfulSubmission(BuildContext context, OrderSnapshot order) {
-    cartController.clear();
-    if (order.modality == FulfillmentMode.local && order.tableId != null) {
-      fulfillmentController.lockAssignedTable(order.tableId!);
-    } else {
-      fulfillmentController.clearDraft();
-    }
-    context.goNamed(
-      CustomerRoutes.orderSubmitted,
-      pathParameters: <String, String>{'orderId': order.id},
-    );
-  }
-
-  orderTrackingController?.addListener(() {
-    final OrderTrackingSnapshot? tracking =
-        orderTrackingController.state.tracking;
-    if (tracking != null &&
-        (tracking.isPaid || tracking.orderStatus == 'CLOSED')) {
-      fulfillmentController.releaseAssignedTable();
-    }
-  });
-
-  paymentStatusController?.addListener(() {
-    final PaymentSummary? summary =
-        paymentStatusController.state.paymentSummary;
-    if (summary != null && summary.paymentStatus == 'PAID') {
-      fulfillmentController.releaseAssignedTable();
-    }
-  });
-
-  orderHistoryController?.addListener(() {
-    final List<OrderSnapshot> orders = orderHistoryController.state.orders;
-    if (orders.isNotEmpty) {
-      final OrderSnapshot? activeLocal = orders.cast<OrderSnapshot?>().firstWhere(
-        (OrderSnapshot? o) =>
-            o != null &&
-            o.modality == FulfillmentMode.local &&
-            o.tableId != null &&
-            o.status != 'CLOSED',
-        orElse: () => null,
-      );
-      if (activeLocal != null) {
-        if (fulfillmentController.state.assignedTableId != activeLocal.tableId) {
-          fulfillmentController.lockAssignedTable(activeLocal.tableId!);
-        }
-      } else if (fulfillmentController.state.hasAssignedTable) {
-        fulfillmentController.releaseAssignedTable();
-      }
-    }
-  });
-
-  String resolveInitials() {
-    final session = authController.state.session;
-    if (session?.isGuest ?? true) return 'I';
-    final user = session?.user;
-    final String name = profileController?.displayName ?? user?.displayName ?? '';
-    final String? avatar = profileController?.avatarPath;
-    if (avatar != null && avatar.isNotEmpty) {
-      return avatar.characters.first;
-    }
-    if (name.trim().isNotEmpty) {
-      return name.trim().characters.first.toUpperCase();
-    }
-    return 'C';
-  }
-
-  String? resolveAvatar() {
-    final session = authController.state.session;
-    if (session?.isGuest ?? true) return null;
-    return profileController?.avatarPath;
-  }
+  CatalogProduct? lastSelectedProduct;
+  CatalogCategory? lastSelectedCategory;
+  FulfillmentDraft? activeFulfillmentDraft;
+  OrderSnapshot? lastCreatedOrder;
 
   return GoRouter(
-    initialLocation: '/splash',
-    refreshListenable: authController.navigationRefresh,
-    redirect: (BuildContext context, GoRouterState state) {
-      final AuthStatus status = authController.state.status;
-      final String location = state.matchedLocation;
-      final bool isSplash = location == '/splash';
-      final bool isAccessRoute =
-          location == '/acceso' ||
-          location == '/registro' ||
-          location == '/invitado';
-
-      if (status == AuthStatus.restoring) {
-        return isSplash ? null : '/splash';
-      }
-      if (status == AuthStatus.signedOut) {
-        return isAccessRoute ? null : '/acceso';
-      }
-      if (isSplash || isAccessRoute) {
-        return '/';
-      }
-      return null;
-    },
+    initialLocation: CustomerRoutes.home,
     routes: <RouteBase>[
-      _resetRoute(
-        path: '/splash',
-        name: CustomerRoutes.splash,
-        authController: authController,
-      ),
-      GoRoute(
-        path: '/acceso',
-        name: CustomerRoutes.access,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          return _accessTransitionPage(
-            state,
-            SignInPage(authController: authController),
-          );
-        },
-      ),
-      GoRoute(
-        path: '/registro',
-        name: CustomerRoutes.registration,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          return _accessTransitionPage(
-            state,
-            RegistrationPage(authController: authController),
-          );
-        },
-      ),
-      GoRoute(
-        path: '/invitado',
-        name: CustomerRoutes.guest,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          return _accessTransitionPage(
-            state,
-            GuestAccessPage(authController: authController),
-          );
-        },
-      ),
+      // Shell con BottomNavigationBar persistente para las 4 pestañas
       StatefulShellRoute.indexedStack(
-        builder:
-            (
-              BuildContext context,
-              GoRouterState state,
-              StatefulNavigationShell navigationShell,
-            ) {
-              return CustomerShell(
-                navigationShell: navigationShell,
-                profileController: profileController,
-              );
-            },
+        builder: (
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: AsiaBottomNav(
+              currentIndex: navigationShell.currentIndex,
+              onTap: (int index) => navigationShell.goBranch(
+                index,
+                initialLocation: index == navigationShell.currentIndex,
+              ),
+            ),
+          );
+        },
         branches: <StatefulShellBranch>[
+          // Rama 0: Inicio
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: '/',
-                name: CustomerRoutes.home,
+                path: CustomerRoutes.home,
+                name: 'home',
                 builder: (BuildContext context, GoRouterState state) {
-                  return AnimatedBuilder(
-                    animation: Listenable.merge(<Listenable>[
-                      cartController,
-                      fulfillmentController,
-                      ?profileController,
-                    ]),
-                    builder: (BuildContext context, _) {
-                      return CatalogHomePage(
-                        themeModeController: themeModeController,
-                        catalogController: catalogController,
-                        onOpenMenu: () => context.go('/menu'),
-                        onCategorySelected: (String categoryId) {
-                          unawaited(catalogController.selectCategory(categoryId));
-                          context.go('/menu');
-                        },
-                        onOpenCart: () => context.goNamed(CustomerRoutes.cart),
-                        cartItemCount: cartController.state.totalQuantity,
-                        initials: resolveInitials(),
-                        avatarPath: resolveAvatar(),
-                        onAvatarPressed: () => context.go('/cuenta'),
-                        tableLabel: fulfillmentController.state.assignedTable?.code != null
-                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                            : null,
-                      );
+                  return HomePage(
+                    catalogController: catalogController,
+                    cartController: cartController,
+                    onNavigateToMenu: () => context.go(CustomerRoutes.menu),
+                    onNavigateToCart: () => context.push(CustomerRoutes.cart),
+                    onProductSelected: (CatalogCategory cat, CatalogProduct prod) {
+                      lastSelectedCategory = cat;
+                      lastSelectedProduct = prod;
+                      context.push('/menu/producto/${prod.id}');
+                    },
+                    onToggleTheme: themeModeController.toggle,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
+                  );
+                },
+              ),
+            ],
+          ),
+
+          // Rama 1: Menú
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: CustomerRoutes.menu,
+                name: 'menu',
+                builder: (BuildContext context, GoRouterState state) {
+                  return CatalogPage(
+                    catalogController: catalogController,
+                    cartController: cartController,
+                    onNavigateToCart: () => context.push(CustomerRoutes.cart),
+                    onProductSelected: (CatalogCategory cat, CatalogProduct prod) {
+                      lastSelectedCategory = cat;
+                      lastSelectedProduct = prod;
+                      context.push('/menu/producto/${prod.id}');
+                    },
+                    onToggleTheme: themeModeController.toggle,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
+                  );
+                },
+              ),
+            ],
+          ),
+
+          // Rama 2: Pedidos
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: CustomerRoutes.orders,
+                name: 'orders',
+                builder: (BuildContext context, GoRouterState state) {
+                  if (orderHistoryController == null) {
+                    return const AsiaScaffold(
+                      title: 'Pedidos',
+                      body: AsiaStateView(
+                        kind: AsiaStateKind.empty,
+                        title: 'Módulo de pedidos no disponible',
+                      ),
+                    );
+                  }
+                  return OrdersHistoryPage(
+                    controller: orderHistoryController,
+                    onBack: () => context.go(CustomerRoutes.home),
+                    onOrderSelected: (String orderId) {
+                      context.push('/seguimiento/$orderId');
                     },
                   );
                 },
               ),
             ],
           ),
+
+          // Rama 3: Cuenta
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: '/menu',
-                name: CustomerRoutes.menu,
+                path: CustomerRoutes.account,
+                name: 'account',
                 builder: (BuildContext context, GoRouterState state) {
-                  return AnimatedBuilder(
-                    animation: Listenable.merge(<Listenable>[
-                      cartController,
-                      fulfillmentController,
-                      ?profileController,
-                    ]),
-                    builder: (BuildContext context, _) {
-                      return CatalogBrowsePage(
-                        themeModeController: themeModeController,
-                        catalogController: catalogController,
-                        useGrid: true,
-                        showBackButton: true,
-                        onBackPressed: () => context.go('/'),
-                        onOpenCart: () => context.goNamed(CustomerRoutes.cart),
-                        cartItemCount: cartController.state.totalQuantity,
-                        cartTotalCents: cartController.state.subtotalCents,
-                        initials: resolveInitials(),
-                        avatarPath: resolveAvatar(),
-                        onAvatarPressed: () => context.go('/cuenta'),
-                        tableLabel: fulfillmentController.state.assignedTable?.code != null
-                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                            : null,
-                        onAddProduct: (CatalogProduct product) {
-                          if (product.availableForSale) {
-                            cartController.addProduct(
-                              CartProductSnapshot(
-                                id: product.id,
-                                categoryId: product.categoryId,
-                                name: product.name,
-                                unitPriceCents: product.priceCents,
-                              ),
-                            );
-                          }
-                        },
-                        onOpenProduct: (CatalogProduct product) {
-                          context.pushNamed(
-                            CustomerRoutes.productDetail,
-                            pathParameters: <String, String>{
-                              'categoryId': product.categoryId,
-                              'productId': product.id,
-                            },
-                            extra: product,
-                          );
-                        },
-                      );
-                    },
+                  if (profileController == null) {
+                    return const AsiaScaffold(
+                      title: 'Mi cuenta',
+                      body: AsiaStateView(
+                        kind: AsiaStateKind.empty,
+                        title: 'Perfil no disponible',
+                      ),
+                    );
+                  }
+                  return AccountHubPage(
+                    authController: authController,
+                    profileController: profileController,
+                    onNavigateToPersonalInfo: () => context.push(CustomerRoutes.personalInfo),
+                    onNavigateToAddresses: () => context.push(CustomerRoutes.addresses),
+                    onNavigateToPaymentMethods: () => context.push(CustomerRoutes.paymentMethods),
+                    onNavigateToOrders: () => context.go(CustomerRoutes.orders),
+                    onToggleTheme: themeModeController.toggle,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
                   );
                 },
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: 'carrito',
-                    name: CustomerRoutes.cart,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return AnimatedBuilder(
-                        animation: Listenable.merge(<Listenable>[
-                          cartController,
-                          fulfillmentController,
-                          ?profileController,
-                        ]),
-                        builder: (BuildContext context, _) {
-                          return CartPage(
-                            themeModeController: themeModeController,
-                            cartController: cartController,
-                            showBackButton: true,
-                            onBackPressed: () => context.go('/menu'),
-                            tableLabel: fulfillmentController.state.assignedTable?.code != null
-                                ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                                : null,
-                            initials: resolveInitials(),
-                            avatarPath: resolveAvatar(),
-                            onAvatarPressed: () => context.go('/cuenta'),
-                            onContinue: () {
-                              context.pushNamed(CustomerRoutes.fulfillmentMode);
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/pedidos',
-                name: CustomerRoutes.orders,
-                builder: (BuildContext context, GoRouterState state) {
-                  return AnimatedBuilder(
-                    animation: Listenable.merge(<Listenable>[
-                      cartController,
-                      fulfillmentController,
-                      ?orderHistoryController,
-                      ?profileController,
-                    ]),
-                    builder: (BuildContext context, _) {
-                      if (orderHistoryController != null) {
-                        return OrdersHistoryPage(
-                          themeModeController: themeModeController,
-                          controller: orderHistoryController,
-                          onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-                          cartItemCount: cartController.state.totalQuantity,
-                          initials: resolveInitials(),
-                          avatarPath: resolveAvatar(),
-                          onAvatarPressed: () => context.go('/cuenta'),
-                          tableLabel: fulfillmentController.state.assignedTable?.code != null
-                              ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                              : null,
-                          onOpenOrderDetail: (String orderId) {
-                            context.pushNamed(
-                              CustomerRoutes.orderTracking,
-                              pathParameters: <String, String>{'orderId': orderId},
-                            );
-                          },
-                        );
-                      }
-                      return FoundationOrdersPage(
-                        themeModeController: themeModeController,
-                        onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-                        cartItemCount: cartController.state.totalQuantity,
-                        initials: resolveInitials(),
-                        avatarPath: resolveAvatar(),
-                        onAvatarPressed: () => context.go('/cuenta'),
-                        tableLabel: fulfillmentController.state.assignedTable?.code != null
-                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                            : null,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/cuenta',
-                name: CustomerRoutes.account,
-                builder: (BuildContext context, GoRouterState state) {
-                  return AnimatedBuilder(
-                    animation: Listenable.merge(<Listenable>[
-                      cartController,
-                      fulfillmentController,
-                      ?profileController,
-                    ]),
-                    builder: (BuildContext context, _) {
-                      final session = authController.state.session;
-                      final user = session?.user;
-                      final bool isGuest = session?.isGuest ?? true;
-                      return FoundationAccountPage(
-                        themeModeController: themeModeController,
-                        isGuest: isGuest,
-                        displayName: isGuest
-                            ? 'Invitado'
-                            : (profileController?.displayName ?? user?.displayName),
-                        email: user?.email,
-                        profileController: profileController,
-                        onOpenOrders: () => context.go('/pedidos'),
-                        onLogout: authController.logout,
-                        onBackPressed: () => context.go('/'),
-                        showBackButton: true,
-                        onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-                        cartItemCount: cartController.state.totalQuantity,
-                        tableLabel: fulfillmentController.state.assignedTable?.code != null
-                            ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                            : null,
-                      );
-                    },
-                  );
-                },
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: 'editar-perfil',
-                    name: CustomerRoutes.editProfile,
-                    builder: (BuildContext context, GoRouterState state) {
-                      final session = authController.state.session;
-                      final user = session?.user;
-                      return EditProfilePage(
-                        themeModeController: themeModeController,
-                        controller: profileController ?? UserProfileController(),
-                        currentDisplayName: profileController?.displayName ??
-                            user?.displayName ??
-                            'Cliente',
-                        currentEmail: user?.email ?? 'cliente@kairo.pe',
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'direcciones/nueva',
-                    name: CustomerRoutes.addAddress,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return AddAddressPage(
-                        themeModeController: themeModeController,
-                        controller: profileController ?? UserProfileController(),
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'tarjetas/nueva',
-                    name: CustomerRoutes.addCard,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return AddCardPage(
-                        themeModeController: themeModeController,
-                        controller: profileController ?? UserProfileController(),
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'direcciones/editar',
-                    name: CustomerRoutes.editAddress,
-                    builder: (BuildContext context, GoRouterState state) {
-                      final CustomerAddress? address = state.extra is CustomerAddress
-                          ? state.extra! as CustomerAddress
-                          : null;
-                      return AddAddressPage(
-                        themeModeController: themeModeController,
-                        controller: profileController ?? UserProfileController(),
-                        existingAddress: address,
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'tarjetas/editar',
-                    name: CustomerRoutes.editCard,
-                    builder: (BuildContext context, GoRouterState state) {
-                      final SavedPaymentCard? card = state.extra is SavedPaymentCard
-                          ? state.extra! as SavedPaymentCard
-                          : null;
-                      return AddCardPage(
-                        themeModeController: themeModeController,
-                        controller: profileController ?? UserProfileController(),
-                        existingCard: card,
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'foto',
-                    name: CustomerRoutes.photoViewer,
-                    builder: (BuildContext context, GoRouterState state) {
-                      final session = authController.state.session;
-                      final user = session?.user;
-                      return ProfilePhotoViewerPage(
-                        themeModeController: themeModeController,
-                        avatarPath: resolveAvatar(),
-                        displayName: profileController?.displayName ??
-                            user?.displayName ??
-                            'Cliente',
-                        onEditProfile: () =>
-                            context.goNamed(CustomerRoutes.editProfile),
-                        onBackPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.goNamed(CustomerRoutes.account);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ],
               ),
             ],
           ),
         ],
       ),
+
+      // Rutas de autenticación
       GoRoute(
-        path: '/pedido/modalidad',
-        name: CustomerRoutes.fulfillmentMode,
+        path: CustomerRoutes.signIn,
+        name: 'signin',
+        builder: (BuildContext context, GoRouterState state) {
+          return SignInPage(
+            controller: authController,
+            onRegisterTap: () => context.push(CustomerRoutes.registration),
+            onGuestTap: () => context.push(CustomerRoutes.guest),
+            onSuccess: () => context.go(CustomerRoutes.home),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.registration,
+        name: 'registration',
+        builder: (BuildContext context, GoRouterState state) {
+          return RegistrationPage(
+            controller: authController,
+            onBackToSignIn: () => context.pop(),
+            onSuccess: () => context.go(CustomerRoutes.home),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.guest,
+        name: 'guest',
+        builder: (BuildContext context, GoRouterState state) {
+          return GuestAccessPage(
+            controller: authController,
+            onBackToSignIn: () => context.pop(),
+            onSuccess: () => context.go(CustomerRoutes.home),
+          );
+        },
+      ),
+
+      // Rutas de Catálogo y Producto
+      GoRoute(
+        path: CustomerRoutes.productDetail,
+        name: 'productDetail',
+        builder: (BuildContext context, GoRouterState state) {
+          final String productId = state.pathParameters['productId'] ?? '';
+          final ProductDetailController detailController = ProductDetailController.fromSelection(
+            categoryId: lastSelectedCategory?.id ?? '',
+            productId: productId,
+            selectedProduct: lastSelectedProduct,
+          );
+
+          return ProductDetailPage(
+            controller: detailController,
+            cartController: cartController,
+            onBack: () => context.pop(),
+            onNavigateToCart: () => context.push(CustomerRoutes.cart),
+          );
+        },
+      ),
+
+      // Ruta del Carrito
+      GoRoute(
+        path: CustomerRoutes.cart,
+        name: 'cart',
+        builder: (BuildContext context, GoRouterState state) {
+          return CartPage(
+            cartController: cartController,
+            onBack: () => context.pop(),
+            onBrowseCatalog: () => context.go(CustomerRoutes.menu),
+            onProceedToFulfillment: () => context.push(CustomerRoutes.fulfillmentMode),
+          );
+        },
+      ),
+
+      // Rutas del flujo de Checkout y Pedido
+      GoRoute(
+        path: CustomerRoutes.fulfillmentMode,
+        name: 'fulfillmentMode',
         builder: (BuildContext context, GoRouterState state) {
           return FulfillmentModePage(
-            themeModeController: themeModeController,
             controller: fulfillmentController,
-            showBackButton: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.goNamed(CustomerRoutes.cart);
-              }
-            },
-            onModeSelected: (FulfillmentMode mode) {
-              final String routeName = switch (mode) {
-                FulfillmentMode.local => CustomerRoutes.tableSelection,
-                FulfillmentMode.pickup => CustomerRoutes.pickupDetails,
-                FulfillmentMode.delivery => CustomerRoutes.deliveryDetails,
-              };
-              context.pushNamed(routeName);
-            },
+            onBack: () => context.pop(),
+            onTableSelected: () => context.push(CustomerRoutes.tableSelection),
+            onDeliverySelected: () => context.push(CustomerRoutes.deliveryDetails),
+            onPickupSelected: () => context.push(CustomerRoutes.pickupDetails),
           );
         },
       ),
       GoRoute(
-        path: '/pedido/mesa',
-        name: CustomerRoutes.tableSelection,
+        path: CustomerRoutes.tableSelection,
+        name: 'tableSelection',
         builder: (BuildContext context, GoRouterState state) {
           return TableSelectionPage(
-            themeModeController: themeModeController,
             controller: fulfillmentController,
-            showBackButton: true,
-            useGrid: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.pushNamed(CustomerRoutes.fulfillmentMode);
-              }
-            },
-            onFinished: (FulfillmentDraft draft) {
-              finishPreparation(context, draft);
+            onBack: () => context.pop(),
+            onTableConfirmed: (FulfillmentDraft draft) {
+              activeFulfillmentDraft = draft;
+              submitOrderController.startNewLogicalRequest(
+                CreateOrderCommand(
+                  items: cartController.state.items.map(
+                    (CartItem item) => CreateOrderItem(
+                      productId: item.product.id,
+                      quantity: item.quantity,
+                    ),
+                  ),
+                  fulfillment: draft,
+                ),
+              );
+              context.push(CustomerRoutes.orderReview);
             },
           );
         },
       ),
       GoRoute(
-        path: '/pedido/recojo',
-        name: CustomerRoutes.pickupDetails,
+        path: CustomerRoutes.deliveryDetails,
+        name: 'deliveryDetails',
         builder: (BuildContext context, GoRouterState state) {
-          return PickupDetailsPage(
-            themeModeController: themeModeController,
-            controller: fulfillmentController,
-            showBackButton: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.pushNamed(CustomerRoutes.fulfillmentMode);
-              }
-            },
-            onFinished: (FulfillmentDraft draft) {
-              finishPreparation(context, draft);
-            },
-          );
-        },
-      ),
-      GoRoute(
-        path: '/pedido/delivery',
-        name: CustomerRoutes.deliveryDetails,
-        builder: (BuildContext context, GoRouterState state) {
-          return DeliveryDetailsPage(
-            themeModeController: themeModeController,
-            controller: fulfillmentController,
-            savedAddresses: profileController?.addresses,
-            showBackButton: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.pushNamed(CustomerRoutes.fulfillmentMode);
-              }
-            },
-            onFinished: (FulfillmentDraft draft) {
-              finishPreparation(context, draft);
-            },
-          );
-        },
-      ),
-      GoRoute(
-        path: '/pedido/revision',
-        name: CustomerRoutes.orderReview,
-        redirect: (BuildContext context, GoRouterState state) {
-          return submitOrderController.state.command == null
-              ? '/menu/carrito'
+          final String? initialAddr = profileController != null && profileController.addresses.isNotEmpty
+              ? profileController.addresses.first.address
               : null;
-        },
-        builder: (BuildContext context, GoRouterState state) {
-          final CartState cart = cartController.state;
-          final FulfillmentDraft draft =
-              submitOrderController.state.command!.fulfillment;
-          return OrderReviewPage(
-            themeModeController: themeModeController,
-            controller: submitOrderController,
-            productsSubtitle: _productSummary(cart),
-            attentionSubtitle: _attentionSummary(draft, fulfillmentController),
-            amountSubtitle:
-                '${_formatSoles(cart.subtotalCents)} estimado por el carrito',
-            showBackButton: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/menu/carrito');
-              }
-            },
-            onSubmitted: (OrderSnapshot order) {
-              finishSuccessfulSubmission(context, order);
-            },
-            onFailure: (OrderFailure failure) {
-              context.goNamed(CustomerRoutes.orderException, extra: failure);
+          final String? initialName = profileController?.displayName;
+          final String? initialPhone = profileController?.phone;
+
+          return DeliveryDetailsPage(
+            onBack: () => context.pop(),
+            initialAddress: initialAddr,
+            initialName: initialName,
+            initialPhone: initialPhone,
+            onDeliveryConfirmed: (FulfillmentDraft draft) {
+              activeFulfillmentDraft = draft;
+              submitOrderController.startNewLogicalRequest(
+                CreateOrderCommand(
+                  items: cartController.state.items.map(
+                    (CartItem item) => CreateOrderItem(
+                      productId: item.product.id,
+                      quantity: item.quantity,
+                    ),
+                  ),
+                  fulfillment: draft,
+                ),
+              );
+              context.push(CustomerRoutes.orderReview);
             },
           );
         },
       ),
       GoRoute(
-        path: '/pedido/solicitud/:orderId',
-        name: CustomerRoutes.orderSubmitted,
+        path: CustomerRoutes.pickupDetails,
+        name: 'pickupDetails',
+        builder: (BuildContext context, GoRouterState state) {
+          final String? initialName = profileController?.displayName;
+          final String? initialPhone = profileController?.phone;
+
+          return PickupDetailsPage(
+            onBack: () => context.pop(),
+            initialName: initialName,
+            initialPhone: initialPhone,
+            onPickupConfirmed: (FulfillmentDraft draft) {
+              activeFulfillmentDraft = draft;
+              submitOrderController.startNewLogicalRequest(
+                CreateOrderCommand(
+                  items: cartController.state.items.map(
+                    (CartItem item) => CreateOrderItem(
+                      productId: item.product.id,
+                      quantity: item.quantity,
+                    ),
+                  ),
+                  fulfillment: draft,
+                ),
+              );
+              context.push(CustomerRoutes.orderReview);
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.orderReview,
+        name: 'orderReview',
+        builder: (BuildContext context, GoRouterState state) {
+          final FulfillmentDraft draft = activeFulfillmentDraft ??
+              FulfillmentDraft.local(tableId: 'M1');
+
+          return OrderReviewPage(
+            controller: submitOrderController,
+            items: cartController.state.items,
+            fulfillment: draft,
+            onBack: () => context.pop(),
+            onShowException: () => context.push(CustomerRoutes.orderException),
+            onOrderPlaced: (OrderSnapshot order) {
+              lastCreatedOrder = order;
+              cartController.clear();
+              context.go(CustomerRoutes.orderSubmitted);
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.orderSubmitted,
+        name: 'orderSubmitted',
+        builder: (BuildContext context, GoRouterState state) {
+          final OrderSnapshot order = lastCreatedOrder ??
+              OrderSnapshot(
+                id: 'ORD-DEMO',
+                status: 'REQUESTED',
+                channel: 'CUSTOMER_APP',
+                modality: FulfillmentMode.local,
+                totalAmount: '0.00',
+                lines: const <OrderLineSnapshot>[],
+                createdAt: DateTime.now(),
+              );
+
+          return OrderSubmittedPage(
+            order: order,
+            onViewTracking: () => context.go('/seguimiento/${order.id}'),
+            onGoHome: () => context.go(CustomerRoutes.home),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.orderException,
+        name: 'orderException',
+        builder: (BuildContext context, GoRouterState state) {
+          return OrderExceptionPage(
+            controller: submitOrderController,
+            onRetry: () async {
+              final bool ok = await submitOrderController.retrySubmission();
+              if (ok && submitOrderController.state.order != null && context.mounted) {
+                lastCreatedOrder = submitOrderController.state.order;
+                cartController.clear();
+                context.go(CustomerRoutes.orderSubmitted);
+              }
+            },
+            onBack: () => context.pop(),
+          );
+        },
+      ),
+
+      // Rutas de Seguimiento y Pagos
+      GoRoute(
+        path: CustomerRoutes.orderTracking,
+        name: 'orderTracking',
         builder: (BuildContext context, GoRouterState state) {
           final String orderId = state.pathParameters['orderId'] ?? '';
-          return OrderResultPage(
-            themeModeController: themeModeController,
-            controller: submitOrderController,
+          if (orderTrackingController == null) {
+            return const AsiaScaffold(
+              title: 'Seguimiento',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Controlador de seguimiento no disponible',
+              ),
+            );
+          }
+
+          return OrderDetailTrackingPage(
             orderId: orderId,
-            showBackButton: true,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackPressed: () => context.goNamed(CustomerRoutes.orders),
-            onViewOrders: () => context.goNamed(CustomerRoutes.orders),
-            onBackToHome: () => context.goNamed(CustomerRoutes.home),
+            controller: orderTrackingController,
+            onBack: () => context.go(CustomerRoutes.orders),
+            onViewAdvance: (String id) => context.push('/anticipo/$id'),
+            onViewPayments: (String id) => context.push('/pagos/$id'),
           );
         },
       ),
       GoRoute(
-        path: '/pedido/excepcion',
-        name: CustomerRoutes.orderException,
+        path: CustomerRoutes.advanceStatus,
+        name: 'advanceStatus',
         builder: (BuildContext context, GoRouterState state) {
-          final OrderFailure failure = state.extra is OrderFailure
-              ? state.extra! as OrderFailure
-              : submitOrderController.state.failure ??
-                    const OrderFailure(
-                      OrderFailureKind.validation,
-                      'Revisa la solicitud antes de continuar.',
-                    );
-          return OrderExceptionPage(
-            themeModeController: themeModeController,
-            failure: failure,
-            initials: resolveInitials(),
-            avatarPath: resolveAvatar(),
-            onAvatarPressed: () => context.go('/cuenta'),
-            onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-            cartItemCount: cartController.state.totalQuantity,
-            onBackToHome: () => context.goNamed(CustomerRoutes.home),
-            onRetry: submitOrderController.state.canRetrySubmission
-                ? () async {
-                    final bool succeeded = await submitOrderController
-                        .retrySubmission();
-                    if (!context.mounted) return;
-                    final OrderSnapshot? order =
-                        submitOrderController.state.order;
-                    if (succeeded && order != null) {
-                      finishSuccessfulSubmission(context, order);
-                    }
-                  }
-                : null,
+          final String orderId = state.pathParameters['orderId'] ?? '';
+          if (paymentStatusController == null) {
+            return const AsiaScaffold(
+              title: 'Anticipo',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Módulo de pagos no disponible',
+              ),
+            );
+          }
+
+          return AdvanceStatusPage(
+            orderId: orderId,
+            controller: paymentStatusController,
+            onBack: () => context.pop(),
+            onViewOrder: () => context.go('/seguimiento/$orderId'),
           );
         },
       ),
-      if (paymentStatusController != null) ...<RouteBase>[
-        GoRoute(
-          path: '/pedido/solicitud/:orderId/anticipo',
-          name: CustomerRoutes.orderAdvance,
-          builder: (BuildContext context, GoRouterState state) {
-            final String orderId = state.pathParameters['orderId'] ?? '';
-            return AdvanceStatusPage(
-              themeModeController: themeModeController,
-              controller: paymentStatusController,
-              orderId: orderId,
-              initials: resolveInitials(),
-              avatarPath: resolveAvatar(),
-              onAvatarPressed: () => context.go('/cuenta'),
-              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-              cartItemCount: cartController.state.totalQuantity,
-              onViewOrder: () {
-                context.goNamed(
-                  CustomerRoutes.orderSubmitted,
-                  pathParameters: <String, String>{'orderId': orderId},
-                );
-              },
-            );
-          },
-        ),
-        GoRoute(
-          path: '/pedido/solicitud/:orderId/pagos',
-          name: CustomerRoutes.orderPayments,
-          builder: (BuildContext context, GoRouterState state) {
-            final String orderId = state.pathParameters['orderId'] ?? '';
-            return OrderPaymentStatusPage(
-              themeModeController: themeModeController,
-              controller: paymentStatusController,
-              orderId: orderId,
-              initials: resolveInitials(),
-              avatarPath: resolveAvatar(),
-              onAvatarPressed: () => context.go('/cuenta'),
-              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-              cartItemCount: cartController.state.totalQuantity,
-              onBackToOrder: () {
-                context.goNamed(
-                  CustomerRoutes.orderSubmitted,
-                  pathParameters: <String, String>{'orderId': orderId},
-                );
-              },
-            );
-          },
-        ),
-      ],
-      if (orderTrackingController != null) ...<RouteBase>[
-        GoRoute(
-          path: '/pedidos/:orderId',
-          name: CustomerRoutes.orderTracking,
-          builder: (BuildContext context, GoRouterState state) {
-            final String orderId = state.pathParameters['orderId'] ?? '';
-            return OrderDetailTrackingPage(
-              themeModeController: themeModeController,
-              controller: orderTrackingController,
-              orderId: orderId,
-              showBackButton: true,
-              onBackToOrders: () => context.goNamed(CustomerRoutes.orders),
-              onCartPressed: () => context.goNamed(CustomerRoutes.cart),
-              cartItemCount: cartController.state.totalQuantity,
-              initials: resolveInitials(),
-              avatarPath: resolveAvatar(),
-              onAvatarPressed: () => context.go('/cuenta'),
-              onViewAdvance: (String id) {
-                context.pushNamed(
-                  CustomerRoutes.orderAdvance,
-                  pathParameters: <String, String>{'orderId': id},
-                );
-              },
-              onViewPayments: (String id) {
-                context.pushNamed(
-                  CustomerRoutes.orderPayments,
-                  pathParameters: <String, String>{'orderId': id},
-                );
-              },
-            );
-          },
-        ),
-      ],
       GoRoute(
-        path: '/menu/categoria/:categoryId/producto/:productId',
-        name: CustomerRoutes.productDetail,
+        path: CustomerRoutes.paymentStatus,
+        name: 'paymentStatus',
         builder: (BuildContext context, GoRouterState state) {
-          final String categoryId = state.pathParameters['categoryId'] ?? '';
-          final String productId = state.pathParameters['productId'] ?? '';
-          final CatalogProduct? selectedProduct = state.extra is CatalogProduct
-              ? state.extra! as CatalogProduct
-              : null;
-          return AnimatedBuilder(
-            animation: Listenable.merge(<Listenable>[
-              cartController,
-              fulfillmentController,
-              ?profileController,
-            ]),
-            builder: (BuildContext context, _) {
-              return CatalogProductDetailPage(
-                themeModeController: themeModeController,
-                controller: ProductDetailController.fromSelection(
-                  categoryId: categoryId,
-                  productId: productId,
-                  selectedProduct: selectedProduct,
-                ),
-                initials: resolveInitials(),
-                avatarPath: resolveAvatar(),
-                onAvatarPressed: () => context.go('/cuenta'),
-                cartItemCount: cartController.state.totalQuantity,
-                onAddProduct: (CatalogProduct product, int quantity, [String? notes]) {
-                  if (!product.availableForSale) return false;
-                  return cartController.addProduct(
-                    CartProductSnapshot(
-                      id: product.id,
-                      categoryId: product.categoryId,
-                      name: product.name,
-                      unitPriceCents: product.priceCents,
-                    ),
-                    quantity: quantity,
-                    notes: notes,
-                  );
-                },
-                onProductAdded: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/menu');
-                  }
-                },
-                onOpenCart: () => context.goNamed(CustomerRoutes.cart),
-                showBackButton: true,
-                onBackPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/menu');
-                  }
-                },
-                showCartInHeader: true,
-                tableLabel: fulfillmentController.state.assignedTable?.code != null
-                    ? 'Mesa ${fulfillmentController.state.assignedTable!.code}'
-                    : null,
-              );
-            },
+          final String orderId = state.pathParameters['orderId'] ?? '';
+          if (paymentStatusController == null) {
+            return const AsiaScaffold(
+              title: 'Pagos',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Módulo de pagos no disponible',
+              ),
+            );
+          }
+
+          return OrderPaymentStatusPage(
+            orderId: orderId,
+            controller: paymentStatusController,
+            onBack: () => context.pop(),
+          );
+        },
+      ),
+
+      // Rutas del Perfil
+      GoRoute(
+        path: CustomerRoutes.personalInfo,
+        name: 'personalInfo',
+        builder: (BuildContext context, GoRouterState state) {
+          if (profileController == null) {
+            return const AsiaScaffold(
+              title: 'Información personal',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Perfil no disponible',
+              ),
+            );
+          }
+          return PersonalInfoPage(
+            profileController: profileController,
+            onBack: () => context.pop(),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.addresses,
+        name: 'addresses',
+        builder: (BuildContext context, GoRouterState state) {
+          if (profileController == null) {
+            return const AsiaScaffold(
+              title: 'Direcciones',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Perfil no disponible',
+              ),
+            );
+          }
+          return AddressesPage(
+            profileController: profileController,
+            onBack: () => context.pop(),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.paymentMethods,
+        name: 'paymentMethods',
+        builder: (BuildContext context, GoRouterState state) {
+          if (profileController == null) {
+            return const AsiaScaffold(
+              title: 'Métodos de pago',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Perfil no disponible',
+              ),
+            );
+          }
+          return PaymentMethodsPage(
+            profileController: profileController,
+            onBack: () => context.pop(),
           );
         },
       ),
     ],
-    errorBuilder: (BuildContext context, GoRouterState state) {
-      return const _UiResetPlaceholder();
-    },
-  );
-}
-
-String _attentionSummary(
-  FulfillmentDraft draft,
-  FulfillmentController fulfillmentController,
-) {
-  return switch (draft.mode) {
-    FulfillmentMode.local =>
-      fulfillmentController.state.selectedTable == null
-          ? 'Consumo en local · mesa seleccionada'
-          : 'Consumo en local · ${fulfillmentController.state.selectedTable!.code}',
-    FulfillmentMode.pickup => 'Recojo · ${draft.contactName}',
-    FulfillmentMode.delivery => 'Delivery · ${draft.deliveryAddress}',
-  };
-}
-
-String _productSummary(CartState cart) {
-  final String products = cart.items.length == 1 ? 'producto' : 'productos';
-  final String units = cart.totalQuantity == 1 ? 'unidad' : 'unidades';
-  return '${cart.items.length} $products · ${cart.totalQuantity} $units';
-}
-
-String _formatSoles(int cents) {
-  return 'S/ ${(cents / 100).toStringAsFixed(2)}';
-}
-
-GoRoute _resetRoute({
-  required String path,
-  required String name,
-  required AuthSessionController authController,
-}) {
-  return GoRoute(
-    path: path,
-    name: name,
-    builder: (BuildContext context, GoRouterState state) {
-      return KairoSplashScreen(
-        onAnimationComplete: () {
-          final AuthStatus status = authController.state.status;
-          if (status == AuthStatus.signedOut) {
-            context.go('/acceso');
-          } else {
-            context.go('/');
-          }
-        },
-      );
-    },
-  );
-}
-
-class _UiResetPlaceholder extends StatelessWidget {
-  const _UiResetPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: SizedBox.shrink());
-  }
-}
-
-/// Fade + gentle rise used across the access flow (Login, Registro, Invitado)
-/// so the shared KAIRO logo and tabs glide between screens.
-CustomTransitionPage<void> _accessTransitionPage(
-  GoRouterState state,
-  Widget child,
-) {
-  return CustomTransitionPage<void>(
-    key: state.pageKey,
-    child: child,
-    transitionDuration: const Duration(milliseconds: 420),
-    reverseTransitionDuration: const Duration(milliseconds: 340),
-    transitionsBuilder: (
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-    ) {
-      final Animation<double> curved = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.035),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
   );
 }
