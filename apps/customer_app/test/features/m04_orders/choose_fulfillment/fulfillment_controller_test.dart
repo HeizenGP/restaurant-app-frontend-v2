@@ -34,7 +34,7 @@ void main() {
     controller.selectTable('available');
     expect(
       controller.completeLocal(),
-      FulfillmentDraft.local(tableId: 'available'),
+      FulfillmentDraft.local(tableId: 'available', tableCode: 'B-01'),
     );
   });
 

@@ -13,6 +13,7 @@ class AsiaButton extends StatelessWidget {
     required this.onPressed,
     this.variant = AsiaButtonVariant.primary,
     this.isLoading = false,
+    this.loadingLabel,
     this.enabled = true,
     this.leading,
     this.trailing,
@@ -27,6 +28,7 @@ class AsiaButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final AsiaButtonVariant variant;
   final bool isLoading;
+  final String? loadingLabel;
   final bool enabled;
   final IconData? leading;
   final IconData? trailing;
@@ -94,15 +96,29 @@ class AsiaButton extends StatelessWidget {
       mainAxisSize: width == null ? MainAxisSize.min : MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        if (isLoading)
+        if (isLoading) ...<Widget>[
           SizedBox.square(
             dimension: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2.2,
               valueColor: AlwaysStoppedAnimation<Color>(fgColor),
             ),
-          )
-        else ...<Widget>[
+          ),
+          if (loadingLabel != null) ...<Widget>[
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                loadingLabel!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AsiaTypography.labelLarge.copyWith(
+                  color: fgColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ] else ...<Widget>[
           if (leading != null) ...<Widget>[
             Icon(leading, size: iconSize, color: fgColor),
             const SizedBox(width: 8),
@@ -132,7 +148,7 @@ class AsiaButton extends StatelessWidget {
         onPressed: canPress ? onPressed : null,
         enabled: canPress,
         borderRadius: radius,
-        semanticLabel: label,
+        semanticLabel: isLoading && loadingLabel != null ? loadingLabel : label,
         child: Container(
           height: height,
           width: width ?? double.infinity,
@@ -150,4 +166,3 @@ class AsiaButton extends StatelessWidget {
     );
   }
 }
-

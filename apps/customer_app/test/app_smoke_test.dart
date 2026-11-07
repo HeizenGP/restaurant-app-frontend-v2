@@ -14,67 +14,102 @@ import 'helpers/payment_fakes.dart';
 import 'helpers/tables_fakes.dart';
 
 void main() {
-  testWidgets('KairoSplashScreen renders emblem, branding and executes onFinished callback', (WidgetTester tester) async {
-    bool finished = false;
+  testWidgets(
+    'KairoSplashScreen renders emblem, branding and executes onFinished callback',
+    (WidgetTester tester) async {
+      bool finished = false;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AsiaAppTheme.dark,
-        home: KairoSplashScreen(
-          duration: const Duration(milliseconds: 500),
-          onFinished: () {
-            finished = true;
-          },
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AsiaAppTheme.dark,
+          home: KairoSplashScreen(
+            duration: const Duration(milliseconds: 500),
+            onFinished: () {
+              finished = true;
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    // Initial frame of splash
-    await tester.pump();
-    expect(find.byType(KairoEmblem), findsOneWidget);
-    expect(find.text('K A I R O'), findsOneWidget);
-    expect(find.text('ALTA COCINA ASIÁTICA'), findsOneWidget);
+      // Initial frame of splash
+      await tester.pump();
+      expect(find.byType(KairoEmblem), findsOneWidget);
+      expect(find.text('K A I R O'), findsOneWidget);
+      expect(find.text('ALTA COCINA ASIÁTICA'), findsOneWidget);
 
-    // Advance animation past finish
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(finished, isTrue);
-  });
+      // Advance animation past finish
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(finished, isTrue);
+    },
+  );
 
-  testWidgets('CustomerApp boots up and renders Home Page with KAIRO branding', (WidgetTester tester) async {
-    final FakeAuthRepository fakeAuth = FakeAuthRepository();
-    final MemoryAuthSessionStore fakeSessionStore = MemoryAuthSessionStore();
-    final FakeCatalogRepository fakeCatalog = FakeCatalogRepository();
-    final FakeTablesRepository fakeTables = FakeTablesRepository();
-    final FakeOrdersRepository fakeOrders = FakeOrdersRepository();
-    final FakeOrderTrackingRepository fakeTracking = FakeOrderTrackingRepository();
-    final FakePaymentStatusRepository fakePayment = FakePaymentStatusRepository();
+  testWidgets(
+    'CustomerApp boots up and renders Home Page with KAIRO branding',
+    (WidgetTester tester) async {
+      final FakeAuthRepository fakeAuth = FakeAuthRepository();
+      final MemoryAuthSessionStore fakeSessionStore = MemoryAuthSessionStore(
+        session: registeredSession(),
+      );
+      final FakeCatalogRepository fakeCatalog = FakeCatalogRepository();
+      final FakeTablesRepository fakeTables = FakeTablesRepository();
+      final FakeOrdersRepository fakeOrders = FakeOrdersRepository();
+      final FakeOrderTrackingRepository fakeTracking =
+          FakeOrderTrackingRepository();
+      final FakePaymentStatusRepository fakePayment =
+          FakePaymentStatusRepository();
 
+      await tester.pumpWidget(
+        CustomerApp(
+          environment: ApiEnvironment(baseUrl: ApiEnvironment.renderUrl),
+          initialLocation: CustomerRoutes.home,
+          authRepository: fakeAuth,
+          sessionStore: fakeSessionStore,
+          catalogRepository: fakeCatalog,
+          tablesRepository: fakeTables,
+          ordersRepository: fakeOrders,
+          orderTrackingRepository: fakeTracking,
+          paymentStatusRepository: fakePayment,
+        ),
+      );
+
+      // Initial frame rendered
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verify KAIRO app brand title is rendered on home screen
+      expect(find.text('KAIRO'), findsOneWidget);
+      expect(find.text('Alta Cocina Asiática Contemporánea'), findsOneWidget);
+
+      // Verify bottom navigation bar destinations
+      expect(find.text('Inicio'), findsOneWidget);
+      expect(find.text('Menú'), findsOneWidget);
+      expect(find.text('Pedidos'), findsOneWidget);
+      expect(find.text('Cuenta'), findsOneWidget);
+    },
+  );
+
+  testWidgets('signed-out users are redirected away from private routes', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       CustomerApp(
         environment: ApiEnvironment(baseUrl: ApiEnvironment.renderUrl),
         initialLocation: CustomerRoutes.home,
-        authRepository: fakeAuth,
-        sessionStore: fakeSessionStore,
-        catalogRepository: fakeCatalog,
-        tablesRepository: fakeTables,
-        ordersRepository: fakeOrders,
-        orderTrackingRepository: fakeTracking,
-        paymentStatusRepository: fakePayment,
+        authRepository: FakeAuthRepository(),
+        sessionStore: MemoryAuthSessionStore(),
+        catalogRepository: FakeCatalogRepository(),
+        tablesRepository: FakeTablesRepository(),
+        ordersRepository: FakeOrdersRepository(),
+        orderTrackingRepository: FakeOrderTrackingRepository(),
+        paymentStatusRepository: FakePaymentStatusRepository(),
       ),
     );
 
-    // Initial frame rendered
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(seconds: 1));
 
-    // Verify KAIRO app brand title is rendered on home screen
-    expect(find.text('KAIRO'), findsOneWidget);
-    expect(find.text('Alta Cocina Asiática Contemporánea'), findsOneWidget);
-
-    // Verify bottom navigation bar destinations
-    expect(find.text('Inicio'), findsOneWidget);
-    expect(find.text('Menú'), findsOneWidget);
-    expect(find.text('Pedidos'), findsOneWidget);
-    expect(find.text('Cuenta'), findsOneWidget);
+    expect(find.byKey(const Key('signin-page')), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
+    expect(find.text('Inicio'), findsNothing);
   });
 }

@@ -113,6 +113,17 @@ abstract final class AccessValidators {
     if (password.length > 128) {
       return 'La contraseña no puede superar 128 caracteres.';
     }
+    if (!RegExp('[a-z]').hasMatch(password) ||
+        !RegExp('[A-Z]').hasMatch(password) ||
+        !RegExp('[0-9]').hasMatch(password)) {
+      return 'Incluye mayúscula, minúscula y número.';
+    }
+    return null;
+  }
+
+  static String? passwordConfirmation(String? value, String password) {
+    if ((value ?? '').isEmpty) return 'Confirma tu contraseña.';
+    if (value != password) return 'Las contraseñas no coinciden.';
     return null;
   }
 }

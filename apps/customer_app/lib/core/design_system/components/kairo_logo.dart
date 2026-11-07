@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../foundations/asia_colors.dart';
@@ -38,17 +39,18 @@ class KairoLogo extends StatelessWidget {
     final AsiaTheme theme = context.asiaTheme;
     final bool effectiveDark = isDark ?? theme.isDark;
 
-    final Widget emblem = KairoEmblem(
-      size: emblemSize,
-      isDark: effectiveDark,
-    );
+    final Widget emblem = KairoEmblem(size: emblemSize, isDark: effectiveDark);
 
     if (variant == KairoLogoVariant.emblemOnly) {
       return emblem;
     }
 
-    final Color titleColor = effectiveDark ? Colors.white : AsiaColors.lightTextPrimary;
-    final Color subtitleColor = effectiveDark ? AsiaColors.brandGoldLight : AsiaColors.brandGold;
+    final Color titleColor = effectiveDark
+        ? Colors.white
+        : AsiaColors.lightTextPrimary;
+    final Color subtitleColor = effectiveDark
+        ? AsiaColors.brandGoldLight
+        : AsiaColors.brandGoldText;
 
     final Widget textBlock = Column(
       mainAxisSize: MainAxisSize.min,
@@ -58,11 +60,13 @@ class KairoLogo extends StatelessWidget {
       children: <Widget>[
         Text(
           'K A I R O',
-          textAlign: variant == KairoLogoVariant.vertical ? TextAlign.center : TextAlign.left,
-          style: AsiaTypography.titleLarge.copyWith(
+          textAlign: variant == KairoLogoVariant.vertical
+              ? TextAlign.center
+              : TextAlign.left,
+          style: AsiaTypography.brandDisplay.copyWith(
             color: titleColor,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 6.0,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 6.4,
             fontSize: emblemSize * 0.36 > 18 ? emblemSize * 0.36 : 18,
             height: 1.1,
           ),
@@ -104,11 +108,7 @@ class KairoLogo extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          emblem,
-          const SizedBox(width: 14),
-          textBlock,
-        ],
+        children: <Widget>[emblem, const SizedBox(width: 14), textBlock],
       );
     }
 
@@ -129,11 +129,7 @@ class KairoLogo extends StatelessWidget {
 /// Incorpora el círculo Ensō imperial, el monograma geométrico 'K' inspirado
 /// en palillos de bambú cruzados y el destello ascendente de llama de wok.
 class KairoEmblem extends StatelessWidget {
-  const KairoEmblem({
-    this.size = 64.0,
-    this.isDark = true,
-    super.key,
-  });
+  const KairoEmblem({this.size = 64.0, this.isDark = true, super.key});
 
   final double size;
   final bool isDark;
@@ -174,7 +170,9 @@ class _KairoEmblemPainter extends CustomPainter {
     final Paint haloPaint = Paint()
       ..shader = RadialGradient(
         colors: <Color>[
-          (isDark ? crimsonVibrant : crimsonDeep).withValues(alpha: isDark ? 0.22 : 0.12),
+          (isDark ? crimsonVibrant : crimsonDeep).withValues(
+            alpha: isDark ? 0.22 : 0.12,
+          ),
           goldWarm.withValues(alpha: isDark ? 0.08 : 0.04),
           Colors.transparent,
         ],
@@ -195,12 +193,7 @@ class _KairoEmblemPainter extends CustomPainter {
       ..shader = const SweepGradient(
         startAngle: 0.0,
         endAngle: math.pi * 2,
-        colors: <Color>[
-          crimsonDeep,
-          crimsonVibrant,
-          crimsonGlow,
-          crimsonDeep,
-        ],
+        colors: <Color>[crimsonDeep, crimsonVibrant, crimsonGlow, crimsonDeep],
       ).createShader(ensoRect)
       ..style = PaintingStyle.stroke
       ..strokeWidth = r * 0.14
@@ -210,8 +203,8 @@ class _KairoEmblemPainter extends CustomPainter {
     // El arco del Ensō abarca aproximadamente 300° (dejando una apertura elegante de 60°)
     canvas.drawArc(
       ensoRect,
-      math.pi * 0.35,  // Ángulo de inicio
-      math.pi * 1.62,  // Barrido
+      math.pi * 0.35, // Ángulo de inicio
+      math.pi * 1.62, // Barrido
       false,
       ensoPaint,
     );
@@ -229,11 +222,7 @@ class _KairoEmblemPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[
-          goldRadiant,
-          goldWarm,
-          Color(0xFFB45309),
-        ],
+        colors: <Color>[goldRadiant, goldWarm, Color(0xFFB45309)],
       ).createShader(Rect.fromCircle(center: center, radius: r * 0.50))
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
@@ -274,29 +263,37 @@ class _KairoEmblemPainter extends CustomPainter {
 
     // 6. Llama de Wok ascendente (*Wok Hei*) en la cúspide central
     final Paint flamePaint = Paint()
-      ..shader = const RadialGradient(
-        colors: <Color>[
-          Colors.white,
-          goldRadiant,
-          crimsonGlow,
-        ],
-      ).createShader(Rect.fromCircle(center: Offset(cx + r * 0.02, cy - r * 0.34), radius: r * 0.14))
+      ..shader =
+          const RadialGradient(
+            colors: <Color>[Colors.white, goldRadiant, crimsonGlow],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(cx + r * 0.02, cy - r * 0.34),
+              radius: r * 0.14,
+            ),
+          )
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
     final Path flamePath = Path()
       ..moveTo(cx + r * 0.02, cy - r * 0.46) // Punta de la llama
       ..quadraticBezierTo(
-        cx + r * 0.11, cy - r * 0.32,
-        cx + r * 0.06, cy - r * 0.22,
+        cx + r * 0.11,
+        cy - r * 0.32,
+        cx + r * 0.06,
+        cy - r * 0.22,
       )
       ..quadraticBezierTo(
-        cx + r * 0.02, cy - r * 0.28,
-        cx - r * 0.02, cy - r * 0.24,
+        cx + r * 0.02,
+        cy - r * 0.28,
+        cx - r * 0.02,
+        cy - r * 0.24,
       )
       ..quadraticBezierTo(
-        cx - r * 0.06, cy - r * 0.33,
-        cx + r * 0.02, cy - r * 0.46,
+        cx - r * 0.06,
+        cy - r * 0.33,
+        cx + r * 0.02,
+        cy - r * 0.46,
       )
       ..close();
     canvas.drawPath(flamePath, flamePaint);

@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'app/customer_app.dart';
 import 'core/api_environment.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  if (ApiEnvironment.mapboxAccessToken.isNotEmpty) {
+    try {
+      MapboxOptions.setAccessToken(ApiEnvironment.mapboxAccessToken);
+    } catch (e) {
+      debugPrint('MapboxOptions.setAccessToken initialization: $e');
+    }
+  }
   ApiEnvironment environment;
   try {
     environment = ApiEnvironment.fromCompileTime();

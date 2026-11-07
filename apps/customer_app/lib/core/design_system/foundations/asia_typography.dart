@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
 abstract final class AsiaTypography {
+  static const TextStyle brandDisplay = TextStyle(
+    fontFamily: 'Cormorant Garamond',
+    fontSize: 34.0,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.5,
+    height: 1.05,
+  );
+
   static const TextStyle displayLarge = TextStyle(
     fontSize: 28.0,
     fontWeight: FontWeight.w800,
@@ -71,4 +79,3 @@ abstract final class AsiaTypography {
     height: 1.2,
   );
 }
-

@@ -1,12 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/design_system/design_system.dart';
+import '../../features/location_delivery/application/location_delivery_controller.dart';
+import '../../features/location_delivery/presentation/map_location_picker_page.dart';
 import '../../features/m01_access/presentation/guest_access_page.dart';
+import '../../features/m01_access/presentation/password_recovery_page.dart';
 import '../../features/m01_access/presentation/profile_pages.dart';
 import '../../features/m01_access/presentation/registration_page.dart';
 import '../../features/m01_access/presentation/sign_in_page.dart';
 import '../../features/m01_access/profile/application/user_profile_controller.dart';
+import '../../features/m01_access/profile/domain/profile_models.dart';
 import '../../features/m01_access/shared/application/auth_session_controller.dart';
 import '../../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../../features/m02_catalog/presentation/catalog_pages.dart';
@@ -39,6 +44,7 @@ abstract final class CustomerRoutes {
 
   static const String signIn = '/acceso';
   static const String registration = '/registro';
+  static const String passwordRecovery = '/recuperar-acceso';
   static const String guest = '/invitado';
 
   static const String productDetail = '/menu/producto/:productId';
@@ -59,6 +65,7 @@ abstract final class CustomerRoutes {
   static const String personalInfo = '/cuenta/perfil';
   static const String addresses = '/cuenta/direcciones';
   static const String paymentMethods = '/cuenta/pagos';
+  static const String mapPicker = '/mapa-ubicacion';
 }
 
 GoRouter createCustomerRouter({
@@ -72,6 +79,7 @@ GoRouter createCustomerRouter({
   OrderHistoryController? orderHistoryController,
   OrderTrackingController? orderTrackingController,
   UserProfileController? profileController,
+  LocationDeliveryController? locationDeliveryController,
   String initialLocation = CustomerRoutes.splash,
 }) {
   CatalogProduct? lastSelectedProduct;
@@ -81,25 +89,47 @@ GoRouter createCustomerRouter({
 
   return GoRouter(
     initialLocation: initialLocation,
+    refreshListenable: authController.navigationRefresh,
+    redirect: (BuildContext context, GoRouterState state) {
+      final AuthStatus status = authController.state.status;
+      final String location = state.matchedLocation;
+      final bool isSplash = location == CustomerRoutes.splash;
+      final bool isPublicAuth =
+          location == CustomerRoutes.signIn ||
+          location == CustomerRoutes.registration ||
+          location == CustomerRoutes.passwordRecovery ||
+          location == CustomerRoutes.guest;
+
+      if (status == AuthStatus.restoring) {
+        return isSplash ? null : CustomerRoutes.splash;
+      }
+      if (status == AuthStatus.signedOut) {
+        if (isSplash) return CustomerRoutes.signIn;
+        return isPublicAuth ? null : CustomerRoutes.signIn;
+      }
+      if (isSplash) return CustomerRoutes.home;
+      return null;
+    },
     routes: <RouteBase>[
       // Shell con BottomNavigationBar persistente para las 4 pestañas
       StatefulShellRoute.indexedStack(
-        builder: (
-          BuildContext context,
-          GoRouterState state,
-          StatefulNavigationShell navigationShell,
-        ) {
-          return Scaffold(
-            body: navigationShell,
-            bottomNavigationBar: AsiaBottomNav(
-              currentIndex: navigationShell.currentIndex,
-              onTap: (int index) => navigationShell.goBranch(
-                index,
-                initialLocation: index == navigationShell.currentIndex,
-              ),
-            ),
-          );
-        },
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              return Scaffold(
+                body: navigationShell,
+                bottomNavigationBar: AsiaBottomNav(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: (int index) => navigationShell.goBranch(
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
+                  ),
+                ),
+              );
+            },
         branches: <StatefulShellBranch>[
           // Rama 0: Inicio
           StatefulShellBranch(
@@ -111,13 +141,15 @@ GoRouter createCustomerRouter({
                   return HomePage(
                     catalogController: catalogController,
                     cartController: cartController,
+                    locationDeliveryController: locationDeliveryController,
                     onNavigateToMenu: () => context.go(CustomerRoutes.menu),
                     onNavigateToCart: () => context.push(CustomerRoutes.cart),
-                    onProductSelected: (CatalogCategory cat, CatalogProduct prod) {
-                      lastSelectedCategory = cat;
-                      lastSelectedProduct = prod;
-                      context.push('/menu/producto/${prod.id}');
-                    },
+                    onProductSelected:
+                        (CatalogCategory cat, CatalogProduct prod) {
+                          lastSelectedCategory = cat;
+                          lastSelectedProduct = prod;
+                          context.push('/menu/producto/${prod.id}');
+                        },
                     onToggleTheme: themeModeController.toggle,
                     isDark: Theme.of(context).brightness == Brightness.dark,
                   );
@@ -137,11 +169,12 @@ GoRouter createCustomerRouter({
                     catalogController: catalogController,
                     cartController: cartController,
                     onNavigateToCart: () => context.push(CustomerRoutes.cart),
-                    onProductSelected: (CatalogCategory cat, CatalogProduct prod) {
-                      lastSelectedCategory = cat;
-                      lastSelectedProduct = prod;
-                      context.push('/menu/producto/${prod.id}');
-                    },
+                    onProductSelected:
+                        (CatalogCategory cat, CatalogProduct prod) {
+                          lastSelectedCategory = cat;
+                          lastSelectedProduct = prod;
+                          context.push('/menu/producto/${prod.id}');
+                        },
                     onToggleTheme: themeModeController.toggle,
                     isDark: Theme.of(context).brightness == Brightness.dark,
                   );
@@ -197,9 +230,12 @@ GoRouter createCustomerRouter({
                   return AccountHubPage(
                     authController: authController,
                     profileController: profileController,
-                    onNavigateToPersonalInfo: () => context.push(CustomerRoutes.personalInfo),
-                    onNavigateToAddresses: () => context.push(CustomerRoutes.addresses),
-                    onNavigateToPaymentMethods: () => context.push(CustomerRoutes.paymentMethods),
+                    onNavigateToPersonalInfo: () =>
+                        context.push(CustomerRoutes.personalInfo),
+                    onNavigateToAddresses: () =>
+                        context.push(CustomerRoutes.addresses),
+                    onNavigateToPaymentMethods: () =>
+                        context.push(CustomerRoutes.paymentMethods),
                     onNavigateToOrders: () => context.go(CustomerRoutes.orders),
                     onToggleTheme: themeModeController.toggle,
                     isDark: Theme.of(context).brightness == Brightness.dark,
@@ -226,34 +262,65 @@ GoRouter createCustomerRouter({
       GoRoute(
         path: CustomerRoutes.signIn,
         name: 'signin',
-        builder: (BuildContext context, GoRouterState state) {
-          return SignInPage(
-            controller: authController,
-            onRegisterTap: () => context.push(CustomerRoutes.registration),
-            onGuestTap: () => context.push(CustomerRoutes.guest),
-            onSuccess: () => context.go(CustomerRoutes.home),
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _authPage(
+            context: context,
+            state: state,
+            child: SignInPage(
+              controller: authController,
+              onRegisterTap: () => context.push(CustomerRoutes.registration),
+              onGuestTap: () => context.push(CustomerRoutes.guest),
+              onForgotPasswordTap: () =>
+                  context.push(CustomerRoutes.passwordRecovery),
+              onSuccess: () => context.go(CustomerRoutes.home),
+              onToggleTheme: themeModeController.toggle,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.passwordRecovery,
+        name: 'passwordRecovery',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _authPage(
+            context: context,
+            state: state,
+            child: PasswordRecoveryPage(
+              controller: authController,
+              initialToken: state.uri.queryParameters['token'],
+              onBack: () => context.pop(),
+              onCompleted: () => context.go(CustomerRoutes.signIn),
+            ),
           );
         },
       ),
       GoRoute(
         path: CustomerRoutes.registration,
         name: 'registration',
-        builder: (BuildContext context, GoRouterState state) {
-          return RegistrationPage(
-            controller: authController,
-            onBackToSignIn: () => context.pop(),
-            onSuccess: () => context.go(CustomerRoutes.home),
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _authPage(
+            context: context,
+            state: state,
+            child: RegistrationPage(
+              controller: authController,
+              onBackToSignIn: () => context.pop(),
+              onSuccess: () => context.go(CustomerRoutes.signIn),
+            ),
           );
         },
       ),
       GoRoute(
         path: CustomerRoutes.guest,
         name: 'guest',
-        builder: (BuildContext context, GoRouterState state) {
-          return GuestAccessPage(
-            controller: authController,
-            onBackToSignIn: () => context.pop(),
-            onSuccess: () => context.go(CustomerRoutes.home),
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _authPage(
+            context: context,
+            state: state,
+            child: GuestAccessPage(
+              controller: authController,
+              onBackToSignIn: () => context.pop(),
+              onSuccess: () => context.go(CustomerRoutes.home),
+            ),
           );
         },
       ),
@@ -264,11 +331,12 @@ GoRouter createCustomerRouter({
         name: 'productDetail',
         builder: (BuildContext context, GoRouterState state) {
           final String productId = state.pathParameters['productId'] ?? '';
-          final ProductDetailController detailController = ProductDetailController.fromSelection(
-            categoryId: lastSelectedCategory?.id ?? '',
-            productId: productId,
-            selectedProduct: lastSelectedProduct,
-          );
+          final ProductDetailController detailController =
+              ProductDetailController.fromSelection(
+                categoryId: lastSelectedCategory?.id ?? '',
+                productId: productId,
+                selectedProduct: lastSelectedProduct,
+              );
 
           return ProductDetailPage(
             controller: detailController,
@@ -288,7 +356,8 @@ GoRouter createCustomerRouter({
             cartController: cartController,
             onBack: () => context.pop(),
             onBrowseCatalog: () => context.go(CustomerRoutes.menu),
-            onProceedToFulfillment: () => context.push(CustomerRoutes.fulfillmentMode),
+            onProceedToFulfillment: () =>
+                context.push(CustomerRoutes.fulfillmentMode),
           );
         },
       ),
@@ -302,7 +371,8 @@ GoRouter createCustomerRouter({
             controller: fulfillmentController,
             onBack: () => context.pop(),
             onTableSelected: () => context.push(CustomerRoutes.tableSelection),
-            onDeliverySelected: () => context.push(CustomerRoutes.deliveryDetails),
+            onDeliverySelected: () =>
+                context.push(CustomerRoutes.deliveryDetails),
             onPickupSelected: () => context.push(CustomerRoutes.pickupDetails),
           );
         },
@@ -336,7 +406,9 @@ GoRouter createCustomerRouter({
         path: CustomerRoutes.deliveryDetails,
         name: 'deliveryDetails',
         builder: (BuildContext context, GoRouterState state) {
-          final String? initialAddr = profileController != null && profileController.addresses.isNotEmpty
+          final String? initialAddr =
+              profileController != null &&
+                  profileController.addresses.isNotEmpty
               ? profileController.addresses.first.address
               : null;
           final String? initialName = profileController?.displayName;
@@ -347,6 +419,7 @@ GoRouter createCustomerRouter({
             initialAddress: initialAddr,
             initialName: initialName,
             initialPhone: initialPhone,
+            locationDeliveryController: locationDeliveryController,
             onDeliveryConfirmed: (FulfillmentDraft draft) {
               activeFulfillmentDraft = draft;
               submitOrderController.startNewLogicalRequest(
@@ -398,8 +471,9 @@ GoRouter createCustomerRouter({
         path: CustomerRoutes.orderReview,
         name: 'orderReview',
         builder: (BuildContext context, GoRouterState state) {
-          final FulfillmentDraft draft = activeFulfillmentDraft ??
-              FulfillmentDraft.local(tableId: 'M1');
+          final FulfillmentDraft draft =
+              activeFulfillmentDraft ??
+              FulfillmentDraft.local(tableId: 'M1', tableCode: 'Mesa 1');
 
           return OrderReviewPage(
             controller: submitOrderController,
@@ -419,7 +493,8 @@ GoRouter createCustomerRouter({
         path: CustomerRoutes.orderSubmitted,
         name: 'orderSubmitted',
         builder: (BuildContext context, GoRouterState state) {
-          final OrderSnapshot order = lastCreatedOrder ??
+          final OrderSnapshot order =
+              lastCreatedOrder ??
               OrderSnapshot(
                 id: 'ORD-DEMO',
                 status: 'REQUESTED',
@@ -445,7 +520,9 @@ GoRouter createCustomerRouter({
             controller: submitOrderController,
             onRetry: () async {
               final bool ok = await submitOrderController.retrySubmission();
-              if (ok && submitOrderController.state.order != null && context.mounted) {
+              if (ok &&
+                  submitOrderController.state.order != null &&
+                  context.mounted) {
                 lastCreatedOrder = submitOrderController.state.order;
                 cartController.clear();
                 context.go(CustomerRoutes.orderSubmitted);
@@ -562,7 +639,30 @@ GoRouter createCustomerRouter({
           }
           return AddressesPage(
             profileController: profileController,
+            locationDeliveryController: locationDeliveryController,
             onBack: () => context.pop(),
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerRoutes.mapPicker,
+        name: 'mapPicker',
+        builder: (BuildContext context, GoRouterState state) {
+          if (locationDeliveryController == null) {
+            return const AsiaScaffold(
+              title: 'Mapa',
+              body: AsiaStateView(
+                kind: AsiaStateKind.empty,
+                title: 'Módulo de ubicación no disponible',
+              ),
+            );
+          }
+          return MapLocationPickerPage(
+            controller: locationDeliveryController,
+            onBack: () => context.pop(),
+            onAddressSaved: (CustomerAddress address) {
+              context.pop();
+            },
           );
         },
       ),
@@ -586,5 +686,52 @@ GoRouter createCustomerRouter({
         },
       ),
     ],
+  );
+}
+
+Page<void> _authPage({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  final bool reduceMotion = MediaQuery.disableAnimationsOf(context);
+  final TargetPlatform platform = Theme.of(context).platform;
+  final bool desktop =
+      platform == TargetPlatform.linux ||
+      platform == TargetPlatform.macOS ||
+      platform == TargetPlatform.windows;
+  final bool animate = !reduceMotion && !kIsWeb && !desktop;
+
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: animate ? AsiaMotion.standard : AsiaMotion.instant,
+    reverseTransitionDuration: animate
+        ? AsiaMotion.standard
+        : AsiaMotion.instant,
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          if (!animate) return child;
+          final Animation<double> curved = CurvedAnimation(
+            parent: animation,
+            curve: AsiaMotion.emphasized,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.025, 0),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
   );
 }

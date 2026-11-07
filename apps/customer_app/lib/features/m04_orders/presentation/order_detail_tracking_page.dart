@@ -438,9 +438,9 @@ class _OrderDetailTrackingPageState extends State<OrderDetailTrackingPage> {
               // Acciones adicionales
               if (showAdvance) ...<Widget>[
                 AsiaButton(
-                  label: 'Ver Estado del Anticipo (50 %)',
+                  label: 'Ver Detalle del Pago',
                   variant: AsiaButtonVariant.secondary,
-                  leading: LucideIcons.creditCard,
+                  leading: LucideIcons.wallet,
                   onPressed: () => widget.onViewAdvance!(order.id),
                 ),
                 const SizedBox(height: 10),

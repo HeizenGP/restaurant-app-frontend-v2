@@ -77,7 +77,8 @@ class AsiaTheme extends ThemeExtension<AsiaTheme> {
 
   static AsiaTheme of(BuildContext context) {
     final AsiaTheme? theme = Theme.of(context).extension<AsiaTheme>();
-    return theme ?? (Theme.of(context).brightness == Brightness.dark ? dark : light);
+    return theme ??
+        (Theme.of(context).brightness == Brightness.dark ? dark : light);
   }
 
   @override
@@ -164,12 +165,18 @@ abstract final class AsiaAppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
+      fontFamily: 'DM Sans',
       colorScheme: scheme,
       scaffoldBackgroundColor: tokens.bg,
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
       splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: tokens.brandCrimson,
+        selectionColor: tokens.brandCrimson.withValues(alpha: 0.22),
+        selectionHandleColor: tokens.brandCrimson,
+      ),
       dividerTheme: DividerThemeData(
         color: tokens.border,
         thickness: 0.8,
@@ -177,16 +184,34 @@ abstract final class AsiaAppTheme {
       ),
       extensions: <ThemeExtension<dynamic>>[tokens],
       textTheme: TextTheme(
-        displayLarge: AsiaTypography.displayLarge.copyWith(color: tokens.textPrimary),
-        titleLarge: AsiaTypography.titleLarge.copyWith(color: tokens.textPrimary),
-        titleMedium: AsiaTypography.titleMedium.copyWith(color: tokens.textPrimary),
-        titleSmall: AsiaTypography.titleSmall.copyWith(color: tokens.textPrimary),
+        displayLarge: AsiaTypography.displayLarge.copyWith(
+          color: tokens.textPrimary,
+        ),
+        titleLarge: AsiaTypography.titleLarge.copyWith(
+          color: tokens.textPrimary,
+        ),
+        titleMedium: AsiaTypography.titleMedium.copyWith(
+          color: tokens.textPrimary,
+        ),
+        titleSmall: AsiaTypography.titleSmall.copyWith(
+          color: tokens.textPrimary,
+        ),
         bodyLarge: AsiaTypography.bodyLarge.copyWith(color: tokens.textPrimary),
-        bodyMedium: AsiaTypography.bodyMedium.copyWith(color: tokens.textSecondary),
-        bodySmall: AsiaTypography.bodySmall.copyWith(color: tokens.textTertiary),
-        labelLarge: AsiaTypography.labelLarge.copyWith(color: tokens.textPrimary),
-        labelMedium: AsiaTypography.labelMedium.copyWith(color: tokens.textSecondary),
-        labelSmall: AsiaTypography.labelSmall.copyWith(color: tokens.textTertiary),
+        bodyMedium: AsiaTypography.bodyMedium.copyWith(
+          color: tokens.textSecondary,
+        ),
+        bodySmall: AsiaTypography.bodySmall.copyWith(
+          color: tokens.textTertiary,
+        ),
+        labelLarge: AsiaTypography.labelLarge.copyWith(
+          color: tokens.textPrimary,
+        ),
+        labelMedium: AsiaTypography.labelMedium.copyWith(
+          color: tokens.textSecondary,
+        ),
+        labelSmall: AsiaTypography.labelSmall.copyWith(
+          color: tokens.textTertiary,
+        ),
       ),
     );
   }

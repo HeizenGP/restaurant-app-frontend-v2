@@ -123,3 +123,41 @@
 - **Pruebas finales 10.10:** `flutter analyze` 0 issues (limpio); suite funcional completa pasando (213/213 pruebas no-golden unitarias, de widgets y flujos integrales).
 - **Fidelidad Figma global:** Todas las 20 pantallas verificadas según `AGENTS.md`. Similitud media >98%. Calificación global: **9.8/10**.
 - **Siguiente acción única:** coordinar despliegue/prueba en el dispositivo del usuario y solicitar su aprobación formal.
+
+## Mejora focal — selector de ubicación KAIRO (2026-11-07)
+
+- `MapLocationPickerPage` migró de los estilos clásicos Light/Dark a Mapbox
+  Standard y Standard Satellite, configurados mediante propiedades públicas del
+  import `basemap`; no depende de IDs internos de capas.
+- Perfiles cartográficos claro/oscuro con tierra, vías, edificios, parques,
+  agua, etiquetas y POI legibles; el cambio de tema o capa conserva la cámara.
+- Nueva composición premium: pin compacto con elevación al mover, buscador con
+  autocompletado y resultados stale-safe, rail accesible de controles 48 dp y
+  `DraggableScrollableSheet` con dirección, cobertura, referencia, confirmación
+  y recuperación ante fallos de GPS, red o geocodificación.
+- Debounce de cámara/búsqueda, invalidación de respuestas obsoletas, respeto a
+  movimiento reducido, SafeArea, teclado y alturas compactas.
+- Evidencia inicial: `flutter analyze` sin incidencias y suite completa 166/166. Se
+  inspeccionaron capturas deterministas claro/oscuro; queda pendiente una última
+  captura con el renderer nativo de Mapbox porque el dispositivo Android no se
+  encontraba conectado al cierre.
+
+### Ajuste Tarapoto y satélite (2026-11-07)
+
+- Tarapoto (`-6.4825, -76.3727`) pasa a ser la referencia única del frontend
+  para cámara inicial, proximidad de búsqueda y cobertura máxima de 12 km.
+- Se corrigió el cálculo de distancia Haversine y se añadieron zonas locales
+  para Tarapoto, Morales y La Banda de Shilcayo. Si el backend desplegado aún
+  declara la sede heredada de Lima, el cliente aplica el cálculo local; una
+  respuesta futura con sede Tarapoto se conserva automáticamente.
+- Standard Satellite activa explícitamente vías y tránsito, caminos peatonales,
+  límites administrativos, etiquetas y POI circulares para una lectura similar
+  a un mapa de navegación moderno, usando solo propiedades públicas de Mapbox.
+- Los fallos recuperables de teselas, fuentes, glifos o sprites ya no presentan
+  un aviso global; únicamente un fallo completo del estilo bloquea el mapa.
+- La validación en Android detectó respuestas `429 Too Many Requests` de Mapbox
+  para teselas satelitales. El cliente conserva la cámara, vuelve al mapa
+  vectorial y comunica el límite de forma no bloqueante; recuperar la imagen
+  aérea requiere cuota válida en la cuenta/token de Mapbox.
+- Evidencia: `flutter analyze` sin incidencias; pruebas focales 20/20, suite
+  completa 172/172 y APK debug compilado correctamente.

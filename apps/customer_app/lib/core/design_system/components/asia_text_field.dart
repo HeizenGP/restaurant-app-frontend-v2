@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../foundations/asia_motion.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_typography.dart';
 import '../theme/asia_theme.dart';
+import 'asia_pressable.dart';
 
 class AsiaTextField extends StatefulWidget {
   const AsiaTextField({
     this.controller,
+    this.focusNode,
     this.label,
     this.hintText,
     this.prefixIcon,
@@ -15,17 +19,24 @@ class AsiaTextField extends StatefulWidget {
     this.keyboardType,
     this.textInputAction,
     this.validator,
+    this.autovalidateMode,
     this.onChanged,
     this.onSubmitted,
     this.errorText,
     this.enabled = true,
     this.maxLines = 1,
     this.autofocus = false,
+    this.autofillHints,
+    this.enableSuggestions = true,
+    this.autocorrect = true,
+    this.textCapitalization = TextCapitalization.none,
+    this.focusColor,
     this.semanticKey,
     super.key,
   });
 
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hintText;
   final IconData? prefixIcon;
@@ -34,12 +45,18 @@ class AsiaTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final FormFieldValidator<String>? validator;
+  final AutovalidateMode? autovalidateMode;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final String? errorText;
   final bool enabled;
   final int maxLines;
   final bool autofocus;
+  final Iterable<String>? autofillHints;
+  final bool enableSuggestions;
+  final bool autocorrect;
+  final TextCapitalization textCapitalization;
+  final Color? focusColor;
   final Key? semanticKey;
 
   @override
@@ -59,7 +76,12 @@ class _AsiaTextFieldState extends State<AsiaTextField> {
   @override
   Widget build(BuildContext context) {
     final AsiaTheme theme = context.asiaTheme;
-    final bool hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
+    final bool hasError =
+        widget.errorText != null && widget.errorText!.isNotEmpty;
+    final Color activeColor = widget.focusColor ?? theme.brandCrimson;
+    final Duration feedbackDuration = MediaQuery.disableAnimationsOf(context)
+        ? AsiaMotion.instant
+        : AsiaMotion.feedback;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,15 +100,15 @@ class _AsiaTextFieldState extends State<AsiaTextField> {
         Focus(
           onFocusChange: (bool focused) => setState(() => _isFocused = focused),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOutCubic,
+            duration: feedbackDuration,
+            curve: AsiaMotion.emphasized,
             decoration: BoxDecoration(
               color: theme.surfaceSubtle,
               borderRadius: AsiaRadii.brMd,
               border: Border.all(
                 color: hasError
                     ? theme.error
-                    : (_isFocused ? theme.brandCrimson : theme.border),
+                    : (_isFocused ? activeColor : theme.border),
                 width: _isFocused || hasError ? 1.4 : 0.8,
               ),
             ),
@@ -98,22 +120,30 @@ class _AsiaTextFieldState extends State<AsiaTextField> {
                     child: Icon(
                       widget.prefixIcon,
                       size: 20,
-                      color: _isFocused ? theme.brandCrimson : theme.textTertiary,
+                      color: hasError
+                          ? theme.error
+                          : (_isFocused ? activeColor : theme.textTertiary),
                     ),
                   ),
                 Expanded(
                   child: TextFormField(
                     key: widget.semanticKey,
                     controller: widget.controller,
+                    focusNode: widget.focusNode,
                     obscureText: _obscured,
                     keyboardType: widget.keyboardType,
                     textInputAction: widget.textInputAction,
                     validator: widget.validator,
+                    autovalidateMode: widget.autovalidateMode,
                     onChanged: widget.onChanged,
                     onFieldSubmitted: widget.onSubmitted,
                     enabled: widget.enabled,
                     maxLines: widget.maxLines,
                     autofocus: widget.autofocus,
+                    autofillHints: widget.autofillHints,
+                    enableSuggestions: widget.enableSuggestions,
+                    autocorrect: widget.autocorrect,
+                    textCapitalization: widget.textCapitalization,
                     style: AsiaTypography.bodyLarge.copyWith(
                       color: theme.textPrimary,
                     ),
@@ -132,13 +162,22 @@ class _AsiaTextFieldState extends State<AsiaTextField> {
                   ),
                 ),
                 if (widget.obscureText)
-                  IconButton(
-                    icon: Icon(
-                      _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                      size: 20,
-                      color: theme.textTertiary,
+                  AsiaPressable(
+                    semanticLabel: _obscured
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña',
+                    borderRadius: AsiaRadii.brSm,
+                    onPressed: widget.enabled
+                        ? () => setState(() => _obscured = !_obscured)
+                        : null,
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: Icon(
+                        _obscured ? LucideIcons.eye : LucideIcons.eyeOff,
+                        size: 20,
+                        color: _isFocused ? activeColor : theme.textTertiary,
+                      ),
                     ),
-                    onPressed: () => setState(() => _obscured = !_obscured),
                   )
                 else if (widget.suffixIcon != null)
                   Padding(
@@ -166,4 +205,3 @@ class _AsiaTextFieldState extends State<AsiaTextField> {
     );
   }
 }
-

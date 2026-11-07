@@ -21,6 +21,8 @@ final class CatalogProduct {
     required this.name,
     required this.priceCents,
     required this.availableForSale,
+    this.imageUrl,
+    this.description,
   });
 
   final String id;
@@ -28,6 +30,8 @@ final class CatalogProduct {
   final String name;
   final int priceCents;
   final bool availableForSale;
+  final String? imageUrl;
+  final String? description;
 
   @override
   bool operator ==(Object other) {
@@ -37,11 +41,13 @@ final class CatalogProduct {
             other.categoryId == categoryId &&
             other.name == name &&
             other.priceCents == priceCents &&
-            other.availableForSale == availableForSale;
+            other.availableForSale == availableForSale &&
+            other.imageUrl == imageUrl &&
+            other.description == description;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, categoryId, name, priceCents, availableForSale);
+    return Object.hash(id, categoryId, name, priceCents, availableForSale, imageUrl, description);
   }
 }

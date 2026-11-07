@@ -41,15 +41,17 @@ final class FulfillmentDraft {
   const FulfillmentDraft._({
     required this.mode,
     this.tableId,
+    this.tableCode,
     this.contactName,
     this.contactPhone,
     this.deliveryAddress,
   });
 
-  factory FulfillmentDraft.local({required String tableId}) {
+  factory FulfillmentDraft.local({required String tableId, String? tableCode}) {
     return FulfillmentDraft._(
       mode: FulfillmentMode.local,
       tableId: tableId.trim(),
+      tableCode: tableCode?.trim(),
     );
   }
 
@@ -79,9 +81,26 @@ final class FulfillmentDraft {
 
   final FulfillmentMode mode;
   final String? tableId;
+  final String? tableCode;
   final String? contactName;
   final String? contactPhone;
   final String? deliveryAddress;
+
+  String get effectiveTableDisplay {
+    if (tableCode != null && tableCode!.isNotEmpty) {
+      return tableCode!;
+    }
+    if (tableId == null || tableId!.isEmpty) return 'Mesa asignada';
+    if (tableId!.length > 12) {
+      // Si es un UUID (ej. 7a000001-0000-4000-a000-000000000002)
+      final String lastPart = tableId!.split('-').last;
+      final int? numVal = int.tryParse(lastPart);
+      if (numVal != null) {
+        return 'Mesa $numVal';
+      }
+    }
+    return 'Mesa $tableId';
+  }
 
   @override
   bool operator ==(Object other) {
@@ -89,6 +108,7 @@ final class FulfillmentDraft {
         other is FulfillmentDraft &&
             other.mode == mode &&
             other.tableId == tableId &&
+            other.tableCode == tableCode &&
             other.contactName == contactName &&
             other.contactPhone == contactPhone &&
             other.deliveryAddress == deliveryAddress;
@@ -99,6 +119,7 @@ final class FulfillmentDraft {
     return Object.hash(
       mode,
       tableId,
+      tableCode,
       contactName,
       contactPhone,
       deliveryAddress,

@@ -155,15 +155,7 @@ class UserProfileController extends ChangeNotifier {
         final List<dynamic> list = decoded['addresses'] as List<dynamic>;
         for (final dynamic item in list) {
           if (item is Map<String, dynamic>) {
-            _addresses.add(CustomerAddress(
-              id: item['id'] as String? ?? 'addr-${DateTime.now().millisecondsSinceEpoch}',
-              label: item['label'] as String? ?? 'Casa',
-              address: item['address'] as String? ?? '',
-              reference: item['reference'] as String?,
-              department: item['department'] as String?,
-              recipientPhone: item['recipientPhone'] as String?,
-              isDefault: item['isDefault'] as bool? ?? false,
-            ));
+            _addresses.add(CustomerAddress.fromJson(item));
           }
         }
       }
@@ -221,15 +213,7 @@ class UserProfileController extends ChangeNotifier {
         'avatarPath': _avatarPath,
         'birthDate': _birthDate,
         'dietaryPreferences': _dietaryPreferences,
-        'addresses': _addresses.map((CustomerAddress a) => <String, dynamic>{
-          'id': a.id,
-          'label': a.label,
-          'address': a.address,
-          'reference': a.reference,
-          'department': a.department,
-          'recipientPhone': a.recipientPhone,
-          'isDefault': a.isDefault,
-        }).toList(),
+        'addresses': _addresses.map((CustomerAddress a) => a.toJson()).toList(),
         'cards': _cards.map((SavedPaymentCard c) => <String, dynamic>{
           'id': c.id,
           'cardNumberMasked': c.cardNumberMasked,
@@ -382,6 +366,8 @@ class UserProfileController extends ChangeNotifier {
     String? reference,
     String? department,
     String? recipientPhone,
+    double? latitude,
+    double? longitude,
     bool isDefault = false,
   }) {
     final String id = 'addr-${DateTime.now().millisecondsSinceEpoch}';
@@ -389,15 +375,7 @@ class UserProfileController extends ChangeNotifier {
       for (int i = 0; i < _addresses.length; i++) {
         final CustomerAddress a = _addresses[i];
         if (a.isDefault) {
-          _addresses[i] = CustomerAddress(
-            id: a.id,
-            label: a.label,
-            address: a.address,
-            reference: a.reference,
-            department: a.department,
-            recipientPhone: a.recipientPhone,
-            isDefault: false,
-          );
+          _addresses[i] = a.copyWith(isDefault: false);
         }
       }
     }
@@ -409,6 +387,8 @@ class UserProfileController extends ChangeNotifier {
         reference: reference?.trim().isNotEmpty == true ? reference!.trim() : null,
         department: department?.trim().isNotEmpty == true ? department!.trim() : null,
         recipientPhone: recipientPhone?.trim().isNotEmpty == true ? recipientPhone!.trim() : null,
+        latitude: latitude,
+        longitude: longitude,
         isDefault: isDefault,
       ),
     );
@@ -419,6 +399,20 @@ class UserProfileController extends ChangeNotifier {
 
   void removeAddress(String id) {
     _addresses.removeWhere((CustomerAddress a) => a.id == id);
+    notifyListeners();
+    unawaited(saveToStorage());
+    unawaited(syncRemote());
+  }
+
+  void setDefaultAddress(String id) {
+    for (int i = 0; i < _addresses.length; i++) {
+      final CustomerAddress a = _addresses[i];
+      if (a.id == id && !a.isDefault) {
+        _addresses[i] = a.copyWith(isDefault: true);
+      } else if (a.id != id && a.isDefault) {
+        _addresses[i] = a.copyWith(isDefault: false);
+      }
+    }
     notifyListeners();
     unawaited(saveToStorage());
     unawaited(syncRemote());

@@ -14,6 +14,20 @@ final class ApiEnvironment {
   static const bool useRender = bool.fromEnvironment('USE_RENDER');
   static const bool useLocal = bool.fromEnvironment('USE_LOCAL');
 
+  /// Token público de Mapbox configurado en tiempo de compilación.
+  /// Debe suministrarse mediante:
+  /// `--dart-define=MAPBOX_ACCESS_TOKEN=pk.xxx`
+  /// o de forma retrocompatible con `--dart-define=ACCESS_TOKEN=pk.xxx`.
+  ///
+  /// NUNCA incluir tokens secretos (`sk.`) ni credenciales reales en el repositorio.
+  static const String mapboxAccessToken = String.fromEnvironment(
+    'MAPBOX_ACCESS_TOKEN',
+    defaultValue: String.fromEnvironment(
+      'ACCESS_TOKEN',
+      defaultValue: '',
+    ),
+  );
+
   final Uri baseUri;
 
   /// Resuelve la URL base evaluando las variables de compilación.

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/design_system/design_system.dart';
+import '../../location_delivery/application/location_delivery_controller.dart';
+import '../../location_delivery/presentation/widgets/home_delivery_bar.dart';
 import '../../m04_orders/manage_cart/application/cart_controller.dart';
 import '../../m04_orders/manage_cart/domain/cart_models.dart';
 import '../browse_catalog/application/catalog_controller.dart';
@@ -38,6 +40,7 @@ class HomePage extends StatefulWidget {
     required this.onProductSelected,
     required this.onToggleTheme,
     required this.isDark,
+    this.locationDeliveryController,
     super.key,
   });
 
@@ -48,6 +51,7 @@ class HomePage extends StatefulWidget {
   final void Function(CatalogCategory category, CatalogProduct product) onProductSelected;
   final VoidCallback onToggleTheme;
   final bool isDark;
+  final LocationDeliveryController? locationDeliveryController;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -82,7 +86,9 @@ class _HomePageState extends State<HomePage> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(height: 12),
+              if (widget.locationDeliveryController != null)
+                HomeDeliveryBar(controller: widget.locationDeliveryController!),
+              const SizedBox(height: 8),
               // Banner Hero Destacado
               Container(
                 padding: const EdgeInsets.all(22),
@@ -589,34 +595,80 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         children: <Widget>[
           const SizedBox(height: 12),
           // Gran contenedor visual del plato
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: theme.surfaceSubtle,
-              borderRadius: AsiaRadii.brCard,
-              border: Border.all(color: theme.border, width: 0.8),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          ClipRRect(
+            borderRadius: AsiaRadii.brCard,
+            child: Container(
+              height: 220,
+              decoration: BoxDecoration(
+                color: theme.surfaceSubtle,
+                borderRadius: AsiaRadii.brCard,
+                border: Border.all(color: theme.border, width: 0.8),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
                 children: <Widget>[
-                  Icon(
-                    getCategoryIcon(product.name),
-                    size: 64,
-                    color: theme.brandCrimson,
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.brandGold.withValues(alpha: 0.15),
-                      borderRadius: AsiaRadii.brPill,
+                  if (product.imageUrl != null && product.imageUrl!.isNotEmpty)
+                    Image.network(
+                      product.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Icon(
+                          getCategoryIcon(product.name),
+                          size: 64,
+                          color: theme.brandCrimson,
+                        ),
+                      ),
+                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: theme.brandCrimson,
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    Center(
+                      child: Icon(
+                        getCategoryIcon(product.name),
+                        size: 64,
+                        color: theme.brandCrimson,
+                      ),
                     ),
-                    child: Text(
-                      'Preparado al momento al Wok',
-                      style: AsiaTypography.labelSmall.copyWith(
-                        color: theme.brandGold,
-                        fontWeight: FontWeight.w700,
+                  // Gradiente inferior con badge
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: <Color>[
+                            Colors.black.withValues(alpha: 0.7),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: theme.brandGold,
+                            borderRadius: AsiaRadii.brPill,
+                          ),
+                          child: Text(
+                            'Preparado al momento al Wok',
+                            style: AsiaTypography.labelSmall.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -650,7 +702,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Elaborado con los mejores insumos frescos, sazonado con sillao superior, aceite de ajonjolí y el inconfundible fuego del wok tradicional.',
+            product.description?.isNotEmpty == true
+                ? product.description!
+                : 'Elaborado con los mejores insumos frescos, sazonado con sillao superior, aceite de ajonjolí y el inconfundible fuego del wok tradicional.',
             style: AsiaTypography.bodyMedium.copyWith(color: theme.textSecondary),
           ),
           const SizedBox(height: 24),
@@ -746,18 +800,48 @@ class _ProductCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: Row(
         children: <Widget>[
-          Container(
-            width: 68,
-            height: 68,
-            decoration: BoxDecoration(
-              color: theme.surfaceSubtle,
-              borderRadius: AsiaRadii.brMd,
-              border: Border.all(color: theme.border, width: 0.8),
-            ),
-            child: Icon(
-              getCategoryIcon(product.name),
-              size: 28,
-              color: theme.brandCrimson,
+          ClipRRect(
+            borderRadius: AsiaRadii.brMd,
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: theme.surfaceSubtle,
+                borderRadius: AsiaRadii.brMd,
+                border: Border.all(color: theme.border, width: 0.8),
+              ),
+              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      product.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Icon(
+                          getCategoryIcon(product.name),
+                          size: 28,
+                          color: theme.brandCrimson,
+                        ),
+                      ),
+                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: theme.brandCrimson.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Icon(
+                        getCategoryIcon(product.name),
+                        size: 28,
+                        color: theme.brandCrimson,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(width: 14),
@@ -781,6 +865,18 @@ class _ProductCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                if (product.description != null && product.description!.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    product.description!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AsiaTypography.bodySmall.copyWith(
+                      color: theme.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 4),
                 Text(
                   formatPrice(product.priceCents),

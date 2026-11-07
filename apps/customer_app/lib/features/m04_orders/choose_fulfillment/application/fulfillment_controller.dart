@@ -92,10 +92,10 @@ final class FulfillmentController extends ChangeNotifier {
       if (!_isCurrent(requestVersion)) return;
 
       String? selectedTableId;
-      final String? targetId =
-          _state.assignedTableId ?? _state.selectedTableId;
+      final String? targetId = _state.assignedTableId ?? _state.selectedTableId;
       final RestaurantTable? current = _findTable(tables, targetId);
-      if (current != null && (current.isAvailable || current.id == _state.assignedTableId)) {
+      if (current != null &&
+          (current.isAvailable || current.id == _state.assignedTableId)) {
         selectedTableId = current.id;
       }
 
@@ -147,7 +147,10 @@ final class FulfillmentController extends ChangeNotifier {
     final RestaurantTable? table = _state.selectedTable;
     if (table == null) return null;
     if (!table.isAvailable && table.id != _state.assignedTableId) return null;
-    final FulfillmentDraft draft = FulfillmentDraft.local(tableId: table.id);
+    final FulfillmentDraft draft = FulfillmentDraft.local(
+      tableId: table.id,
+      tableCode: table.code,
+    );
     _emit(
       FulfillmentState(
         mode: FulfillmentMode.local,

@@ -54,6 +54,46 @@ class AuthRestRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthSession> loginWithGoogle(String idToken) async {
+    final http.Response response = await _post(
+      'auth/google',
+      body: <String, Object?>{'id_token': idToken},
+    );
+    if (response.statusCode != 200) {
+      throw _failureFor(response, request: _AuthRequest.google);
+    }
+    return _decodeSession(response, expectedKind: AuthSessionKind.user);
+  }
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    final http.Response response = await _post(
+      'auth/password-reset/request',
+      body: <String, Object?>{'email': email.trim().toLowerCase()},
+    );
+    if (response.statusCode != 202) {
+      throw _failureFor(response, request: _AuthRequest.passwordResetRequest);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final http.Response response = await _post(
+      'auth/password-reset/confirm',
+      body: <String, Object?>{
+        'token': token.trim(),
+        'new_password': newPassword,
+      },
+    );
+    if (response.statusCode != 204) {
+      throw _failureFor(response, request: _AuthRequest.passwordResetConfirm);
+    }
+  }
+
+  @override
   Future<AuthSession> createGuestSession() async {
     final http.Response response = await _post('auth/guest');
     if (response.statusCode != 201) {
@@ -220,6 +260,19 @@ class AuthRestRepository implements AuthRepository {
         'Tu sesión terminó. Inicia sesión nuevamente.',
       );
     }
+    if (response.statusCode == 400 &&
+        request == _AuthRequest.passwordResetConfirm) {
+      return const AuthFailure(
+        AuthFailureKind.validation,
+        'El enlace o token venció o ya fue utilizado. Solicita uno nuevo.',
+      );
+    }
+    if (response.statusCode == 503 && request == _AuthRequest.google) {
+      return const AuthFailure(
+        AuthFailureKind.providerUnavailable,
+        'Google no está configurado todavía en KAIRO.',
+      );
+    }
     if (response.statusCode == 409 && request == _AuthRequest.register) {
       return const AuthFailure(
         AuthFailureKind.duplicateEmail,
@@ -239,4 +292,14 @@ class AuthRestRepository implements AuthRepository {
   }
 }
 
-enum _AuthRequest { register, login, guest, refresh, logout, profile }
+enum _AuthRequest {
+  register,
+  login,
+  google,
+  passwordResetRequest,
+  passwordResetConfirm,
+  guest,
+  refresh,
+  logout,
+  profile,
+}

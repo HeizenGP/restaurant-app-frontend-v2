@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../foundations/asia_motion.dart';
+import '../theme/asia_theme.dart';
+
 /// House Pressable para KAIRO.
 /// Reemplaza el ink ripple por una micro-interacción táctil con escala y hundimiento.
 class AsiaPressable extends StatefulWidget {
@@ -28,18 +31,19 @@ class AsiaPressable extends StatefulWidget {
 
 class _AsiaPressableState extends State<AsiaPressable> {
   bool _pressed = false;
+  bool _showFocus = false;
 
   @override
   Widget build(BuildContext context) {
     final bool interactive = widget.enabled && widget.onPressed != null;
     final bool reduce = MediaQuery.disableAnimationsOf(context);
-    final Duration duration =
-        reduce ? Duration.zero : const Duration(milliseconds: 90);
+    final Duration duration = reduce ? AsiaMotion.instant : AsiaMotion.press;
     final bool isPressed = _pressed && interactive;
+    final AsiaTheme theme = context.asiaTheme;
 
     Widget content = AnimatedContainer(
       duration: duration,
-      curve: Curves.easeOutCubic,
+      curve: AsiaMotion.emphasized,
       transformAlignment: Alignment.center,
       transform: Matrix4.identity()
         ..translateByDouble(0.0, isPressed ? widget.pressSink : 0.0, 0.0, 1.0)
@@ -49,6 +53,12 @@ class _AsiaPressableState extends State<AsiaPressable> {
           1.0,
           1.0,
         ),
+      decoration: BoxDecoration(
+        borderRadius: widget.borderRadius,
+        border: _showFocus && interactive
+            ? Border.all(color: theme.brandGold, width: 2)
+            : null,
+      ),
       child: widget.child,
     );
 
@@ -57,19 +67,38 @@ class _AsiaPressableState extends State<AsiaPressable> {
         button: true,
         enabled: interactive,
         label: widget.semanticLabel,
+        excludeSemantics: true,
         child: content,
       );
     }
 
-    return FocusableActionDetector(
-      enabled: interactive,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: interactive ? (_) => setState(() => _pressed = true) : null,
-        onTapUp: interactive ? (_) => setState(() => _pressed = false) : null,
-        onTapCancel: interactive ? () => setState(() => _pressed = false) : null,
-        onTap: widget.onPressed,
-        child: content,
+    return MouseRegion(
+      cursor: interactive ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: FocusableActionDetector(
+        enabled: interactive,
+        onShowFocusHighlight: (bool value) {
+          if (_showFocus != value) setState(() => _showFocus = value);
+        },
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              if (interactive) widget.onPressed?.call();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: interactive
+              ? (_) => setState(() => _pressed = true)
+              : null,
+          onTapUp: interactive ? (_) => setState(() => _pressed = false) : null,
+          onTapCancel: interactive
+              ? () => setState(() => _pressed = false)
+              : null,
+          onTap: interactive ? widget.onPressed : null,
+          child: content,
+        ),
       ),
     );
   }

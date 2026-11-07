@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 final class CustomerAddress {
   const CustomerAddress({
     required this.id,
@@ -5,17 +7,93 @@ final class CustomerAddress {
     required this.address,
     this.reference,
     this.department,
+    this.deliveryInstructions,
     this.recipientPhone,
+    this.latitude,
+    this.longitude,
     this.isDefault = false,
   });
+
+  factory CustomerAddress.fromJson(Map<String, dynamic> json) {
+    return CustomerAddress(
+      id:
+          json['id'] as String? ??
+          'addr-${DateTime.now().millisecondsSinceEpoch}',
+      label: json['label'] as String? ?? 'Casa',
+      address: json['address'] as String? ?? '',
+      reference: json['reference'] as String?,
+      department: json['department'] as String?,
+      deliveryInstructions:
+          json['deliveryInstructions'] as String? ??
+          json['delivery_instructions'] as String?,
+      recipientPhone:
+          json['recipientPhone'] as String? ??
+          json['recipient_phone'] as String?,
+      latitude: json['latitude'] is num
+          ? (json['latitude'] as num).toDouble()
+          : null,
+      longitude: json['longitude'] is num
+          ? (json['longitude'] as num).toDouble()
+          : null,
+      isDefault:
+          json['isDefault'] as bool? ?? json['is_default'] as bool? ?? false,
+    );
+  }
 
   final String id;
   final String label;
   final String address;
   final String? reference;
   final String? department;
+  final String? deliveryInstructions;
   final String? recipientPhone;
+  final double? latitude;
+  final double? longitude;
   final bool isDefault;
+
+  bool get hasCoordinates => latitude != null && longitude != null;
+
+  CustomerAddress copyWith({
+    String? id,
+    String? label,
+    String? address,
+    String? reference,
+    String? department,
+    String? deliveryInstructions,
+    String? recipientPhone,
+    double? latitude,
+    double? longitude,
+    bool? isDefault,
+  }) {
+    return CustomerAddress(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      address: address ?? this.address,
+      reference: reference ?? this.reference,
+      department: department ?? this.department,
+      deliveryInstructions: deliveryInstructions ?? this.deliveryInstructions,
+      recipientPhone: recipientPhone ?? this.recipientPhone,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'label': label,
+    'address': address,
+    'reference': reference,
+    'department': department,
+    if (deliveryInstructions != null)
+      'deliveryInstructions': deliveryInstructions,
+    if (deliveryInstructions != null)
+      'delivery_instructions': deliveryInstructions,
+    'recipientPhone': recipientPhone,
+    if (latitude != null) 'latitude': latitude,
+    if (longitude != null) 'longitude': longitude,
+    'isDefault': isDefault,
+  };
 
   String get fullText {
     final StringBuffer buffer = StringBuffer(address);
@@ -38,18 +116,22 @@ final class CustomerAddress {
           other.reference == reference &&
           other.department == department &&
           other.recipientPhone == recipientPhone &&
+          other.latitude == latitude &&
+          other.longitude == longitude &&
           other.isDefault == isDefault;
 
   @override
   int get hashCode => Object.hash(
-        id,
-        label,
-        address,
-        reference,
-        department,
-        recipientPhone,
-        isDefault,
-      );
+    id,
+    label,
+    address,
+    reference,
+    department,
+    recipientPhone,
+    latitude,
+    longitude,
+    isDefault,
+  );
 }
 
 final class SavedPaymentCard {
@@ -85,14 +167,98 @@ final class SavedPaymentCard {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        cardNumberMasked,
-        cardHolder,
-        expiry,
-        brand,
-        documentType,
-        documentNumber,
-      );
+    id,
+    cardNumberMasked,
+    cardHolder,
+    expiry,
+    brand,
+    documentType,
+    documentNumber,
+  );
+}
+
+class PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('51') && digits.length > 9) {
+      digits = digits.substring(2);
+    }
+    if (digits.length > 9) {
+      digits = digits.substring(0, 9);
+    }
+
+    final StringBuffer formatted = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i > 0 && i % 3 == 0) {
+        formatted.write(' ');
+      }
+      formatted.write(digits[i]);
+    }
+
+    final String resultText = formatted.toString();
+    return TextEditingValue(
+      text: resultText,
+      selection: TextSelection.collapsed(offset: resultText.length),
+    );
+  }
+}
+
+class CardNumberInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.length > 16) {
+      digits = digits.substring(0, 16);
+    }
+
+    final StringBuffer formatted = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        formatted.write(' ');
+      }
+      formatted.write(digits[i]);
+    }
+
+    final String resultText = formatted.toString();
+    return TextEditingValue(
+      text: resultText,
+      selection: TextSelection.collapsed(offset: resultText.length),
+    );
+  }
+}
+
+class ExpiryDateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.length > 4) {
+      digits = digits.substring(0, 4);
+    }
+
+    final StringBuffer formatted = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 2) {
+        formatted.write('/');
+      }
+      formatted.write(digits[i]);
+    }
+
+    final String resultText = formatted.toString();
+    return TextEditingValue(
+      text: resultText,
+      selection: TextSelection.collapsed(offset: resultText.length),
+    );
+  }
 }
 
 abstract final class ProfileFormatters {
@@ -191,7 +357,11 @@ abstract final class ProfileValidators {
     final int month = int.parse(parts[0]);
     final int year = 2000 + int.parse(parts[1]);
     final DateTime now = DateTime.now();
-    final DateTime expiry = DateTime(year, month + 1, 1).subtract(const Duration(seconds: 1));
+    final DateTime expiry = DateTime(
+      year,
+      month + 1,
+      1,
+    ).subtract(const Duration(seconds: 1));
     if (expiry.isBefore(now)) {
       return 'La tarjeta está vencida.';
     }
@@ -243,7 +413,8 @@ abstract final class ProfileValidators {
     if (raw.isEmpty) {
       return 'Ingresa tu correo electrónico.';
     }
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(raw)) {
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(raw)) {
       return 'Ingresa un correo electrónico válido (ej. usuario@kairo.pe).';
     }
     return null;

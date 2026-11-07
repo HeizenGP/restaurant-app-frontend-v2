@@ -61,6 +61,49 @@ void main() {
     expect(session.user?.email, 'ana@example.com');
   });
 
+  test(
+    'Google and password recovery use the exact backend contracts',
+    () async {
+      final List<http.Request> captured = <http.Request>[];
+      final AuthRestRepository repository = AuthRestRepository(
+        baseUri: Uri.parse(baseUrl),
+        client: MockClient((http.Request request) async {
+          captured.add(request);
+          return switch (request.url.path) {
+            '/api/v1/auth/google' => http.Response(
+              jsonEncode(_userSessionJson),
+              200,
+            ),
+            '/api/v1/auth/password-reset/request' => http.Response(
+              jsonEncode(<String, String>{'message': 'accepted'}),
+              202,
+            ),
+            '/api/v1/auth/password-reset/confirm' => http.Response('', 204),
+            _ => http.Response('', 404),
+          };
+        }),
+      );
+
+      await repository.loginWithGoogle('verified-google-id-token');
+      await repository.requestPasswordReset(' ANA@EXAMPLE.COM ');
+      await repository.resetPassword(
+        token: 'opaque-token',
+        newPassword: 'NewKairo123',
+      );
+
+      expect(jsonDecode(captured[0].body), <String, Object>{
+        'id_token': 'verified-google-id-token',
+      });
+      expect(jsonDecode(captured[1].body), <String, Object>{
+        'email': 'ana@example.com',
+      });
+      expect(jsonDecode(captured[2].body), <String, Object>{
+        'token': 'opaque-token',
+        'new_password': 'NewKairo123',
+      });
+    },
+  );
+
   test('guest, refresh and logout use their exact contracts', () async {
     final List<http.Request> captured = <http.Request>[];
     final AuthRestRepository repository = AuthRestRepository(

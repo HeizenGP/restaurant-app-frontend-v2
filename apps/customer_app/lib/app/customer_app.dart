@@ -7,12 +7,15 @@ import 'package:http/http.dart' as http;
 
 import '../core/api_environment.dart';
 import '../core/design_system/theme/asia_theme.dart';
+import '../features/location_delivery/application/location_delivery_controller.dart';
+import '../features/location_delivery/infrastructure/address_rest_repository.dart';
 import '../features/m01_access/profile/application/user_profile_controller.dart';
 import '../features/m01_access/shared/application/auth_contracts.dart';
 import '../features/m01_access/shared/application/auth_session_controller.dart';
 import '../features/m01_access/shared/domain/auth_models.dart';
 import '../features/m01_access/shared/infrastructure/auth_rest_repository.dart';
 import '../features/m01_access/shared/infrastructure/flutter_secure_session_store.dart';
+import '../features/m01_access/shared/infrastructure/google_sign_in_identity_provider.dart';
 import '../features/m02_catalog/browse_catalog/application/catalog_controller.dart';
 import '../features/m02_catalog/shared/application/catalog_contracts.dart';
 import '../features/m02_catalog/shared/infrastructure/catalog_rest_repository.dart';
@@ -39,12 +42,14 @@ class CustomerApp extends StatefulWidget {
     this.initialThemeMode = ThemeMode.light,
     this.authRepository,
     this.sessionStore,
+    this.googleIdentityProvider,
     this.catalogRepository,
     this.tablesRepository,
     this.ordersRepository,
     this.paymentStatusRepository,
     this.orderTrackingRepository,
     this.userProfileController,
+    this.locationDeliveryController,
     this.initialLocation,
     super.key,
   });
@@ -54,12 +59,14 @@ class CustomerApp extends StatefulWidget {
   final String? initialLocation;
   final AuthRepository? authRepository;
   final AuthSessionStore? sessionStore;
+  final GoogleIdentityProvider? googleIdentityProvider;
   final CatalogRepository? catalogRepository;
   final TablesRepository? tablesRepository;
   final OrdersRepository? ordersRepository;
   final PaymentStatusRepository? paymentStatusRepository;
   final OrderTrackingRepository? orderTrackingRepository;
   final UserProfileController? userProfileController;
+  final LocationDeliveryController? locationDeliveryController;
 
   @override
   State<CustomerApp> createState() => _CustomerAppState();
@@ -77,6 +84,8 @@ class _CustomerAppState extends State<CustomerApp> {
   late final OrderTrackingController _orderTrackingController;
   late final UserProfileController _userProfileController;
   UserProfileController? _ownedUserProfileController;
+  late final LocationDeliveryController _locationDeliveryController;
+  LocationDeliveryController? _ownedLocationDeliveryController;
   late final CatalogRepository _catalogRepository;
   late final GoRouter _router;
   http.Client? _ownedHttpClient;
@@ -99,14 +108,20 @@ class _CustomerAppState extends State<CustomerApp> {
       _orderHistoryController.clear();
       _orderTrackingController.clear();
 
-      if (authState.status == AuthStatus.signedOut || currentIsGuest || currentUserId == null) {
+      if (authState.status == AuthStatus.signedOut ||
+          currentIsGuest ||
+          currentUserId == null) {
         _userProfileController.clear();
       } else {
-        unawaited(_userProfileController.loadForUser(currentUserId).then((_) {
-          if (mounted && session?.user != null && _lastSessionUserId == currentUserId) {
-            _userProfileController.syncWithUser(session!.user);
-          }
-        }));
+        unawaited(
+          _userProfileController.loadForUser(currentUserId).then((_) {
+            if (mounted &&
+                session?.user != null &&
+                _lastSessionUserId == currentUserId) {
+              _userProfileController.syncWithUser(session!.user);
+            }
+          }),
+        );
       }
     } else if (session?.user != null && !currentIsGuest) {
       _userProfileController.syncWithUser(session!.user);
@@ -148,6 +163,13 @@ class _CustomerAppState extends State<CustomerApp> {
     _authController = AuthSessionController(
       repository: authRepository,
       sessionStore: widget.sessionStore ?? FlutterSecureSessionStore(),
+      googleIdentityProvider:
+          widget.googleIdentityProvider ??
+          GoogleSignInIdentityProvider(
+            serverClientId: const String.fromEnvironment(
+              'GOOGLE_WEB_CLIENT_ID',
+            ),
+          ),
     );
 
     _catalogRepository =
@@ -202,7 +224,8 @@ class _CustomerAppState extends State<CustomerApp> {
       accessTokenProvider: () => _authController.state.session?.accessToken,
       refreshAccessToken: _authController.refreshSession,
     );
-    if (widget.userProfileController case final UserProfileController injected) {
+    if (widget.userProfileController
+        case final UserProfileController injected) {
       _userProfileController = injected;
       _ownedUserProfileController = null;
     } else {
@@ -213,6 +236,25 @@ class _CustomerAppState extends State<CustomerApp> {
       unawaited(_userProfileController.clearLegacyStorage());
     }
     _userProfileController.setRemoteUpdater(_authController.updateProfile);
+
+    if (widget.locationDeliveryController
+        case final LocationDeliveryController injected) {
+      _locationDeliveryController = injected;
+      _ownedLocationDeliveryController = null;
+    } else {
+      final AddressRestRepository addressRepository = AddressRestRepository(
+        baseUri: widget.environment.baseUri,
+        httpClient: sharedClient ?? http.Client(),
+        tokenGetter: () => _authController.state.session?.accessToken,
+      );
+      _locationDeliveryController = LocationDeliveryController(
+        addressRepository: addressRepository,
+        profileController: _userProfileController,
+      );
+      _ownedLocationDeliveryController = _locationDeliveryController;
+      unawaited(_locationDeliveryController.initialize());
+    }
+
     _router = createCustomerRouter(
       themeModeController: _themeModeController,
       authController: _authController,
@@ -224,6 +266,7 @@ class _CustomerAppState extends State<CustomerApp> {
       orderHistoryController: _orderHistoryController,
       orderTrackingController: _orderTrackingController,
       profileController: _userProfileController,
+      locationDeliveryController: _locationDeliveryController,
       initialLocation: widget.initialLocation ?? CustomerRoutes.splash,
     );
     _authController.addListener(_onAuthStateChanged);
@@ -241,6 +284,7 @@ class _CustomerAppState extends State<CustomerApp> {
     _paymentStatusController.dispose();
     _orderHistoryController.dispose();
     _orderTrackingController.dispose();
+    _ownedLocationDeliveryController?.dispose();
     _ownedUserProfileController?.dispose();
     _authController.dispose();
     _themeModeController.dispose();

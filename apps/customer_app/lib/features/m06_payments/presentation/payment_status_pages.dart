@@ -71,12 +71,12 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
 
         if (advance == null) {
           return AsiaScaffold(
-            title: 'Anticipo del Pedido',
+            title: 'Detalle de Pago',
             showBack: true,
             onBack: widget.onBack,
             body: const AsiaStateView(
               kind: AsiaStateKind.empty,
-              title: 'Sin información de anticipo',
+              title: 'Sin información de pago registrado',
             ),
           );
         }
@@ -84,7 +84,7 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
         final bool isVerified = advance.isVerified;
 
         return AsiaScaffold(
-          title: 'Anticipo (50 %)',
+          title: 'Estado de Pago',
           subtitle: 'Pedido #${advance.orderId.length >= 8 ? advance.orderId.substring(0, 8).toUpperCase() : advance.orderId.toUpperCase()}',
           showBack: true,
           onBack: widget.onBack,
@@ -126,8 +126,8 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
                         children: <Widget>[
                           Text(
                             isVerified
-                                ? 'Anticipo verificado'
-                                : 'Pendiente de verificación administrativa',
+                                ? 'Pago validado'
+                                : 'Pendiente de verificación en caja',
                             style: AsiaTypography.titleSmall.copyWith(
                               color: isVerified ? theme.success : theme.brandGold,
                               fontWeight: FontWeight.w700,
@@ -136,8 +136,8 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
                           const SizedBox(height: 2),
                           Text(
                             isVerified
-                                ? 'El pago del 50 % fue validado por caja. Tu pedido está en marcha.'
-                                : 'Nuestro equipo está confirmando la transferencia o comprobante.',
+                                ? 'El pago fue validado con éxito. Tu comanda continúa en cocina.'
+                                : 'Nuestro equipo está confirmando tu operación en Yape, Plin o Efectivo.',
                             style: AsiaTypography.bodySmall.copyWith(color: theme.textSecondary),
                           ),
                         ],
@@ -161,7 +161,7 @@ class _AdvanceStatusPageState extends State<AdvanceStatusPage> {
                     _AmountRow(label: 'Total del pedido', amount: 'S/ ${advance.totalAmount}'),
                     const SizedBox(height: 10),
                     _AmountRow(
-                      label: 'Anticipo requerido (50 %)',
+                      label: 'Monto solicitado',
                       amount: 'S/ ${advance.requiredAmount}',
                       amountColor: theme.brandGold,
                     ),

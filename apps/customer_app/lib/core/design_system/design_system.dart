@@ -9,6 +9,7 @@ export 'components/asia_state_view.dart';
 export 'components/asia_text_field.dart';
 export 'components/kairo_logo.dart';
 export 'foundations/asia_colors.dart';
+export 'foundations/asia_motion.dart';
 export 'foundations/asia_radii.dart';
 export 'foundations/asia_spacing.dart';
 export 'foundations/asia_typography.dart';

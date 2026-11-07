@@ -44,7 +44,13 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
           title: 'Mis Pedidos',
           subtitle: 'Historial de comandas y pedidos anteriores',
           showBack: true,
-          onBack: widget.onBack,
+          onBack: () {
+            if (state.selectedFilter != OrderHistoryFilter.all) {
+              widget.controller.setFilter(OrderHistoryFilter.all);
+            } else {
+              widget.onBack();
+            }
+          },
           body: isLoading
               ? const AsiaStateView(
                   kind: AsiaStateKind.loading,
@@ -58,43 +64,63 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
                       actionLabel: 'Reintentar',
                       onAction: widget.controller.retry,
                     )
-                  : orders.isEmpty
-                      ? const AsiaStateView(
-                          kind: AsiaStateKind.empty,
-                          title: 'Aún no tienes pedidos registrados',
-                          message: 'Realiza tu primer pedido y podrás seguir su preparación aquí.',
-                          icon: LucideIcons.receiptText,
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            const SizedBox(height: 12),
-                            // Selector de filtro
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: <Widget>[
-                                  AsiaChip(
-                                    label: 'Todos',
-                                    isSelected: state.selectedFilter == OrderHistoryFilter.all,
-                                    onTap: () => widget.controller.setFilter(OrderHistoryFilter.all),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  AsiaChip(
-                                    label: 'Pendientes',
-                                    isSelected: state.selectedFilter == OrderHistoryFilter.pending,
-                                    onTap: () => widget.controller.setFilter(OrderHistoryFilter.pending),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  AsiaChip(
-                                    label: 'Confirmados',
-                                    isSelected: state.selectedFilter == OrderHistoryFilter.confirmed,
-                                    onTap: () => widget.controller.setFilter(OrderHistoryFilter.confirmed),
-                                  ),
-                                ],
-                              ),
+                  : RefreshIndicator(
+                      onRefresh: widget.controller.loadOrders,
+                      color: theme.brandCrimson,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          const SizedBox(height: 12),
+                          // Selector de filtro (siempre visible para poder alternar)
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              children: <Widget>[
+                                AsiaChip(
+                                  label: 'Todos',
+                                  isSelected: state.selectedFilter == OrderHistoryFilter.all,
+                                  onTap: () => widget.controller.setFilter(OrderHistoryFilter.all),
+                                ),
+                                const SizedBox(width: 8),
+                                AsiaChip(
+                                  label: 'Pendientes',
+                                  isSelected: state.selectedFilter == OrderHistoryFilter.pending,
+                                  onTap: () => widget.controller.setFilter(OrderHistoryFilter.pending),
+                                ),
+                                const SizedBox(width: 8),
+                                AsiaChip(
+                                  label: 'Confirmados',
+                                  isSelected: state.selectedFilter == OrderHistoryFilter.confirmed,
+                                  onTap: () => widget.controller.setFilter(OrderHistoryFilter.confirmed),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
+                          ),
+                          const SizedBox(height: 16),
+                          if (orders.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 40),
+                              child: AsiaStateView(
+                                kind: AsiaStateKind.empty,
+                                title: state.selectedFilter == OrderHistoryFilter.all
+                                    ? 'Aún no tienes pedidos registrados'
+                                    : (state.selectedFilter == OrderHistoryFilter.pending
+                                        ? 'No tienes pedidos pendientes'
+                                        : 'No tienes pedidos confirmados'),
+                                message: state.selectedFilter == OrderHistoryFilter.all
+                                    ? 'Realiza tu primer pedido y podrás seguir su preparación aquí.'
+                                    : 'Los pedidos en este estado aparecerán aquí cuando sean procesados.',
+                                icon: LucideIcons.receiptText,
+                                actionLabel: state.selectedFilter != OrderHistoryFilter.all
+                                    ? 'Ver todos los pedidos'
+                                    : null,
+                                onAction: state.selectedFilter != OrderHistoryFilter.all
+                                    ? () => widget.controller.setFilter(OrderHistoryFilter.all)
+                                    : null,
+                              ),
+                            )
+                          else
                             ListView.separated(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
@@ -183,6 +209,7 @@ class _OrdersHistoryPageState extends State<OrdersHistoryPage> {
                             const SizedBox(height: 36),
                           ],
                         ),
+                      ),
         );
       },
     );

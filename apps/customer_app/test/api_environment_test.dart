@@ -97,5 +97,11 @@ void main() {
         expect(() => ApiEnvironment.fromCompileTime(), throwsStateError);
       }
     });
+
+    test('mapboxAccessToken does not contain hardcoded credentials in repo', () {
+      // Sin --dart-define, debe resolverse como cadena vacía y nunca como token predeterminado
+      expect(ApiEnvironment.mapboxAccessToken, isNot(contains('pk.')));
+      expect(ApiEnvironment.mapboxAccessToken, isNot(contains('sk.')));
+    });
   });
 }

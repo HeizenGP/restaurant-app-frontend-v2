@@ -5,6 +5,15 @@ abstract interface class AuthRepository {
 
   Future<AuthSession> login(LoginInput input);
 
+  Future<AuthSession> loginWithGoogle(String idToken);
+
+  Future<void> requestPasswordReset(String email);
+
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  });
+
   Future<AuthSession> createGuestSession();
 
   Future<AuthSession> refresh(String refreshToken);
@@ -19,6 +28,14 @@ abstract interface class AuthRepository {
     List<Map<String, dynamic>>? savedCards,
     List<Map<String, dynamic>>? savedAddresses,
   });
+}
+
+abstract interface class GoogleIdentityProvider {
+  bool get isConfigured;
+
+  Future<String> authenticate();
+
+  Future<void> signOut();
 }
 
 abstract interface class AuthSessionStore {
@@ -37,6 +54,8 @@ enum AuthFailureKind {
   network,
   server,
   malformedResponse,
+  cancelled,
+  providerUnavailable,
 }
 
 class AuthFailure implements Exception {

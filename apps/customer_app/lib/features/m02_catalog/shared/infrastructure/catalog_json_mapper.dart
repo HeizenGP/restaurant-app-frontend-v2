@@ -52,6 +52,8 @@ abstract final class CatalogJsonMapper {
               name: _name(json['name']),
               priceCents: _priceCents(json['price']),
               availableForSale: json['available_for_sale']! as bool,
+              imageUrl: json['image_url'] as String?,
+              description: json['description'] as String?,
             );
           })
           .toList(growable: false);

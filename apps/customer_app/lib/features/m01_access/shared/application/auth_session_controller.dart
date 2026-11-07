@@ -8,7 +8,16 @@ import 'auth_contracts.dart';
 
 enum AuthStatus { restoring, signedOut, signedIn }
 
-enum AuthOperation { none, signIn, register, guest, refresh, logout }
+enum AuthOperation {
+  none,
+  signIn,
+  googleSignIn,
+  register,
+  passwordReset,
+  guest,
+  refresh,
+  logout,
+}
 
 @immutable
 class AuthState {
@@ -54,19 +63,27 @@ class AuthSessionController extends ChangeNotifier {
   factory AuthSessionController({
     required AuthRepository repository,
     required AuthSessionStore sessionStore,
+    GoogleIdentityProvider? googleIdentityProvider,
     DateTime Function()? now,
   }) {
     return AuthSessionController._(
       repository,
       sessionStore,
+      googleIdentityProvider,
       now ?? DateTime.now,
     );
   }
 
-  AuthSessionController._(this._repository, this._sessionStore, this._now);
+  AuthSessionController._(
+    this._repository,
+    this._sessionStore,
+    this._googleIdentityProvider,
+    this._now,
+  );
 
   final AuthRepository _repository;
   final AuthSessionStore _sessionStore;
+  final GoogleIdentityProvider? _googleIdentityProvider;
   final DateTime Function() _now;
   final ValueNotifier<AuthStatus> _navigationStatus = ValueNotifier<AuthStatus>(
     AuthStatus.restoring,
@@ -78,6 +95,9 @@ class AuthSessionController extends ChangeNotifier {
   AuthState get state => _state;
 
   Listenable get navigationRefresh => _navigationStatus;
+
+  bool get googleSignInAvailable =>
+      _googleIdentityProvider?.isConfigured ?? false;
 
   Future<void> restore() async {
     _setState(const AuthState.restoring());
@@ -217,6 +237,101 @@ class AuthSessionController extends ChangeNotifier {
     }
   }
 
+  Future<bool> loginWithGoogle() async {
+    if (_state.isBusy) return false;
+    final GoogleIdentityProvider? provider = _googleIdentityProvider;
+    if (provider == null || !provider.isConfigured) {
+      _finishWithFailure(
+        const AuthFailure(
+          AuthFailureKind.providerUnavailable,
+          'Google no está configurado todavía en KAIRO.',
+        ),
+      );
+      return false;
+    }
+    _setState(
+      _state.copyWith(
+        operation: AuthOperation.googleSignIn,
+        clearError: true,
+        clearNotice: true,
+      ),
+    );
+    try {
+      final String idToken = await provider.authenticate();
+      final AuthSession session = _requireSessionKind(
+        await _repository.loginWithGoogle(idToken),
+        AuthSessionKind.user,
+      );
+      await _sessionStore.write(session);
+      _setState(AuthState(status: AuthStatus.signedIn, session: session));
+      _scheduleSessionMaintenance(session);
+      return true;
+    } on AuthFailure catch (failure) {
+      _finishWithFailure(failure);
+      return false;
+    } on Object {
+      _finishWithUnexpectedFailure();
+      return false;
+    }
+  }
+
+  Future<bool> requestPasswordReset(String email) async {
+    if (_state.isBusy) return false;
+    _setState(
+      _state.copyWith(
+        operation: AuthOperation.passwordReset,
+        clearError: true,
+        clearNotice: true,
+      ),
+    );
+    try {
+      await _repository.requestPasswordReset(email);
+      _setState(
+        const AuthState(
+          status: AuthStatus.signedOut,
+          noticeMessage: 'Si existe una cuenta con ese correo, recibirás instrucciones para continuar.',
+        ),
+      );
+      return true;
+    } on AuthFailure catch (failure) {
+      _finishWithFailure(failure);
+      return false;
+    } on Object {
+      _finishWithUnexpectedFailure();
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    if (_state.isBusy) return false;
+    _setState(
+      _state.copyWith(
+        operation: AuthOperation.passwordReset,
+        clearError: true,
+        clearNotice: true,
+      ),
+    );
+    try {
+      await _repository.resetPassword(token: token, newPassword: newPassword);
+      _setState(
+        const AuthState(
+          status: AuthStatus.signedOut,
+          noticeMessage: 'Contraseña actualizada. Ya puedes iniciar sesión.',
+        ),
+      );
+      return true;
+    } on AuthFailure catch (failure) {
+      _finishWithFailure(failure);
+      return false;
+    } on Object {
+      _finishWithUnexpectedFailure();
+      return false;
+    }
+  }
+
   Future<bool> continueAsGuest() async {
     if (_state.isBusy) return false;
     _setState(
@@ -319,6 +434,9 @@ class AuthSessionController extends ChangeNotifier {
       if (accessToken != null) {
         await _repository.logout(accessToken);
       }
+      if (_googleIdentityProvider != null) {
+        await _googleIdentityProvider.signOut();
+      }
     } on Object {
       notice = 'Sesión cerrada en este dispositivo. No pudimos confirmarlo con el servidor.';
     }
@@ -333,7 +451,9 @@ class AuthSessionController extends ChangeNotifier {
     List<Map<String, dynamic>>? savedAddresses,
   }) async {
     final String? token = _state.session?.accessToken;
-    if (token == null || _state.session?.kind != AuthSessionKind.user) return false;
+    if (token == null || _state.session?.kind != AuthSessionKind.user) {
+      return false;
+    }
     try {
       final CustomerIdentity updated = await _repository.updateProfile(
         accessToken: token,
@@ -357,9 +477,11 @@ class AuthSessionController extends ChangeNotifier {
       _setState(_state.copyWith(errorMessage: e.message));
       return false;
     } on Object {
-      _setState(_state.copyWith(
-        errorMessage: 'No pudimos conectar con KAIRO. Revisa tu conexión.',
-      ));
+      _setState(
+        _state.copyWith(
+          errorMessage: 'No pudimos conectar con KAIRO. Revisa tu conexión.',
+        ),
+      );
       return false;
     }
   }

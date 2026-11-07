@@ -53,8 +53,13 @@ class FakeAuthRepository implements AuthRepository {
   RegistrationInput? lastRegistration;
   String? lastRefreshToken;
   String? lastLogoutToken;
+  int loginCalls = 0;
+  int googleLoginCalls = 0;
+  int passwordResetRequestCalls = 0;
+  int passwordResetConfirmCalls = 0;
   int guestCalls = 0;
   int refreshCalls = 0;
+  Completer<AuthSession>? loginCompleter;
   Completer<AuthSession>? guestCompleter;
   Completer<AuthSession>? refreshCompleter;
   Completer<CustomerIdentity>? registrationCompleter;
@@ -71,9 +76,32 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<AuthSession> login(LoginInput input) async {
+    loginCalls += 1;
     lastLogin = input;
     if (loginFailure case final AuthFailure failure) throw failure;
+    if (loginCompleter case final Completer<AuthSession> completer) {
+      return completer.future;
+    }
     return loginResult;
+  }
+
+  @override
+  Future<AuthSession> loginWithGoogle(String idToken) async {
+    googleLoginCalls += 1;
+    return loginResult;
+  }
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    passwordResetRequestCalls += 1;
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    passwordResetConfirmCalls += 1;
   }
 
   @override
@@ -126,6 +154,25 @@ class FakeAuthRepository implements AuthRepository {
     }
     return registrationResult;
   }
+}
+
+class FakeGoogleIdentityProvider implements GoogleIdentityProvider {
+  FakeGoogleIdentityProvider({this.idToken = 'google-id-token'});
+
+  final String idToken;
+  int authenticateCalls = 0;
+
+  @override
+  bool get isConfigured => true;
+
+  @override
+  Future<String> authenticate() async {
+    authenticateCalls += 1;
+    return idToken;
+  }
+
+  @override
+  Future<void> signOut() async {}
 }
 
 final CustomerIdentity customerIdentity = CustomerIdentity(
