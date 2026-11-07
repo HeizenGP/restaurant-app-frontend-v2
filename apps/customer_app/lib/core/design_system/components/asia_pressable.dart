@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// House Pressable para Chifa ASIA.
+/// House Pressable para KAIRO.
 /// Reemplaza el ink ripple por una micro-interacción táctil con escala y hundimiento.
 class AsiaPressable extends StatefulWidget {
   const AsiaPressable({

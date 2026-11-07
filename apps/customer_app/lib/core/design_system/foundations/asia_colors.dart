@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Paleta de colores atómica y curada para Chifa ASIA.
-/// Estética imperial asiática contemporánea: carmesí bermellón, oro cálido, porcelana y obsidiana OLED.
+/// Paleta de colores atómica y curada para KAIRO.
+/// Estética imperial asiática contemporánea: carmesí bermellón profundo, oro radiante, obsidiana OLED y porcelana.
 abstract final class AsiaColors {
   // Light Canvas (Porcelana pura)
   static const Color lightBg = Color(0xFFFBFBFD);

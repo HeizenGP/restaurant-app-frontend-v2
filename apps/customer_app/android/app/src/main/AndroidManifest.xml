@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="Chifa ASIA"
+        android:label="KAIRO"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:fullBackupContent="false"

@@ -27,9 +27,11 @@ import '../../features/m04_orders/submit_order/application/submit_order_controll
 import '../../features/m04_orders/submit_order/domain/order_models.dart';
 import '../../features/m06_payments/presentation/payment_status_pages.dart';
 import '../../features/m06_payments/view_payment_status/application/payment_status_controller.dart';
+import '../../features/ui_foundation/presentation/kairo_splash_screen.dart';
 import '../theme/theme_mode_controller.dart';
 
 abstract final class CustomerRoutes {
+  static const String splash = '/splash';
   static const String home = '/';
   static const String menu = '/menu';
   static const String orders = '/pedidos';
@@ -70,6 +72,7 @@ GoRouter createCustomerRouter({
   OrderHistoryController? orderHistoryController,
   OrderTrackingController? orderTrackingController,
   UserProfileController? profileController,
+  String initialLocation = CustomerRoutes.splash,
 }) {
   CatalogProduct? lastSelectedProduct;
   CatalogCategory? lastSelectedCategory;
@@ -77,7 +80,7 @@ GoRouter createCustomerRouter({
   OrderSnapshot? lastCreatedOrder;
 
   return GoRouter(
-    initialLocation: CustomerRoutes.home,
+    initialLocation: initialLocation,
     routes: <RouteBase>[
       // Shell con BottomNavigationBar persistente para las 4 pestañas
       StatefulShellRoute.indexedStack(
@@ -206,6 +209,17 @@ GoRouter createCustomerRouter({
             ],
           ),
         ],
+      ),
+
+      // Ruta Splash Screen animado de KAIRO
+      GoRoute(
+        path: CustomerRoutes.splash,
+        name: 'splash',
+        builder: (BuildContext context, GoRouterState state) {
+          return KairoSplashScreen(
+            onFinished: () => context.go(CustomerRoutes.home),
+          );
+        },
       ),
 
       // Rutas de autenticación

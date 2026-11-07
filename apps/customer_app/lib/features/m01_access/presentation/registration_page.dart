@@ -69,7 +69,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
         return AsiaScaffold(
           title: 'Crear cuenta',
-          subtitle: 'Únete a Chifa ASIA y disfruta de pedidos rápidos',
+          subtitle: 'Únete a KAIRO y disfruta de una experiencia gastronómica exclusiva',
           showBack: true,
           onBack: widget.onBackToSignIn,
           body: Column(

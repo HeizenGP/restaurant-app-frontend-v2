@@ -45,11 +45,13 @@ class CustomerApp extends StatefulWidget {
     this.paymentStatusRepository,
     this.orderTrackingRepository,
     this.userProfileController,
+    this.initialLocation,
     super.key,
   });
 
   final ApiEnvironment environment;
   final ThemeMode initialThemeMode;
+  final String? initialLocation;
   final AuthRepository? authRepository;
   final AuthSessionStore? sessionStore;
   final CatalogRepository? catalogRepository;
@@ -222,6 +224,7 @@ class _CustomerAppState extends State<CustomerApp> {
       orderHistoryController: _orderHistoryController,
       orderTrackingController: _orderTrackingController,
       profileController: _userProfileController,
+      initialLocation: widget.initialLocation ?? CustomerRoutes.splash,
     );
     _authController.addListener(_onAuthStateChanged);
     _authController.restore();
@@ -252,7 +255,7 @@ class _CustomerAppState extends State<CustomerApp> {
       builder: (BuildContext context, ThemeMode themeMode, Widget? child) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Chifa ASIA',
+          title: 'KAIRO',
           theme: AsiaAppTheme.light,
           darkTheme: AsiaAppTheme.dark,
           themeMode: themeMode,

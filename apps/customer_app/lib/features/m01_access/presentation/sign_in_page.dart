@@ -67,49 +67,24 @@ class _SignInPageState extends State<SignInPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Center(
-                  child: Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      color: theme.brandCrimson,
-                      shape: BoxShape.circle,
-                      boxShadow: !theme.isDark
-                          ? <BoxShadow>[
-                              BoxShadow(
-                                color: theme.brandCrimson.withValues(alpha: 0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: const Icon(
-                      LucideIcons.utensils,
-                      color: Colors.white,
-                      size: 36,
-                    ),
+                  child: KairoLogo(
+                    variant: KairoLogoVariant.vertical,
+                    emblemSize: 76,
+                    isDark: theme.isDark,
+                    showSubtitle: true,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Text(
-                  'Chifa ASIA',
-                  textAlign: TextAlign.center,
-                  style: AsiaTypography.displayLarge.copyWith(
-                    color: theme.textPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Tradición, sabor y alta gastronomía nikkei & cantonesa',
+                  'Fusión nikkei, tradición al wok y gastronomía asiática de autor',
                   textAlign: TextAlign.center,
                   style: AsiaTypography.bodyMedium.copyWith(
                     color: theme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 32),
                 if (state.errorMessage != null) ...<Widget>[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

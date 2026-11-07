@@ -47,7 +47,7 @@ class AccountHubPage extends StatelessWidget {
         final String name = (profileController.displayName?.isNotEmpty == true)
             ? profileController.displayName!
             : (authState.session?.user?.displayName ?? 'Invitado');
-        final String email = authState.session?.user?.email ?? 'invitado@chifaasia.pe';
+        final String email = authState.session?.user?.email ?? 'invitado@kairo.pe';
         final String? photoPath = profileController.avatarPath;
 
         return AsiaScaffold(

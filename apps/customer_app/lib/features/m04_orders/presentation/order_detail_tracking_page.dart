@@ -344,7 +344,7 @@ class _OrderDetailTrackingPageState extends State<OrderDetailTrackingPage> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            order.deliveryAddress ?? 'Chifa ASIA Salón Principal',
+                            order.deliveryAddress ?? 'KAIRO Salón Principal',
                             style: AsiaTypography.bodySmall.copyWith(color: theme.textSecondary),
                           ),
                         ],

@@ -14,7 +14,7 @@ String formatPrice(int priceCents) {
   return 'S/ ${soles.toStringAsFixed(2)}';
 }
 
-// Icono según categoría de Chifa
+// Icono según categoría gastronómica de KAIRO
 IconData getCategoryIcon(String categoryName) {
   final String lower = categoryName.toLowerCase();
   if (lower.contains('arroz') || lower.contains('chaufa')) return LucideIcons.cookingPot;
@@ -73,8 +73,8 @@ class _HomePageState extends State<HomePage> {
         final int cartCount = widget.cartController.state.totalQuantity;
 
         return AsiaScaffold(
-          title: 'Chifa ASIA',
-          subtitle: 'Auténtica fusión cantonesa y nikkei',
+          title: 'KAIRO',
+          subtitle: 'Alta Cocina Asiática Contemporánea',
           onToggleTheme: widget.onToggleTheme,
           isDark: widget.isDark,
           onCartTap: widget.onNavigateToCart,
@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                           const Icon(LucideIcons.flame, color: Colors.white, size: 14),
                           const SizedBox(width: 4),
                           Text(
-                            'Sabor tradicional al wok',
+                            'Wok Hei & Alta Gastronomía',
                             style: AsiaTypography.labelSmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      'Los mejores platos\nchinos en tu mesa',
+                      'Experiencia culinaria\nasiática en tu mesa',
                       style: AsiaTypography.titleLarge.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Chaufa ahumado, tallarines saltados y wantanes recién hechos.',
+                      'Fusión cantonesa, nikkei y especialidades al wok preparadas al momento.',
                       style: AsiaTypography.bodySmall.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
 
                     return _ProductCard(
                       product: prod,
-                      categoryName: currentCat?.name ?? 'Chifa ASIA',
+                      categoryName: currentCat?.name ?? 'KAIRO',
                       onTap: () {
                         if (currentCat != null) {
                           widget.onProductSelected(currentCat, prod);
