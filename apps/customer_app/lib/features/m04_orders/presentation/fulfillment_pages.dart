@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -129,11 +130,23 @@ class TableSelectionPage extends StatefulWidget {
 
 class _TableSelectionPageState extends State<TableSelectionPage> {
   String? _selectedTableId;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     widget.controller.loadTables();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (mounted) {
+        widget.controller.loadTables();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   void _confirmSelection() {

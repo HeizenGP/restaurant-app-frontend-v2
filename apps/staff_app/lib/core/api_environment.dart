@@ -2,15 +2,45 @@ final class ApiEnvironment {
   ApiEnvironment({required String baseUrl}) : baseUri = _parseBaseUrl(baseUrl);
 
   factory ApiEnvironment.fromCompileTime() {
-    return ApiEnvironment(baseUrl: _compiledBaseUrl);
+    return ApiEnvironment(baseUrl: resolveBaseUrl());
   }
 
-  static const String _compiledBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8000/api/v1',
-  );
+  /// URLs de entorno oficiales
+  static const String renderUrl =
+      'https://restaurant-app-backend-v2.onrender.com/api/v1';
+  static const String localUrl = 'http://localhost:8000/api/v1';
+
+  /// Variables de compilación
+  static const bool useRender = bool.fromEnvironment('USE_RENDER');
+  static const bool useLocal = bool.fromEnvironment('USE_LOCAL');
+  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
   final Uri baseUri;
+
+  /// Resuelve la URL base evaluando variables de compilación.
+  static String resolveBaseUrl({
+    bool? overrideUseRender,
+    bool? overrideUseLocal,
+    String? overrideApiBaseUrl,
+  }) {
+    final String explicit = overrideApiBaseUrl ?? apiBaseUrl;
+    if (explicit.isNotEmpty) {
+      return explicit;
+    }
+
+    final bool activeRender = overrideUseRender ?? useRender;
+    final bool activeLocal = overrideUseLocal ?? useLocal;
+
+    if (activeRender && !activeLocal) {
+      return renderUrl;
+    }
+    if (!activeRender && activeLocal) {
+      return localUrl;
+    }
+
+    // Default to local backend for development if none explicitly specified
+    return localUrl;
+  }
 
   static Uri _parseBaseUrl(String value) {
     final Uri uri = Uri.parse(value);
