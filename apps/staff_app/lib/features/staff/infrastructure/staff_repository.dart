@@ -7,14 +7,16 @@ class StaffRepository {
   final ApiClient apiClient;
 
   Future<List<StaffUser>> getStaffList({RoleCode? role}) async {
-    final Map<String, dynamic>? query =
-        role != null ? <String, dynamic>{'role': role.value} : null;
-    final dynamic response =
-        await apiClient.get('/users', queryParameters: query);
+    final Map<String, dynamic>? query = role != null
+        ? <String, dynamic>{'role': role.value}
+        : null;
+    final dynamic response = await apiClient.get(
+      '/users',
+      queryParameters: query,
+    );
     if (response is! List<dynamic>) return <StaffUser>[];
     return response
-        .map((dynamic item) =>
-            StaffUser.fromJson(item as Map<String, dynamic>))
+        .map((dynamic item) => StaffUser.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 

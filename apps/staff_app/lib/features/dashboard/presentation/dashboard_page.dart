@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_badge.dart';
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_card.dart';
@@ -96,8 +99,15 @@ class _DashboardPageState extends State<DashboardPage> {
     final AsiaThemeTokens tokens = context.tokens;
     final String greetingName =
         widget.authController.currentUser?.displayName ?? 'Administrador';
-    final String todayFormatted =
-        DateFormat('EEEE d MMMM, yyyy', 'es').format(DateTime.now());
+    String todayFormatted;
+    try {
+      todayFormatted = DateFormat(
+        'EEEE d MMMM, yyyy',
+        'es',
+      ).format(DateTime.now());
+    } catch (_) {
+      todayFormatted = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -167,6 +177,10 @@ class _DashboardPageState extends State<DashboardPage> {
   ) {
     final AsiaThemeTokens tokens = context.tokens;
     final int crossAxisCount = isDesktop ? 4 : (isTablet ? 2 : 1);
+    final int availableTables = math.max(
+      0,
+      stats.totalTablesCount - stats.occupiedTablesCount,
+    );
 
     final List<Widget> kpiCards = <Widget>[
       StatCard(
@@ -177,6 +191,7 @@ class _DashboardPageState extends State<DashboardPage> {
         isPositiveTrend: true,
         icon: LucideIcons.dollarSign,
         accentColor: tokens.brandCrimson,
+        onTap: () => context.go('/payments'),
       ),
       StatCard(
         title: 'Pedidos Activos',
@@ -189,7 +204,7 @@ class _DashboardPageState extends State<DashboardPage> {
       StatCard(
         title: 'Mesas Ocupadas',
         value: '${stats.occupiedTablesCount} / ${stats.totalTablesCount}',
-        subtitle: '${stats.totalTablesCount - stats.occupiedTablesCount} disponibles',
+        subtitle: '$availableTables disponibles',
         icon: LucideIcons.armchair,
         accentColor: tokens.brandJade,
         onTap: () => context.go('/tables'),
@@ -197,7 +212,9 @@ class _DashboardPageState extends State<DashboardPage> {
       StatCard(
         title: 'Alertas de Stock',
         value: '${stats.lowStockCount}',
-        subtitle: stats.lowStockCount > 0 ? 'Insumos por agotarse' : 'Niveles óptimos',
+        subtitle: stats.lowStockCount > 0
+            ? 'Insumos por agotarse'
+            : 'Niveles óptimos',
         icon: LucideIcons.alertTriangle,
         accentColor: stats.lowStockCount > 0 ? tokens.error : tokens.info,
         onTap: () => context.go('/inventory'),
@@ -207,10 +224,12 @@ class _DashboardPageState extends State<DashboardPage> {
     if (crossAxisCount == 1) {
       return Column(
         children: kpiCards
-            .map((Widget c) => Padding(
-                  padding: const EdgeInsets.only(bottom: AsiaSpacing.md),
-                  child: c,
-                ))
+            .map(
+              (Widget c) => Padding(
+                padding: const EdgeInsets.only(bottom: AsiaSpacing.md),
+                child: c,
+              ),
+            )
             .toList(),
       );
     }
@@ -219,7 +238,7 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (BuildContext context, BoxConstraints constraints) {
         final double itemWidth =
             (constraints.maxWidth - (crossAxisCount - 1) * AsiaSpacing.lg) /
-                crossAxisCount;
+            crossAxisCount;
         return Wrap(
           spacing: AsiaSpacing.lg,
           runSpacing: AsiaSpacing.lg,
@@ -237,6 +256,13 @@ class _DashboardPageState extends State<DashboardPage> {
     bool isDesktop,
   ) {
     final AsiaThemeTokens tokens = context.tokens;
+    final int modalityTotal = stats.ordersByModality.values.fold(
+      0,
+      (int a, int b) => a + b,
+    );
+    final int effectiveTotal = modalityTotal > 0
+        ? modalityTotal
+        : stats.todayOrdersCount;
 
     final Widget modalityBreakdown = AdminCard(
       title: 'Canales y Modalidad',
@@ -247,7 +273,7 @@ class _DashboardPageState extends State<DashboardPage> {
             context,
             label: 'Salón / Mesas',
             count: stats.ordersByModality['LOCAL'] ?? 0,
-            total: stats.todayOrdersCount,
+            total: effectiveTotal,
             color: tokens.brandCrimson,
             icon: LucideIcons.utensils,
           ),
@@ -256,7 +282,7 @@ class _DashboardPageState extends State<DashboardPage> {
             context,
             label: 'Delivery Oficial KAIRO',
             count: stats.ordersByModality['DELIVERY'] ?? 0,
-            total: stats.todayOrdersCount,
+            total: effectiveTotal,
             color: tokens.brandGold,
             icon: LucideIcons.bike,
           ),
@@ -265,7 +291,7 @@ class _DashboardPageState extends State<DashboardPage> {
             context,
             label: 'Para Llevar (Pickup)',
             count: stats.ordersByModality['PICKUP'] ?? 0,
-            total: stats.todayOrdersCount,
+            total: effectiveTotal,
             color: tokens.brandJade,
             icon: LucideIcons.packageCheck,
           ),
@@ -289,7 +315,9 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             )
           : Column(
-              children: stats.topProducts.asMap().entries.map((MapEntry<int, TopProduct> entry) {
+              children: stats.topProducts.asMap().entries.map((
+                MapEntry<int, TopProduct> entry,
+              ) {
                 final int rank = entry.key + 1;
                 final TopProduct p = entry.value;
                 return Padding(
@@ -309,7 +337,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: Text(
                           '$rank',
                           style: AsiaTypography.caption.copyWith(
-                            color: rank == 1 ? tokens.brandGold : tokens.textSecondary,
+                            color: rank == 1
+                                ? tokens.brandGold
+                                : tokens.textSecondary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -365,7 +395,8 @@ class _DashboardPageState extends State<DashboardPage> {
     required IconData icon,
   }) {
     final AsiaThemeTokens tokens = context.tokens;
-    final double percent = total > 0 ? (count / total) : 0.0;
+    final double rawPercent = total > 0 ? (count / total) : 0.0;
+    final double percent = rawPercent.clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,11 +476,21 @@ class _DashboardPageState extends State<DashboardPage> {
                   DataColumn(label: Text('Hora')),
                 ],
                 rows: stats.recentOrders.map((DashboardOrder order) {
+                  final String orderIdShort = order.id.length >= 8
+                      ? order.id.substring(0, 8).toUpperCase()
+                      : order.id.toUpperCase();
+                  final String tableLabel =
+                      (order.tableId != null && order.tableId!.isNotEmpty)
+                      ? (order.tableId!.length >= 4
+                            ? 'Mesa ${order.tableId!.substring(0, 4)}'
+                            : 'Mesa ${order.tableId}')
+                      : '-';
+
                   return DataRow(
                     cells: <DataCell>[
                       DataCell(
                         Text(
-                          order.id.substring(0, 8).toUpperCase(),
+                          orderIdShort,
                           style: AsiaTypography.caption.copyWith(
                             color: tokens.brandCrimson,
                             fontWeight: FontWeight.w700,
@@ -458,11 +499,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       DataCell(Text(order.modality)),
                       DataCell(Text(order.channel)),
-                      DataCell(
-                        Text(
-                          order.contactName ?? (order.tableId != null ? 'Mesa ${order.tableId!.substring(0, 4)}' : '-'),
-                        ),
-                      ),
+                      DataCell(Text(order.contactName ?? tableLabel)),
                       DataCell(
                         Text(
                           'S/ ${order.totalAmount.toStringAsFixed(2)}',
@@ -491,22 +528,56 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildStatusBadge(String status) {
     switch (status.toUpperCase()) {
       case 'REQUESTED':
-        return const AdminBadge(label: 'SOLICITADO', variant: AdminBadgeVariant.warning);
+        return const AdminBadge(
+          label: 'SOLICITADO',
+          variant: AdminBadgeVariant.warning,
+        );
       case 'APPROVED':
-        return const AdminBadge(label: 'APROBADO', variant: AdminBadgeVariant.info);
+        return const AdminBadge(
+          label: 'APROBADO',
+          variant: AdminBadgeVariant.info,
+        );
       case 'CONFIRMED':
-        return const AdminBadge(label: 'CONFIRMADO', variant: AdminBadgeVariant.brand);
+        return const AdminBadge(
+          label: 'CONFIRMADO',
+          variant: AdminBadgeVariant.brand,
+        );
       case 'CLOSED':
-        return const AdminBadge(label: 'CERRADO', variant: AdminBadgeVariant.success);
+        return const AdminBadge(
+          label: 'CERRADO',
+          variant: AdminBadgeVariant.success,
+        );
       case 'REJECTED':
       case 'CANCELLED':
-        return const AdminBadge(label: 'CANCELADO', variant: AdminBadgeVariant.error);
+        return const AdminBadge(
+          label: 'CANCELADO',
+          variant: AdminBadgeVariant.error,
+        );
       default:
         return AdminBadge(label: status, variant: AdminBadgeVariant.neutral);
     }
   }
 
   Widget _buildLoadingSkeletons(BuildContext context) {
+    final bool isDesktop = Breakpoints.isDesktop(context);
+    final bool isTablet = Breakpoints.isTablet(context);
+
+    if (!isDesktop && !isTablet) {
+      return Column(
+        children: const <Widget>[
+          AdminSkeletonLoader(height: 100),
+          SizedBox(height: 12),
+          AdminSkeletonLoader(height: 100),
+          SizedBox(height: 12),
+          AdminSkeletonLoader(height: 100),
+          SizedBox(height: 12),
+          AdminSkeletonLoader(height: 100),
+          SizedBox(height: 24),
+          AdminSkeletonLoader(height: 300),
+        ],
+      );
+    }
+
     return Column(
       children: <Widget>[
         Row(

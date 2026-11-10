@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../core/api_environment.dart';
 import '../core/design_system/theme/asia_theme.dart';
 import '../core/network/api_client.dart';
@@ -72,46 +73,44 @@ class _StaffAppState extends State<StaffApp> {
     _storage = AuthStorage();
     _apiClient = ApiClient(environment: widget.environment, storage: _storage);
 
-    _authController = widget.authController ??
+    _authController =
+        widget.authController ??
         AuthController(
           repository: AuthRepository(apiClient: _apiClient, storage: _storage),
           storage: _storage,
         );
 
-    _dashboardController = widget.dashboardController ??
+    _dashboardController =
+        widget.dashboardController ??
         DashboardController(
           repository: DashboardRepository(apiClient: _apiClient),
         );
 
-    _catalogController = widget.catalogController ??
-        CatalogController(
-          repository: CatalogRepository(apiClient: _apiClient),
-        );
+    _catalogController =
+        widget.catalogController ??
+        CatalogController(repository: CatalogRepository(apiClient: _apiClient));
 
-    _orderController = widget.orderController ??
-        OrderController(
-          repository: OrderRepository(apiClient: _apiClient),
-        );
+    _orderController =
+        widget.orderController ??
+        OrderController(repository: OrderRepository(apiClient: _apiClient));
 
-    _inventoryController = widget.inventoryController ??
+    _inventoryController =
+        widget.inventoryController ??
         InventoryController(
           repository: InventoryRepository(apiClient: _apiClient),
         );
 
-    _tableController = widget.tableController ??
-        TableController(
-          repository: TableRepository(apiClient: _apiClient),
-        );
+    _tableController =
+        widget.tableController ??
+        TableController(repository: TableRepository(apiClient: _apiClient));
 
-    _staffController = widget.staffController ??
-        StaffController(
-          repository: StaffRepository(apiClient: _apiClient),
-        );
+    _staffController =
+        widget.staffController ??
+        StaffController(repository: StaffRepository(apiClient: _apiClient));
 
-    _paymentController = widget.paymentController ??
-        PaymentController(
-          repository: PaymentRepository(apiClient: _apiClient),
-        );
+    _paymentController =
+        widget.paymentController ??
+        PaymentController(repository: PaymentRepository(apiClient: _apiClient));
 
     _router = createAppRouter(
       authController: _authController,

@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_badge.dart';
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_card.dart';
@@ -61,9 +63,9 @@ class _OrdersPageState extends State<OrdersPage> {
         if (_selectedOrder != null) {
           // Keep selection synced with fresh data
           final StaffOrder? fresh = orders.cast<StaffOrder?>().firstWhere(
-                (StaffOrder? o) => o?.id == _selectedOrder!.id,
-                orElse: () => null,
-              );
+            (StaffOrder? o) => o?.id == _selectedOrder!.id,
+            orElse: () => null,
+          );
           if (fresh != null) {
             _selectedOrder = fresh;
           }
@@ -127,37 +129,46 @@ class _OrdersPageState extends State<OrdersPage> {
                         children: <Widget>[
                           _buildFilterChip(
                             label: 'TODOS',
-                            isSelected: widget.orderController.statusFilter == null,
+                            isSelected:
+                                widget.orderController.statusFilter == null,
                             onTap: () =>
                                 widget.orderController.setStatusFilter(null),
                           ),
                           _buildFilterChip(
                             label: 'SOLICITADOS',
-                            isSelected: widget.orderController.statusFilter ==
+                            isSelected:
+                                widget.orderController.statusFilter ==
                                 OrderStatus.requested,
-                            onTap: () => widget.orderController
-                                .setStatusFilter(OrderStatus.requested),
+                            onTap: () => widget.orderController.setStatusFilter(
+                              OrderStatus.requested,
+                            ),
                           ),
                           _buildFilterChip(
                             label: 'APROBADOS',
-                            isSelected: widget.orderController.statusFilter ==
+                            isSelected:
+                                widget.orderController.statusFilter ==
                                 OrderStatus.approved,
-                            onTap: () => widget.orderController
-                                .setStatusFilter(OrderStatus.approved),
+                            onTap: () => widget.orderController.setStatusFilter(
+                              OrderStatus.approved,
+                            ),
                           ),
                           _buildFilterChip(
                             label: 'CONFIRMADOS',
-                            isSelected: widget.orderController.statusFilter ==
+                            isSelected:
+                                widget.orderController.statusFilter ==
                                 OrderStatus.confirmed,
-                            onTap: () => widget.orderController
-                                .setStatusFilter(OrderStatus.confirmed),
+                            onTap: () => widget.orderController.setStatusFilter(
+                              OrderStatus.confirmed,
+                            ),
                           ),
                           _buildFilterChip(
                             label: 'CERRADOS',
-                            isSelected: widget.orderController.statusFilter ==
+                            isSelected:
+                                widget.orderController.statusFilter ==
                                 OrderStatus.closed,
-                            onTap: () => widget.orderController
-                                .setStatusFilter(OrderStatus.closed),
+                            onTap: () => widget.orderController.setStatusFilter(
+                              OrderStatus.closed,
+                            ),
                           ),
                         ],
                       ),
@@ -282,8 +293,8 @@ class _OrdersPageState extends State<OrdersPage> {
                       order.modality == OrderModality.local
                           ? LucideIcons.utensils
                           : (order.modality == OrderModality.delivery
-                              ? LucideIcons.bike
-                              : LucideIcons.packageCheck),
+                                ? LucideIcons.bike
+                                : LucideIcons.packageCheck),
                       color: tokens.brandCrimson,
                       size: 20,
                     ),
@@ -402,7 +413,10 @@ class _OrdersPageState extends State<OrdersPage> {
             _buildInfoRow('Teléfono:', order.contactPhone!),
           if (order.deliveryAddress != null)
             _buildInfoRow('Dirección de entrega:', order.deliveryAddress!),
-          _buildInfoRow('Hora de solicitud:', DateFormat('HH:mm:ss - dd/MM/yyyy').format(order.createdAt)),
+          _buildInfoRow(
+            'Hora de solicitud:',
+            DateFormat('HH:mm:ss - dd/MM/yyyy').format(order.createdAt),
+          ),
 
           const SizedBox(height: AsiaSpacing.md),
           Text(
@@ -424,11 +438,17 @@ class _OrdersPageState extends State<OrdersPage> {
             child: Column(
               children: order.items.map((OrderItem item) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: <Widget>[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: tokens.brandCrimson.withValues(alpha: 0.15),
                           borderRadius: AsiaRadii.sm,
@@ -484,8 +504,10 @@ class _OrdersPageState extends State<OrdersPage> {
                     label: 'Aprobar Pedido',
                     icon: LucideIcons.check,
                     isLoading: isActionLoading,
-                    onPressed: () => widget.orderController
-                        .decideOrder(order.id, approved: true),
+                    onPressed: () => widget.orderController.decideOrder(
+                      order.id,
+                      approved: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AsiaSpacing.md),
@@ -495,8 +517,10 @@ class _OrdersPageState extends State<OrdersPage> {
                     icon: LucideIcons.x,
                     variant: AdminButtonVariant.danger,
                     isLoading: isActionLoading,
-                    onPressed: () => widget.orderController
-                        .decideOrder(order.id, approved: false),
+                    onPressed: () => widget.orderController.decideOrder(
+                      order.id,
+                      approved: false,
+                    ),
                   ),
                 ),
               ],
@@ -512,7 +536,8 @@ class _OrdersPageState extends State<OrdersPage> {
             ),
           ] else if (order.isConfirmed) ...<Widget>[
             AdminButton(
-              label: 'Cobrar en Caja (S/ ${order.totalAmount.toStringAsFixed(2)})',
+              label:
+                  'Cobrar en Caja (S/ ${order.totalAmount.toStringAsFixed(2)})',
               icon: LucideIcons.dollarSign,
               variant: AdminButtonVariant.primary,
               isFullWidth: true,
@@ -527,12 +552,14 @@ class _OrdersPageState extends State<OrdersPage> {
                     label: order.modality == OrderModality.local
                         ? 'Servir en Mesa'
                         : (order.modality == OrderModality.delivery
-                            ? 'Entregar a Delivery'
-                            : 'Entregar en Tienda'),
+                              ? 'Entregar a Delivery'
+                              : 'Entregar en Tienda'),
                     icon: LucideIcons.send,
                     isLoading: isActionLoading,
-                    onPressed: () => widget.orderController
-                        .fulfillOrder(order.id, order.modality),
+                    onPressed: () => widget.orderController.fulfillOrder(
+                      order.id,
+                      order.modality,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AsiaSpacing.md),
@@ -554,7 +581,9 @@ class _OrdersPageState extends State<OrdersPage> {
               decoration: BoxDecoration(
                 color: tokens.success.withValues(alpha: 0.1),
                 borderRadius: AsiaRadii.md,
-                border: Border.all(color: tokens.success.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: tokens.success.withValues(alpha: 0.3),
+                ),
               ),
               alignment: Alignment.center,
               child: Text(
@@ -604,16 +633,31 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildStatusBadge(OrderStatus status) {
     switch (status) {
       case OrderStatus.requested:
-        return const AdminBadge(label: 'SOLICITADO', variant: AdminBadgeVariant.warning);
+        return const AdminBadge(
+          label: 'SOLICITADO',
+          variant: AdminBadgeVariant.warning,
+        );
       case OrderStatus.approved:
-        return const AdminBadge(label: 'APROBADO', variant: AdminBadgeVariant.info);
+        return const AdminBadge(
+          label: 'APROBADO',
+          variant: AdminBadgeVariant.info,
+        );
       case OrderStatus.confirmed:
-        return const AdminBadge(label: 'CONFIRMADO', variant: AdminBadgeVariant.brand);
+        return const AdminBadge(
+          label: 'CONFIRMADO',
+          variant: AdminBadgeVariant.brand,
+        );
       case OrderStatus.closed:
-        return const AdminBadge(label: 'CERRADO', variant: AdminBadgeVariant.success);
+        return const AdminBadge(
+          label: 'CERRADO',
+          variant: AdminBadgeVariant.success,
+        );
       case OrderStatus.rejected:
       case OrderStatus.cancelled:
-        return const AdminBadge(label: 'CANCELADO', variant: AdminBadgeVariant.error);
+        return const AdminBadge(
+          label: 'CANCELADO',
+          variant: AdminBadgeVariant.error,
+        );
     }
   }
 
@@ -634,8 +678,10 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   void _openPaymentDialog(BuildContext context, StaffOrder order) {
-    final TextEditingController amountCtrl =
-        TextEditingController(text: order.totalAmount.toStringAsFixed(2));
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final TextEditingController amountCtrl = TextEditingController(
+      text: order.totalAmount.toStringAsFixed(2),
+    );
     final TextEditingController refCtrl = TextEditingController();
     String selectedMethod = 'EFECTIVO';
 
@@ -647,26 +693,33 @@ class _OrdersPageState extends State<OrdersPage> {
             final AsiaThemeTokens tokens = ctx.tokens;
 
             return AdminDialog(
-              title: 'Cobrar Pedido #${order.id.substring(0, 8).toUpperCase()}',
-              subtitle: 'Registro de cobro directo en caja para el pedido actual.',
+              title:
+                  'Cobrar Pedido #${order.id.length >= 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()}',
+              subtitle:
+                  'Registro de cobro directo en caja para el pedido actual.',
               maxWidth: 440,
               confirmLabel: 'Confirmar Cobro',
               isConfirmLoading: widget.orderController.isActionLoading,
               onCancel: () => Navigator.of(dialogContext).pop(),
               onConfirm: () async {
+                if (!(formKey.currentState?.validate() ?? false)) return;
                 final double? amount = double.tryParse(amountCtrl.text.trim());
                 if (amount == null || amount <= 0) return;
 
-                final ScaffoldMessengerState messenger =
-                    ScaffoldMessenger.of(context);
+                final ScaffoldMessengerState messenger = ScaffoldMessenger.of(
+                  context,
+                );
                 final NavigatorState nav = Navigator.of(dialogContext);
 
                 final bool ok = await widget.orderController.recordPayment(
                   orderId: order.id,
                   amount: amount,
                   methodCode: selectedMethod,
-                  referenceCode:
-                      refCtrl.text.trim().isEmpty ? null : refCtrl.text.trim(),
+                  referenceCode: selectedMethod == 'EFECTIVO'
+                      ? null
+                      : (refCtrl.text.trim().isEmpty
+                            ? null
+                            : refCtrl.text.trim()),
                 );
 
                 if (ok && mounted) {
@@ -691,74 +744,121 @@ class _OrdersPageState extends State<OrdersPage> {
                   );
                 }
               },
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Total de la orden: S/ ${order.totalAmount.toStringAsFixed(2)}',
-                    style: AsiaTypography.headingMedium.copyWith(
-                      color: tokens.brandCrimson,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AsiaSpacing.md),
-                  AdminTextField(
-                    controller: amountCtrl,
-                    label: 'Monto a Cobrar (S/)',
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    prefixIcon: LucideIcons.dollarSign,
-                  ),
-                  const SizedBox(height: AsiaSpacing.md),
-                  Text(
-                    'Método de Pago',
-                    style: AsiaTypography.caption.copyWith(
-                      color: tokens.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: tokens.cardElevated,
-                      borderRadius: AsiaRadii.md,
-                      border: Border.all(color: tokens.border),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedMethod,
-                        isExpanded: true,
-                        dropdownColor: tokens.cardElevated,
-                        style: AsiaTypography.bodyMedium.copyWith(
-                          color: tokens.textPrimary,
-                        ),
-                        items: const <DropdownMenuItem<String>>[
-                          DropdownMenuItem(
-                              value: 'EFECTIVO', child: Text('Efectivo')),
-                          DropdownMenuItem(value: 'YAPE', child: Text('Yape')),
-                          DropdownMenuItem(value: 'PLIN', child: Text('Plin')),
-                          DropdownMenuItem(
-                              value: 'TARJETA',
-                              child: Text('Tarjeta de Débito / Crédito')),
-                        ],
-                        onChanged: (String? val) {
-                          if (val != null) {
-                            setState(() => selectedMethod = val);
-                          }
-                        },
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Total de la orden: S/ ${order.totalAmount.toStringAsFixed(2)}',
+                      style: AsiaTypography.headingMedium.copyWith(
+                        color: tokens.brandCrimson,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AsiaSpacing.md),
-                  AdminTextField(
-                    controller: refCtrl,
-                    label: 'Código de Operación / Ref (opcional)',
-                    hintText: 'ej. 128492 o últimos 4 dígitos',
-                    prefixIcon: LucideIcons.hash,
-                  ),
-                ],
+                    const SizedBox(height: AsiaSpacing.md),
+                    AdminTextField(
+                      controller: amountCtrl,
+                      label: 'Monto a Cobrar (S/)',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      prefixIcon: LucideIcons.dollarSign,
+                      validator: (String? val) {
+                        final double? p = double.tryParse(val?.trim() ?? '');
+                        if (p == null || p <= 0)
+                          return 'Ingresa un monto válido mayor a 0';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AsiaSpacing.md),
+                    Text(
+                      'Método de Pago',
+                      style: AsiaTypography.caption.copyWith(
+                        color: tokens.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: tokens.cardElevated,
+                        borderRadius: AsiaRadii.md,
+                        border: Border.all(color: tokens.border),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedMethod,
+                          isExpanded: true,
+                          dropdownColor: tokens.cardElevated,
+                          style: AsiaTypography.bodyMedium.copyWith(
+                            color: tokens.textPrimary,
+                          ),
+                          items: const <DropdownMenuItem<String>>[
+                            DropdownMenuItem(
+                              value: 'EFECTIVO',
+                              child: Text('Efectivo'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'YAPE',
+                              child: Text('Yape'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'PLIN',
+                              child: Text('Plin'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'TARJETA',
+                              child: Text('Tarjeta de Débito / Crédito'),
+                            ),
+                          ],
+                          onChanged: (String? val) {
+                            if (val != null) {
+                              setState(() => selectedMethod = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    if (selectedMethod != 'EFECTIVO') ...<Widget>[
+                      const SizedBox(height: AsiaSpacing.md),
+                      AdminTextField(
+                        controller: refCtrl,
+                        label:
+                            (selectedMethod == 'YAPE' ||
+                                selectedMethod == 'PLIN')
+                            ? 'Número de Celular $selectedMethod'
+                            : 'Código de Operación (9 dígitos)',
+                        hintText:
+                            (selectedMethod == 'YAPE' ||
+                                selectedMethod == 'PLIN')
+                            ? 'ej. 987654321 (inicia con 9)'
+                            : 'ej. 123456789',
+                        prefixIcon: LucideIcons.hash,
+                        keyboardType: TextInputType.number,
+                        validator: (String? val) {
+                          final String trimmed = val?.trim() ?? '';
+                          if (trimmed.isEmpty) {
+                            return 'Obligatorio para pagos con $selectedMethod';
+                          }
+                          if (selectedMethod == 'YAPE' ||
+                              selectedMethod == 'PLIN') {
+                            if (!RegExp(r'^9[0-9]{8}$').hasMatch(trimmed)) {
+                              return '$selectedMethod requiere 9 dígitos que inicien con 9';
+                            }
+                          } else if (selectedMethod == 'TARJETA') {
+                            if (!RegExp(r'^[0-9]{9}$').hasMatch(trimmed)) {
+                              return 'Tarjeta requiere 9 dígitos';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ],
+                ),
               ),
             );
           },

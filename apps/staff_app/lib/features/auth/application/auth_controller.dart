@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/auth_storage.dart';
 import '../domain/auth_models.dart';
 import '../infrastructure/auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
-  AuthController({
-    required this.repository,
-    required this.storage,
-  });
+  AuthController({required this.repository, required this.storage});
 
   final AuthRepository repository;
   final AuthStorage storage;
@@ -79,8 +77,7 @@ class AuthController extends ChangeNotifier {
 
       // Check that user is not just a customer without staff access
       if (!_currentUser!.roles.any((RoleCode r) => r != RoleCode.customer)) {
-        _errorMessage =
-            'Tu cuenta no tiene privilegios de personal (Mozo, Cajero, Cocina o Admin).';
+        _errorMessage = 'Tu cuenta no tiene privilegios de personal (Mozo, Cajero, Cocina o Admin).';
         await logout();
         return false;
       }

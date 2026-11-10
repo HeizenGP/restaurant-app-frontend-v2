@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_spacing.dart';
@@ -30,10 +31,7 @@ class AdminCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isElevated ? tokens.cardElevated : tokens.card,
         borderRadius: AsiaRadii.lg,
-        border: Border.all(
-          color: tokens.border,
-          width: 1.0,
-        ),
+        border: Border.all(color: tokens.border, width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,10 +79,7 @@ class AdminCard extends StatelessWidget {
             ),
             Divider(color: tokens.borderSubtle, height: 1),
           ],
-          Padding(
-            padding: padding,
-            child: child,
-          ),
+          Padding(padding: padding, child: child),
         ],
       ),
     );

@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_typography.dart';
 
-enum AdminBadgeVariant {
-  success,
-  warning,
-  error,
-  info,
-  neutral,
-  brand,
-}
+enum AdminBadgeVariant { success, warning, error, info, neutral, brand }
 
 class AdminBadge extends StatelessWidget {
   const AdminBadge({

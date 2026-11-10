@@ -1,22 +1,13 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_spacing.dart';
 import '../foundations/asia_typography.dart';
 
-enum AdminButtonVariant {
-  primary,
-  secondary,
-  ghost,
-  danger,
-  gold,
-}
+enum AdminButtonVariant { primary, secondary, ghost, danger, gold }
 
-enum AdminButtonSize {
-  sm,
-  md,
-  lg,
-}
+enum AdminButtonSize { sm, md, lg }
 
 class AdminButton extends StatefulWidget {
   const AdminButton({
@@ -56,14 +47,20 @@ class _AdminButtonState extends State<AdminButton> {
 
     switch (widget.variant) {
       case AdminButtonVariant.primary:
-        bg = _isHovered ? tokens.brandCrimson.withValues(alpha: 0.9) : tokens.brandCrimson;
+        bg = _isHovered
+            ? tokens.brandCrimson.withValues(alpha: 0.9)
+            : tokens.brandCrimson;
         fg = Colors.white;
         border = null;
         break;
       case AdminButtonVariant.secondary:
         bg = _isHovered ? tokens.cardElevated : tokens.card;
         fg = tokens.textPrimary;
-        border = Border.all(color: _isHovered ? tokens.brandCrimson.withValues(alpha: 0.5) : tokens.border);
+        border = Border.all(
+          color: _isHovered
+              ? tokens.brandCrimson.withValues(alpha: 0.5)
+              : tokens.border,
+        );
         break;
       case AdminButtonVariant.ghost:
         bg = _isHovered ? tokens.cardElevated : Colors.transparent;
@@ -76,7 +73,9 @@ class _AdminButtonState extends State<AdminButton> {
         border = null;
         break;
       case AdminButtonVariant.gold:
-        bg = _isHovered ? tokens.brandGold.withValues(alpha: 0.9) : tokens.brandGold;
+        bg = _isHovered
+            ? tokens.brandGold.withValues(alpha: 0.9)
+            : tokens.brandGold;
         fg = Colors.black;
         border = null;
         break;
@@ -85,7 +84,9 @@ class _AdminButtonState extends State<AdminButton> {
     if (disabled) {
       bg = bg.withValues(alpha: 0.4);
       fg = fg.withValues(alpha: 0.5);
-      border = border != null ? Border.all(color: tokens.border.withValues(alpha: 0.3)) : null;
+      border = border != null
+          ? Border.all(color: tokens.border.withValues(alpha: 0.3))
+          : null;
     }
 
     EdgeInsets padding;
@@ -147,7 +148,10 @@ class _AdminButtonState extends State<AdminButton> {
         color: bg,
         borderRadius: AsiaRadii.md,
         border: border,
-        boxShadow: _isHovered && !disabled && widget.variant == AdminButtonVariant.primary
+        boxShadow:
+            _isHovered &&
+                !disabled &&
+                widget.variant == AdminButtonVariant.primary
             ? <BoxShadow>[
                 BoxShadow(
                   color: tokens.brandCrimson.withValues(alpha: 0.3),
@@ -168,7 +172,9 @@ class _AdminButtonState extends State<AdminButton> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: disabled ? null : widget.onPressed,
-        child: widget.isFullWidth ? SizedBox(width: double.infinity, child: buttonWidget) : buttonWidget,
+        child: widget.isFullWidth
+            ? SizedBox(width: double.infinity, child: buttonWidget)
+            : buttonWidget,
       ),
     );
   }

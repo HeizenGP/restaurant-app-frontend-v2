@@ -38,7 +38,8 @@ class FakePaymentRepository extends PaymentRepository {
   ];
 
   @override
-  Future<List<PaymentRecord>> getPayments({int limit = 100}) async => fakeRecords;
+  Future<List<PaymentRecord>> getPayments({int limit = 100}) async =>
+      fakeRecords;
 
   @override
   Future<OrderPaymentSummary> recordCollection({
@@ -78,8 +79,22 @@ class FakeCatalogRepository extends CatalogRepository {
   ];
 
   List<Product> fakeProducts = <Product>[
-    const Product(id: 'pr-1', categoryId: 'cat-1', name: 'Chaufa Especial', price: 28.0, stockQty: 15, isAvailable: true),
-    const Product(id: 'pr-2', categoryId: 'cat-2', name: 'Té Jazmín', price: 8.0, stockQty: 3, isAvailable: true),
+    const Product(
+      id: 'pr-1',
+      categoryId: 'cat-1',
+      name: 'Chaufa Especial',
+      price: 28.0,
+      stockQty: 15,
+      isAvailable: true,
+    ),
+    const Product(
+      id: 'pr-2',
+      categoryId: 'cat-2',
+      name: 'Té Jazmín',
+      price: 8.0,
+      stockQty: 3,
+      isAvailable: true,
+    ),
   ];
 
   @override
@@ -114,7 +129,10 @@ class FakeOrderRepository extends OrderRepository {
   ];
 
   @override
-  Future<List<StaffOrder>> getOrders({OrderStatus? status, OrderModality? modality}) async => fakeOrders;
+  Future<List<StaffOrder>> getOrders({
+    OrderStatus? status,
+    OrderModality? modality,
+  }) async => fakeOrders;
 }
 
 void main() {
@@ -129,7 +147,9 @@ void main() {
 
   group('PaymentController Tests', () {
     test('Calculates total collected and filters by payment method', () async {
-      final FakePaymentRepository repo = FakePaymentRepository(apiClient: apiClient);
+      final FakePaymentRepository repo = FakePaymentRepository(
+        apiClient: apiClient,
+      );
       final PaymentController controller = PaymentController(repository: repo);
 
       await controller.loadPayments();
@@ -147,7 +167,9 @@ void main() {
     });
 
     test('Records a new collection successfully', () async {
-      final FakePaymentRepository repo = FakePaymentRepository(apiClient: apiClient);
+      final FakePaymentRepository repo = FakePaymentRepository(
+        apiClient: apiClient,
+      );
       final PaymentController controller = PaymentController(repository: repo);
 
       await controller.loadPayments();
@@ -161,11 +183,67 @@ void main() {
       expect(controller.payments.length, 3);
       expect(controller.totalCollected, 185.0);
     });
+
+    test(
+      'Cash register session open, track and close arqueo correctly',
+      () async {
+        final FakePaymentRepository repo = FakePaymentRepository(
+          apiClient: apiClient,
+        );
+        final PaymentController controller = PaymentController(
+          repository: repo,
+        );
+
+        expect(controller.isCashRegisterOpen, isFalse);
+        expect(controller.currentSession, isNull);
+
+        controller.openCashRegister(
+          initialAmount: 150.0,
+          userName: 'Carlos Cajero',
+          notes: 'Fondo inicial verificado',
+        );
+
+        expect(controller.isCashRegisterOpen, isTrue);
+        expect(controller.currentSession?.initialAmount, 150.0);
+        expect(controller.currentSession?.openedByUserName, 'Carlos Cajero');
+        expect(controller.sessionTotalExpectedCash, 150.0);
+
+        // Record a cash collection
+        await controller.recordCollection(
+          orderId: 'ord-cash-1',
+          amount: 50.0,
+          methodCode: 'EFECTIVO',
+        );
+
+        expect(controller.sessionCashCollected, 50.0);
+        expect(controller.sessionTotalExpectedCash, 200.0);
+
+        // Close cash register with real counted cash of 205.0 (Sobrante +5.0)
+        controller.closeCashRegister(
+          realAmount: 205.0,
+          userName: 'Carlos Cajero',
+          notes: 'Sobrante de 5 soles por propina no registrada',
+        );
+
+        expect(controller.isCashRegisterOpen, isFalse);
+        expect(controller.currentSession, isNull);
+        expect(controller.sessionHistory.length, 1);
+
+        final CashRegisterSession closed = controller.sessionHistory.first;
+        expect(closed.initialAmount, 150.0);
+        expect(closed.finalAmount, 200.0);
+        expect(closed.realAmount, 205.0);
+        expect(closed.difference, 5.0);
+        expect(closed.isOpen, isFalse);
+      },
+    );
   });
 
   group('CatalogController Tests', () {
     test('Loads categories and filters products', () async {
-      final FakeCatalogRepository repo = FakeCatalogRepository(apiClient: apiClient);
+      final FakeCatalogRepository repo = FakeCatalogRepository(
+        apiClient: apiClient,
+      );
       final CatalogController controller = CatalogController(repository: repo);
 
       await controller.loadCatalog();
@@ -185,7 +263,9 @@ void main() {
 
   group('OrderController Tests', () {
     test('Filters orders by status and modality', () async {
-      final FakeOrderRepository repo = FakeOrderRepository(apiClient: apiClient);
+      final FakeOrderRepository repo = FakeOrderRepository(
+        apiClient: apiClient,
+      );
       final OrderController controller = OrderController(repository: repo);
 
       await controller.loadOrders();

@@ -1,8 +1,17 @@
+double _asDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+int _asInt(Object? value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
 class TopProduct {
-  const TopProduct({
-    required this.name,
-    required this.totalQuantity,
-  });
+  const TopProduct({required this.name, required this.totalQuantity});
 
   final String name;
   final int totalQuantity;
@@ -10,7 +19,7 @@ class TopProduct {
   factory TopProduct.fromJson(Map<String, dynamic> json) {
     return TopProduct(
       name: json['name'] as String? ?? '',
-      totalQuantity: (json['total_quantity'] as num?)?.toInt() ?? 0,
+      totalQuantity: _asInt(json['total_quantity']),
     );
   }
 }
@@ -42,7 +51,7 @@ class DashboardOrder {
       modality: json['modality'] as String? ?? '',
       channel: json['channel'] as String? ?? '',
       status: json['status'] as String? ?? '',
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: _asDouble(json['total_amount']),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -81,38 +90,44 @@ class DashboardStats {
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> rawModality =
-        json['orders_by_modality'] as Map<String, dynamic>? ?? <String, dynamic>{};
+        json['orders_by_modality'] as Map<String, dynamic>? ??
+        <String, dynamic>{};
     final Map<String, int> modality = rawModality.map(
-      (String k, dynamic v) => MapEntry<String, int>(k, (v as num).toInt()),
+      (String k, dynamic v) => MapEntry<String, int>(k, _asInt(v)),
     );
 
     final Map<String, dynamic> rawStatus =
-        json['orders_by_status'] as Map<String, dynamic>? ?? <String, dynamic>{};
+        json['orders_by_status'] as Map<String, dynamic>? ??
+        <String, dynamic>{};
     final Map<String, int> status = rawStatus.map(
-      (String k, dynamic v) => MapEntry<String, int>(k, (v as num).toInt()),
+      (String k, dynamic v) => MapEntry<String, int>(k, _asInt(v)),
     );
 
     final List<dynamic> rawTop =
         json['top_products'] as List<dynamic>? ?? <dynamic>[];
     final List<TopProduct> top = rawTop
-        .map((dynamic item) => TopProduct.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) => TopProduct.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
 
     final List<dynamic> rawRecent =
         json['recent_orders'] as List<dynamic>? ?? <dynamic>[];
     final List<DashboardOrder> recent = rawRecent
-        .map((dynamic item) =>
-            DashboardOrder.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) =>
+              DashboardOrder.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
 
     return DashboardStats(
-      todaySales: (json['today_sales'] as num?)?.toDouble() ?? 0.0,
-      todayOrdersCount: (json['today_orders_count'] as num?)?.toInt() ?? 0,
-      activeOrdersCount: (json['active_orders_count'] as num?)?.toInt() ?? 0,
-      occupiedTablesCount: (json['occupied_tables_count'] as num?)?.toInt() ?? 0,
-      totalTablesCount: (json['total_tables_count'] as num?)?.toInt() ?? 0,
-      totalProductsCount: (json['total_products_count'] as num?)?.toInt() ?? 0,
-      lowStockCount: (json['low_stock_count'] as num?)?.toInt() ?? 0,
+      todaySales: _asDouble(json['today_sales']),
+      todayOrdersCount: _asInt(json['today_orders_count']),
+      activeOrdersCount: _asInt(json['active_orders_count']),
+      occupiedTablesCount: _asInt(json['occupied_tables_count']),
+      totalTablesCount: _asInt(json['total_tables_count']),
+      totalProductsCount: _asInt(json['total_products_count']),
+      lowStockCount: _asInt(json['low_stock_count']),
       ordersByModality: modality,
       ordersByStatus: status,
       topProducts: top,

@@ -13,8 +13,10 @@ class PaymentRepository {
     );
     if (response is! List<dynamic>) return <PaymentRecord>[];
     return response
-        .map((dynamic item) =>
-            PaymentRecord.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) =>
+              PaymentRecord.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -34,11 +36,39 @@ class PaymentRepository {
       body: <String, dynamic>{
         'amount': amount,
         'method_code': methodCode,
-        'reference_code': referenceCode?.trim().isEmpty ?? true ? null : referenceCode!.trim(),
+        'reference_code': referenceCode?.trim().isEmpty ?? true
+            ? null
+            : referenceCode!.trim(),
       },
       requiresAuth: true,
       requiresIdempotency: true,
     );
     return OrderPaymentSummary.fromJson(response as Map<String, dynamic>);
+  }
+
+  Future<TableAccountSummary> getTableAccount(String tableId) async {
+    final dynamic response = await apiClient.get('/tables/$tableId/account');
+    return TableAccountSummary.fromJson(response as Map<String, dynamic>);
+  }
+
+  Future<TableAccountSummary> recordTableAccountPayment({
+    required String tableId,
+    required double amount,
+    required String methodCode,
+    String? referenceCode,
+  }) async {
+    final dynamic response = await apiClient.post(
+      '/tables/$tableId/account/payments',
+      body: <String, dynamic>{
+        'amount': amount,
+        'method_code': methodCode,
+        'reference_code': referenceCode?.trim().isEmpty ?? true
+            ? null
+            : referenceCode!.trim(),
+      },
+      requiresAuth: true,
+      requiresIdempotency: true,
+    );
+    return TableAccountSummary.fromJson(response as Map<String, dynamic>);
   }
 }

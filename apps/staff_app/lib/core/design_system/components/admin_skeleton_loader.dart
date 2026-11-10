@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 
@@ -30,9 +31,10 @@ class _AdminSkeletonLoaderState extends State<AdminSkeletonLoader>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.3, end: 0.7).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -66,11 +68,7 @@ class _AdminSkeletonLoaderState extends State<AdminSkeletonLoader>
 }
 
 class AdminTableSkeleton extends StatelessWidget {
-  const AdminTableSkeleton({
-    this.rows = 5,
-    this.columns = 4,
-    super.key,
-  });
+  const AdminTableSkeleton({this.rows = 5, this.columns = 4, super.key});
 
   final int rows;
   final int columns;

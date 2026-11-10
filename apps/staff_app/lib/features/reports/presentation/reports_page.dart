@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_badge.dart';
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_card.dart';
@@ -15,10 +16,7 @@ import '../../dashboard/application/dashboard_controller.dart';
 import '../../dashboard/domain/dashboard_models.dart';
 
 class ReportsPage extends StatefulWidget {
-  const ReportsPage({
-    required this.dashboardController,
-    super.key,
-  });
+  const ReportsPage({required this.dashboardController, super.key});
 
   final DashboardController dashboardController;
 
@@ -49,7 +47,10 @@ class _ReportsPageState extends State<ReportsPage> {
         final DashboardStats? stats = widget.dashboardController.stats;
         final bool isLoading = widget.dashboardController.isLoading;
         final String? errorMessage = widget.dashboardController.errorMessage;
-        final NumberFormat currencyFmt = NumberFormat.currency(locale: 'es_PE', symbol: 'S/ ');
+        final NumberFormat currencyFmt = NumberFormat.currency(
+          locale: 'es_PE',
+          symbol: 'S/ ',
+        );
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AsiaSpacing.xl),
@@ -63,9 +64,19 @@ class _ReportsPageState extends State<ReportsPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text('Reportes & Analítica', style: AsiaTypography.displaySmall.copyWith(color: tokens.textPrimary)),
+                      Text(
+                        'Reportes & Analítica',
+                        style: AsiaTypography.displaySmall.copyWith(
+                          color: tokens.textPrimary,
+                        ),
+                      ),
                       const SizedBox(height: AsiaSpacing.xs),
-                      Text('Indicadores de rendimiento, canales de venta y demanda culinaria', style: AsiaTypography.bodyMedium.copyWith(color: tokens.textSecondary)),
+                      Text(
+                        'Indicadores de rendimiento, canales de venta y demanda culinaria',
+                        style: AsiaTypography.bodyMedium.copyWith(
+                          color: tokens.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                   Wrap(
@@ -75,7 +86,8 @@ class _ReportsPageState extends State<ReportsPage> {
                         label: 'Actualizar',
                         icon: LucideIcons.refreshCw,
                         variant: AdminButtonVariant.secondary,
-                        onPressed: () => widget.dashboardController.loadDashboard(),
+                        onPressed: () =>
+                            widget.dashboardController.loadDashboard(),
                       ),
                       AdminButton(
                         label: 'Exportar Resumen',
@@ -83,7 +95,9 @@ class _ReportsPageState extends State<ReportsPage> {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Reporte consolidado listo para exportar'),
+                              content: Text(
+                                'Reporte consolidado listo para exportar',
+                              ),
                               backgroundColor: AsiaPalette.jade,
                             ),
                           );
@@ -113,14 +127,21 @@ class _ReportsPageState extends State<ReportsPage> {
                   decoration: BoxDecoration(
                     color: tokens.error.withValues(alpha: 0.1),
                     borderRadius: AsiaRadii.md,
-                    border: Border.all(color: tokens.error.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: tokens.error.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: <Widget>[
                       Icon(LucideIcons.alertTriangle, color: tokens.error),
                       const SizedBox(width: AsiaSpacing.sm),
                       Expanded(
-                        child: Text(errorMessage, style: AsiaTypography.bodyMedium.copyWith(color: tokens.error)),
+                        child: Text(
+                          errorMessage,
+                          style: AsiaTypography.bodyMedium.copyWith(
+                            color: tokens.error,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -135,13 +156,17 @@ class _ReportsPageState extends State<ReportsPage> {
                 LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                     final int cols = isDesktop ? 4 : (isTablet ? 2 : 1);
-                    final double cardWidth = (constraints.maxWidth - (cols - 1) * AsiaSpacing.md) / cols;
+                    final double cardWidth =
+                        (constraints.maxWidth - (cols - 1) * AsiaSpacing.md) /
+                        cols;
 
                     final double avgTicket = stats.todayOrdersCount > 0
                         ? (stats.todaySales / stats.todayOrdersCount)
                         : 0.0;
                     final double tableOccupancyRate = stats.totalTablesCount > 0
-                        ? (stats.occupiedTablesCount / stats.totalTablesCount * 100)
+                        ? (stats.occupiedTablesCount /
+                              stats.totalTablesCount *
+                              100)
                         : 0.0;
 
                     return Wrap(
@@ -173,7 +198,8 @@ class _ReportsPageState extends State<ReportsPage> {
                           child: StatCard(
                             title: 'Ocupación de Salón',
                             value: '${tableOccupancyRate.toStringAsFixed(1)}%',
-                            subtitle: '${stats.occupiedTablesCount} de ${stats.totalTablesCount} mesas ocupadas',
+                            subtitle:
+                                '${stats.occupiedTablesCount} de ${stats.totalTablesCount} mesas ocupadas',
                             icon: LucideIcons.armchair,
                             accentColor: AsiaPalette.blue,
                           ),
@@ -183,7 +209,8 @@ class _ReportsPageState extends State<ReportsPage> {
                           child: StatCard(
                             title: 'Pedidos Procesados',
                             value: '${stats.todayOrdersCount}',
-                            subtitle: '${stats.activeOrdersCount} actualmente activos',
+                            subtitle:
+                                '${stats.activeOrdersCount} actualmente activos',
                             icon: LucideIcons.shoppingBag,
                             accentColor: tokens.brandCrimson,
                           ),
@@ -241,7 +268,10 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Widget _buildModalityCard(BuildContext context, DashboardStats stats) {
     final AsiaThemeTokens tokens = context.tokens;
-    final int total = stats.ordersByModality.values.fold(0, (int a, int b) => a + b);
+    final int total = stats.ordersByModality.values.fold(
+      0,
+      (int a, int b) => a + b,
+    );
 
     return AdminCard(
       title: 'Distribución por Modalidad',
@@ -250,18 +280,27 @@ class _ReportsPageState extends State<ReportsPage> {
           ? Padding(
               padding: const EdgeInsets.all(AsiaSpacing.xl),
               child: Center(
-                child: Text('No hay pedidos registrados en el período.', style: AsiaTypography.bodyMedium.copyWith(color: tokens.textTertiary)),
+                child: Text(
+                  'No hay pedidos registrados en el período.',
+                  style: AsiaTypography.bodyMedium.copyWith(
+                    color: tokens.textTertiary,
+                  ),
+                ),
               ),
             )
           : Column(
-              children: stats.ordersByModality.entries.map((MapEntry<String, int> entry) {
+              children: stats.ordersByModality.entries.map((
+                MapEntry<String, int> entry,
+              ) {
                 final double percent = total > 0 ? (entry.value / total) : 0.0;
                 final String label = entry.key == 'DINE_IN'
                     ? 'Consumo en Salón'
                     : (entry.key == 'TAKEAWAY' ? 'Para Llevar' : 'Delivery');
                 final Color color = entry.key == 'DINE_IN'
                     ? AsiaPalette.jade
-                    : (entry.key == 'TAKEAWAY' ? AsiaPalette.gold : AsiaPalette.blue);
+                    : (entry.key == 'TAKEAWAY'
+                          ? AsiaPalette.gold
+                          : AsiaPalette.blue);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: AsiaSpacing.sm),
@@ -271,8 +310,19 @@ class _ReportsPageState extends State<ReportsPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Text(label, style: AsiaTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: tokens.textPrimary)),
-                          Text('${entry.value} (${(percent * 100).toStringAsFixed(1)}%)', style: AsiaTypography.caption.copyWith(color: tokens.textSecondary)),
+                          Text(
+                            label,
+                            style: AsiaTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: tokens.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            '${entry.value} (${(percent * 100).toStringAsFixed(1)}%)',
+                            style: AsiaTypography.caption.copyWith(
+                              color: tokens.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: AsiaSpacing.xs),
@@ -295,7 +345,10 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Widget _buildStatusCard(BuildContext context, DashboardStats stats) {
     final AsiaThemeTokens tokens = context.tokens;
-    final int total = stats.ordersByStatus.values.fold(0, (int a, int b) => a + b);
+    final int total = stats.ordersByStatus.values.fold(
+      0,
+      (int a, int b) => a + b,
+    );
 
     return AdminCard(
       title: 'Flujo de Estados de Pedidos',
@@ -304,11 +357,18 @@ class _ReportsPageState extends State<ReportsPage> {
           ? Padding(
               padding: const EdgeInsets.all(AsiaSpacing.xl),
               child: Center(
-                child: Text('No hay pedidos registrados en el período.', style: AsiaTypography.bodyMedium.copyWith(color: tokens.textTertiary)),
+                child: Text(
+                  'No hay pedidos registrados en el período.',
+                  style: AsiaTypography.bodyMedium.copyWith(
+                    color: tokens.textTertiary,
+                  ),
+                ),
               ),
             )
           : Column(
-              children: stats.ordersByStatus.entries.map((MapEntry<String, int> entry) {
+              children: stats.ordersByStatus.entries.map((
+                MapEntry<String, int> entry,
+              ) {
                 final double percent = total > 0 ? (entry.value / total) : 0.0;
                 final Color color = _getStatusColor(entry.key);
 
@@ -325,13 +385,27 @@ class _ReportsPageState extends State<ReportsPage> {
                               Container(
                                 width: 8,
                                 height: 8,
-                                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                               const SizedBox(width: AsiaSpacing.sm),
-                              Text(entry.key, style: AsiaTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: tokens.textPrimary)),
+                              Text(
+                                entry.key,
+                                style: AsiaTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: tokens.textPrimary,
+                                ),
+                              ),
                             ],
                           ),
-                          Text('${entry.value} (${(percent * 100).toStringAsFixed(1)}%)', style: AsiaTypography.caption.copyWith(color: tokens.textSecondary)),
+                          Text(
+                            '${entry.value} (${(percent * 100).toStringAsFixed(1)}%)',
+                            style: AsiaTypography.caption.copyWith(
+                              color: tokens.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: AsiaSpacing.xs),
@@ -362,11 +436,18 @@ class _ReportsPageState extends State<ReportsPage> {
           ? Padding(
               padding: const EdgeInsets.all(AsiaSpacing.xl),
               child: Center(
-                child: Text('No hay ventas registradas aún para elaborar el ranking.', style: AsiaTypography.bodyMedium.copyWith(color: tokens.textTertiary)),
+                child: Text(
+                  'No hay ventas registradas aún para elaborar el ranking.',
+                  style: AsiaTypography.bodyMedium.copyWith(
+                    color: tokens.textTertiary,
+                  ),
+                ),
               ),
             )
           : Column(
-              children: stats.topProducts.asMap().entries.map((MapEntry<int, TopProduct> entry) {
+              children: stats.topProducts.asMap().entries.map((
+                MapEntry<int, TopProduct> entry,
+              ) {
                 final int rank = entry.key + 1;
                 final TopProduct prod = entry.value;
 
@@ -378,7 +459,9 @@ class _ReportsPageState extends State<ReportsPage> {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: rank <= 3 ? tokens.brandGold.withValues(alpha: 0.15) : tokens.cardElevated,
+                          color: rank <= 3
+                              ? tokens.brandGold.withValues(alpha: 0.15)
+                              : tokens.cardElevated,
                           borderRadius: AsiaRadii.md,
                         ),
                         alignment: Alignment.center,
@@ -386,7 +469,9 @@ class _ReportsPageState extends State<ReportsPage> {
                           '#$rank',
                           style: AsiaTypography.caption.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: rank <= 3 ? tokens.brandGold : tokens.textSecondary,
+                            color: rank <= 3
+                                ? tokens.brandGold
+                                : tokens.textSecondary,
                           ),
                         ),
                       ),
@@ -394,12 +479,17 @@ class _ReportsPageState extends State<ReportsPage> {
                       Expanded(
                         child: Text(
                           prod.name,
-                          style: AsiaTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600, color: tokens.textPrimary),
+                          style: AsiaTypography.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: tokens.textPrimary,
+                          ),
                         ),
                       ),
                       AdminBadge(
                         label: '${prod.totalQuantity} unidades',
-                        variant: rank <= 3 ? AdminBadgeVariant.brand : AdminBadgeVariant.neutral,
+                        variant: rank <= 3
+                            ? AdminBadgeVariant.brand
+                            : AdminBadgeVariant.neutral,
                       ),
                     ],
                   ),

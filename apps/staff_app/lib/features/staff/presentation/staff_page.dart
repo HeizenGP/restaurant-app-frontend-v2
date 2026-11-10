@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_badge.dart';
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_card.dart';
@@ -107,28 +108,46 @@ class _StaffPageState extends State<StaffPage> {
                         children: <Widget>[
                           _buildRoleChip(
                             label: 'TODOS',
-                            isSelected: widget.staffController.roleFilter == null,
-                            onTap: () => widget.staffController.setRoleFilter(null),
+                            isSelected:
+                                widget.staffController.roleFilter == null,
+                            onTap: () =>
+                                widget.staffController.setRoleFilter(null),
                           ),
                           _buildRoleChip(
                             label: 'ADMINISTRADORES',
-                            isSelected: widget.staffController.roleFilter == RoleCode.admin,
-                            onTap: () => widget.staffController.setRoleFilter(RoleCode.admin),
+                            isSelected:
+                                widget.staffController.roleFilter ==
+                                RoleCode.admin,
+                            onTap: () => widget.staffController.setRoleFilter(
+                              RoleCode.admin,
+                            ),
                           ),
                           _buildRoleChip(
                             label: 'MOZOS',
-                            isSelected: widget.staffController.roleFilter == RoleCode.waiter,
-                            onTap: () => widget.staffController.setRoleFilter(RoleCode.waiter),
+                            isSelected:
+                                widget.staffController.roleFilter ==
+                                RoleCode.waiter,
+                            onTap: () => widget.staffController.setRoleFilter(
+                              RoleCode.waiter,
+                            ),
                           ),
                           _buildRoleChip(
                             label: 'CAJEROS',
-                            isSelected: widget.staffController.roleFilter == RoleCode.cashier,
-                            onTap: () => widget.staffController.setRoleFilter(RoleCode.cashier),
+                            isSelected:
+                                widget.staffController.roleFilter ==
+                                RoleCode.cashier,
+                            onTap: () => widget.staffController.setRoleFilter(
+                              RoleCode.cashier,
+                            ),
                           ),
                           _buildRoleChip(
                             label: 'COCINA',
-                            isSelected: widget.staffController.roleFilter == RoleCode.kitchen,
-                            onTap: () => widget.staffController.setRoleFilter(RoleCode.kitchen),
+                            isSelected:
+                                widget.staffController.roleFilter ==
+                                RoleCode.kitchen,
+                            onTap: () => widget.staffController.setRoleFilter(
+                              RoleCode.kitchen,
+                            ),
                           ),
                         ],
                       ),
@@ -152,7 +171,9 @@ class _StaffPageState extends State<StaffPage> {
                     padding: const EdgeInsets.all(AsiaSpacing.xxxl),
                     child: Text(
                       'No se encontraron empleados con los filtros aplicados.',
-                      style: AsiaTypography.bodyMedium.copyWith(color: tokens.textTertiary),
+                      style: AsiaTypography.bodyMedium.copyWith(
+                        color: tokens.textTertiary,
+                      ),
                     ),
                   ),
                 )
@@ -162,7 +183,9 @@ class _StaffPageState extends State<StaffPage> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      headingRowColor: WidgetStateProperty.all(tokens.cardElevated),
+                      headingRowColor: WidgetStateProperty.all(
+                        tokens.cardElevated,
+                      ),
                       columns: const <DataColumn>[
                         DataColumn(label: Text('Colaborador')),
                         DataColumn(label: Text('Correo')),
@@ -179,7 +202,8 @@ class _StaffPageState extends State<StaffPage> {
                                 children: <Widget>[
                                   CircleAvatar(
                                     radius: 16,
-                                    backgroundColor: tokens.brandCrimson.withValues(alpha: 0.15),
+                                    backgroundColor: tokens.brandCrimson
+                                        .withValues(alpha: 0.15),
                                     child: Text(
                                       user.displayName.isNotEmpty
                                           ? user.displayName[0].toUpperCase()
@@ -209,11 +233,13 @@ class _StaffPageState extends State<StaffPage> {
                                 children: user.roles.map((RoleCode r) {
                                   return AdminBadge(
                                     label: r.displayName,
-                                    variant: r == RoleCode.admin || r == RoleCode.superAdmin
+                                    variant:
+                                        r == RoleCode.admin ||
+                                            r == RoleCode.superAdmin
                                         ? AdminBadgeVariant.brand
                                         : (r == RoleCode.cashier
-                                            ? AdminBadgeVariant.warning
-                                            : AdminBadgeVariant.neutral),
+                                              ? AdminBadgeVariant.warning
+                                              : AdminBadgeVariant.neutral),
                                   );
                                 }).toList(),
                               ),
@@ -222,8 +248,8 @@ class _StaffPageState extends State<StaffPage> {
                               Switch(
                                 value: user.isActive,
                                 activeThumbColor: tokens.brandJade,
-                                onChanged: (bool val) =>
-                                    widget.staffController.toggleUserStatus(user.id, val),
+                                onChanged: (bool val) => widget.staffController
+                                    .toggleUserStatus(user.id, val),
                               ),
                             ),
                             DataCell(
@@ -232,7 +258,8 @@ class _StaffPageState extends State<StaffPage> {
                                 icon: LucideIcons.shieldAlert,
                                 variant: AdminButtonVariant.secondary,
                                 size: AdminButtonSize.sm,
-                                onPressed: () => _openAssignRoleDialog(context, user),
+                                onPressed: () =>
+                                    _openAssignRoleDialog(context, user),
                               ),
                             ),
                           ],
@@ -268,7 +295,9 @@ class _StaffPageState extends State<StaffPage> {
         ),
         backgroundColor: tokens.cardElevated,
         side: BorderSide(
-          color: isSelected ? tokens.brandCrimson.withValues(alpha: 0.4) : tokens.border,
+          color: isSelected
+              ? tokens.brandCrimson.withValues(alpha: 0.4)
+              : tokens.border,
         ),
       ),
     );
@@ -314,7 +343,9 @@ class _StaffPageState extends State<StaffPage> {
                 const SizedBox(height: AsiaSpacing.md),
                 DropdownButtonFormField<RoleCode>(
                   initialValue: selectedRole,
-                  decoration: const InputDecoration(labelText: 'Rol Principal Asignado'),
+                  decoration: const InputDecoration(
+                    labelText: 'Rol Principal Asignado',
+                  ),
                   items: const <DropdownMenuItem<RoleCode>>[
                     DropdownMenuItem<RoleCode>(
                       value: RoleCode.waiter,
@@ -382,12 +413,26 @@ class _StaffPageState extends State<StaffPage> {
             subtitle: 'Agrega un rol acumulativo para habilitar permisos adicionales.',
             content: DropdownButtonFormField<RoleCode>(
               initialValue: selectedRole,
-              decoration: const InputDecoration(labelText: 'Nuevo Rol a Conceder'),
+              decoration: const InputDecoration(
+                labelText: 'Nuevo Rol a Conceder',
+              ),
               items: const <DropdownMenuItem<RoleCode>>[
-                DropdownMenuItem<RoleCode>(value: RoleCode.waiter, child: Text('Mozo')),
-                DropdownMenuItem<RoleCode>(value: RoleCode.cashier, child: Text('Cajero')),
-                DropdownMenuItem<RoleCode>(value: RoleCode.kitchen, child: Text('Cocina')),
-                DropdownMenuItem<RoleCode>(value: RoleCode.admin, child: Text('Administrador')),
+                DropdownMenuItem<RoleCode>(
+                  value: RoleCode.waiter,
+                  child: Text('Mozo'),
+                ),
+                DropdownMenuItem<RoleCode>(
+                  value: RoleCode.cashier,
+                  child: Text('Cajero'),
+                ),
+                DropdownMenuItem<RoleCode>(
+                  value: RoleCode.kitchen,
+                  child: Text('Cocina'),
+                ),
+                DropdownMenuItem<RoleCode>(
+                  value: RoleCode.admin,
+                  child: Text('Administrador'),
+                ),
               ],
               onChanged: (RoleCode? val) {
                 if (val != null) setStateDialog(() => selectedRole = val);
@@ -395,8 +440,10 @@ class _StaffPageState extends State<StaffPage> {
             ),
             confirmLabel: 'Asignar Rol',
             onConfirm: () async {
-              final bool ok =
-                  await widget.staffController.assignRole(user.id, selectedRole);
+              final bool ok = await widget.staffController.assignRole(
+                user.id,
+                selectedRole,
+              );
               if (ok && ctx.mounted) {
                 Navigator.of(ctx).pop();
               }

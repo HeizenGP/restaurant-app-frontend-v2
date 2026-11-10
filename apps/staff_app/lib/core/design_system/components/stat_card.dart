@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_spacing.dart';
@@ -35,10 +36,7 @@ class StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: tokens.card,
         borderRadius: AsiaRadii.lg,
-        border: Border.all(
-          color: tokens.border,
-          width: 1.0,
-        ),
+        border: Border.all(color: tokens.border, width: 1.0),
       ),
       padding: const EdgeInsets.all(AsiaSpacing.lg),
       child: Column(
@@ -73,11 +71,7 @@ class StatCard extends StatelessWidget {
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: accent,
-                  ),
+                  child: Icon(icon, size: 18, color: accent),
                 ),
             ],
           ),
@@ -94,7 +88,9 @@ class StatCard extends StatelessWidget {
             children: <Widget>[
               if (trend != null) ...<Widget>[
                 Icon(
-                  isPositiveTrend ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                  isPositiveTrend
+                      ? Icons.trending_up_rounded
+                      : Icons.trending_down_rounded,
                   size: 15,
                   color: isPositiveTrend ? tokens.success : tokens.error,
                 ),
@@ -127,10 +123,7 @@ class StatCard extends StatelessWidget {
     if (onTap != null) {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onTap,
-          child: card,
-        ),
+        child: GestureDetector(onTap: onTap, child: card),
       );
     }
 

@@ -8,7 +8,10 @@ class InventoryRepository {
   final ApiClient apiClient;
 
   Future<List<Product>> getProducts() async {
-    final dynamic response = await apiClient.get('/catalog/products');
+    final dynamic response = await apiClient.get(
+      '/catalog/products',
+      requiresAuth: false,
+    );
     if (response is! List<dynamic>) return <Product>[];
     return response
         .map((dynamic item) => Product.fromJson(item as Map<String, dynamic>))
@@ -31,8 +34,10 @@ class InventoryRepository {
     );
     if (response is! List<dynamic>) return <StockMovement>[];
     return response
-        .map((dynamic item) =>
-            StockMovement.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) =>
+              StockMovement.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 }

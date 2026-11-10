@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/layout/admin_shell.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_page.dart';
@@ -12,15 +13,23 @@ import '../../features/orders/presentation/orders_page.dart';
 import '../../features/payments/application/payment_controller.dart';
 import '../../features/payments/presentation/payments_page.dart';
 import '../../features/products/application/catalog_controller.dart';
+import '../../features/products/domain/catalog_models.dart';
+import '../../features/products/presentation/category_form_page.dart';
+import '../../features/products/presentation/product_form_page.dart';
 import '../../features/products/presentation/products_page.dart';
 import '../../features/reports/presentation/reports_page.dart';
+import '../../features/settings/presentation/settings_page.dart';
 import '../../features/staff/application/staff_controller.dart';
 import '../../features/staff/presentation/staff_page.dart';
 import '../../features/tables/application/table_controller.dart';
 import '../../features/tables/presentation/tables_page.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shell',
+);
 
 GoRouter createAppRouter({
   required AuthController authController,
@@ -51,7 +60,9 @@ GoRouter createAppRouter({
       }
 
       // Check role permissions for admin-only routes
-      if (isAuth && (state.matchedLocation == '/staff' || state.matchedLocation == '/reports')) {
+      if (isAuth &&
+          (state.matchedLocation == '/staff' ||
+              state.matchedLocation == '/reports')) {
         if (!authController.isAdmin) {
           return '/dashboard';
         }
@@ -92,15 +103,43 @@ GoRouter createAppRouter({
           GoRoute(
             path: '/orders',
             builder: (BuildContext context, GoRouterState state) {
-              return OrdersPage(
-                orderController: orderController,
-              );
+              return OrdersPage(orderController: orderController);
             },
           ),
           GoRoute(
             path: '/products',
             builder: (BuildContext context, GoRouterState state) {
-              return ProductsPage(
+              return ProductsPage(catalogController: catalogController);
+            },
+          ),
+          GoRoute(
+            path: '/products/new',
+            builder: (BuildContext context, GoRouterState state) {
+              return ProductFormPage(
+                catalogController: catalogController,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/products/edit/:id',
+            builder: (BuildContext context, GoRouterState state) {
+              final String id = state.pathParameters['id'] ?? '';
+              final Product? product = state.extra as Product? ??
+                  catalogController.products.cast<Product?>().firstWhere(
+                        (Product? p) => p?.id == id,
+                        orElse: () => null,
+                      );
+              return ProductFormPage(
+                catalogController: catalogController,
+                product: product,
+                productId: id,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/products/categories/new',
+            builder: (BuildContext context, GoRouterState state) {
+              return CategoryFormPage(
                 catalogController: catalogController,
               );
             },
@@ -108,9 +147,7 @@ GoRouter createAppRouter({
           GoRoute(
             path: '/inventory',
             builder: (BuildContext context, GoRouterState state) {
-              return InventoryPage(
-                inventoryController: inventoryController,
-              );
+              return InventoryPage(inventoryController: inventoryController);
             },
           ),
           GoRoute(
@@ -118,6 +155,8 @@ GoRouter createAppRouter({
             builder: (BuildContext context, GoRouterState state) {
               return TablesPage(
                 tableController: tableController,
+                paymentController: paymentController,
+                authController: authController,
               );
             },
           ),
@@ -126,22 +165,29 @@ GoRouter createAppRouter({
             builder: (BuildContext context, GoRouterState state) {
               return PaymentsPage(
                 paymentController: paymentController,
+                authController: authController,
               );
             },
           ),
           GoRoute(
             path: '/staff',
             builder: (BuildContext context, GoRouterState state) {
-              return StaffPage(
-                staffController: staffController,
-              );
+              return StaffPage(staffController: staffController);
             },
           ),
           GoRoute(
             path: '/reports',
             builder: (BuildContext context, GoRouterState state) {
-              return ReportsPage(
-                dashboardController: dashboardController,
+              return ReportsPage(dashboardController: dashboardController);
+            },
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (BuildContext context, GoRouterState state) {
+              return SettingsPage(
+                authController: authController,
+                isDarkMode: isDarkMode(),
+                onToggleTheme: onToggleTheme,
               );
             },
           ),

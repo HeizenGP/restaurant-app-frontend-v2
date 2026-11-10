@@ -33,4 +33,13 @@ void main() {
     );
     expect(url, ApiEnvironment.localUrl);
   });
+
+  test('defaults to the same Render backend used by customer_app', () {
+    final String url = ApiEnvironment.resolveBaseUrl(
+      overrideUseRender: false,
+      overrideUseLocal: false,
+      overrideApiBaseUrl: '',
+    );
+    expect(url, ApiEnvironment.renderUrl);
+  });
 }

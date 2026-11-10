@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart' hide Category;
+
 import '../../../core/network/api_client.dart';
 import '../domain/catalog_models.dart';
 import '../infrastructure/catalog_repository.dart';
@@ -26,32 +29,40 @@ class CatalogController extends ChangeNotifier {
 
   List<Product> get filteredProducts {
     return _products.where((Product p) {
-      final bool matchesCategory = _selectedCategoryId == null ||
+      final bool matchesCategory =
+          _selectedCategoryId == null ||
           _selectedCategoryId!.isEmpty ||
           p.categoryId == _selectedCategoryId;
-      final bool matchesSearch = _searchQuery.isEmpty ||
+      final bool matchesSearch =
+          _searchQuery.isEmpty ||
           p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          (p.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+          (p.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+              false);
       return matchesCategory && matchesSearch;
     }).toList();
   }
 
-  Future<void> loadCatalog() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> loadCatalog({bool silent = false}) async {
+    if (!silent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final List<Category> cats = await repository.getCategories();
-      final List<Product> prods = await repository.getProducts();
       _categories = cats;
+      final List<Product> prods = await repository.getProducts();
       _products = prods;
+      _errorMessage = null;
     } on ApiException catch (e) {
       _errorMessage = e.message;
-    } catch (_) {
-      _errorMessage = 'Error al cargar el catálogo de productos.';
+    } catch (e) {
+      _errorMessage = 'Error al cargar el catálogo de productos: $e';
     } finally {
-      _isLoading = false;
+      if (!silent) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -91,8 +102,13 @@ class CatalogController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final Category category = await repository.renameCategory(categoryId, name);
-      final int idx = _categories.indexWhere((Category c) => c.id == categoryId);
+      final Category category = await repository.renameCategory(
+        categoryId,
+        name,
+      );
+      final int idx = _categories.indexWhere(
+        (Category c) => c.id == categoryId,
+      );
       if (idx != -1) {
         _categories[idx] = category;
       }
@@ -115,6 +131,7 @@ class CatalogController extends ChangeNotifier {
     int? initialStock,
     String? imageUrl,
     String? description,
+    bool? isAvailable,
   }) async {
     _isSaving = true;
     _errorMessage = null;
@@ -129,15 +146,22 @@ class CatalogController extends ChangeNotifier {
           imageUrl: imageUrl,
           description: description,
         );
+        Product current = created;
         if (initialStock != null && initialStock > 0) {
-          final Product updated =
-              await repository.setProductStock(created.id, initialStock);
-          _products = <Product>[..._products, updated];
-        } else {
-          _products = <Product>[..._products, created];
+          current = await repository.setProductStock(
+            created.id,
+            initialStock,
+          );
         }
+        if (isAvailable != null && isAvailable != current.isAvailable) {
+          current = await repository.setProductAvailability(
+            current.id,
+            isAvailable,
+          );
+        }
+        _products = <Product>[..._products, current];
       } else {
-        final Product updated = await repository.updateProduct(
+        Product updated = await repository.updateProduct(
           productId,
           categoryId: categoryId,
           name: name,
@@ -145,6 +169,18 @@ class CatalogController extends ChangeNotifier {
           imageUrl: imageUrl,
           description: description,
         );
+        if (initialStock != null) {
+          updated = await repository.setProductStock(
+            productId,
+            initialStock,
+          );
+        }
+        if (isAvailable != null && isAvailable != updated.isAvailable) {
+          updated = await repository.setProductAvailability(
+            productId,
+            isAvailable,
+          );
+        }
         final int idx = _products.indexWhere((Product p) => p.id == productId);
         if (idx != -1) {
           _products[idx] = updated;
@@ -163,7 +199,10 @@ class CatalogController extends ChangeNotifier {
 
   Future<bool> updateStock(String productId, int newQuantity) async {
     try {
-      final Product updated = await repository.setProductStock(productId, newQuantity);
+      final Product updated = await repository.setProductStock(
+        productId,
+        newQuantity,
+      );
       final int idx = _products.indexWhere((Product p) => p.id == productId);
       if (idx != -1) {
         _products[idx] = updated;
@@ -177,8 +216,10 @@ class CatalogController extends ChangeNotifier {
 
   Future<bool> toggleAvailability(String productId, bool isAvailable) async {
     try {
-      final Product updated =
-          await repository.setProductAvailability(productId, isAvailable);
+      final Product updated = await repository.setProductAvailability(
+        productId,
+        isAvailable,
+      );
       final int idx = _products.indexWhere((Product p) => p.id == productId);
       if (idx != -1) {
         _products[idx] = updated;
@@ -188,5 +229,12 @@ class CatalogController extends ChangeNotifier {
     } catch (_) {
       return false;
     }
+  }
+
+  Future<String> uploadImage({
+    required Uint8List bytes,
+    required String filename,
+  }) async {
+    return repository.uploadImage(bytes: bytes, filename: filename);
   }
 }

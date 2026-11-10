@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
 import '../api_environment.dart';
 import '../storage/auth_storage.dart';
 
@@ -81,15 +83,18 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     final Uri uri = _resolveUri(path, queryParameters);
-    final Map<String, String> headers = await _buildHeaders(requiresAuth: requiresAuth);
+    final Map<String, String> headers = await _buildHeaders(
+      requiresAuth: requiresAuth,
+    );
 
     http.Response response = await _client.get(uri, headers: headers);
 
     if (response.statusCode == 401 && requiresAuth) {
       final bool refreshed = await _tryRefreshToken();
       if (refreshed) {
-        final Map<String, String> retryHeaders =
-            await _buildHeaders(requiresAuth: true);
+        final Map<String, String> retryHeaders = await _buildHeaders(
+          requiresAuth: true,
+        );
         response = await _client.get(uri, headers: retryHeaders);
       } else {
         onAuthExpired?.call();
@@ -117,8 +122,11 @@ class ApiClient {
     );
 
     final String? encodedBody = body != null ? jsonEncode(body) : null;
-    http.Response response =
-        await _client.post(uri, headers: headers, body: encodedBody);
+    http.Response response = await _client.post(
+      uri,
+      headers: headers,
+      body: encodedBody,
+    );
 
     if (response.statusCode == 401 && requiresAuth) {
       final bool refreshed = await _tryRefreshToken();
@@ -127,7 +135,11 @@ class ApiClient {
           requiresAuth: true,
           requiresIdempotency: requiresIdempotency,
         );
-        response = await _client.post(uri, headers: retryHeaders, body: encodedBody);
+        response = await _client.post(
+          uri,
+          headers: retryHeaders,
+          body: encodedBody,
+        );
       } else {
         onAuthExpired?.call();
         throw const ApiException(
@@ -147,19 +159,28 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     final Uri uri = _resolveUri(path, queryParameters);
-    final Map<String, String> headers = await _buildHeaders(requiresAuth: requiresAuth);
+    final Map<String, String> headers = await _buildHeaders(
+      requiresAuth: requiresAuth,
+    );
 
     final String? encodedBody = body != null ? jsonEncode(body) : null;
-    http.Response response =
-        await _client.patch(uri, headers: headers, body: encodedBody);
+    http.Response response = await _client.patch(
+      uri,
+      headers: headers,
+      body: encodedBody,
+    );
 
     if (response.statusCode == 401 && requiresAuth) {
       final bool refreshed = await _tryRefreshToken();
       if (refreshed) {
-        final Map<String, String> retryHeaders =
-            await _buildHeaders(requiresAuth: true);
-        response =
-            await _client.patch(uri, headers: retryHeaders, body: encodedBody);
+        final Map<String, String> retryHeaders = await _buildHeaders(
+          requiresAuth: true,
+        );
+        response = await _client.patch(
+          uri,
+          headers: retryHeaders,
+          body: encodedBody,
+        );
       } else {
         onAuthExpired?.call();
         throw const ApiException(
@@ -179,19 +200,28 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     final Uri uri = _resolveUri(path, queryParameters);
-    final Map<String, String> headers = await _buildHeaders(requiresAuth: requiresAuth);
+    final Map<String, String> headers = await _buildHeaders(
+      requiresAuth: requiresAuth,
+    );
 
     final String? encodedBody = body != null ? jsonEncode(body) : null;
-    http.Response response =
-        await _client.put(uri, headers: headers, body: encodedBody);
+    http.Response response = await _client.put(
+      uri,
+      headers: headers,
+      body: encodedBody,
+    );
 
     if (response.statusCode == 401 && requiresAuth) {
       final bool refreshed = await _tryRefreshToken();
       if (refreshed) {
-        final Map<String, String> retryHeaders =
-            await _buildHeaders(requiresAuth: true);
-        response =
-            await _client.put(uri, headers: retryHeaders, body: encodedBody);
+        final Map<String, String> retryHeaders = await _buildHeaders(
+          requiresAuth: true,
+        );
+        response = await _client.put(
+          uri,
+          headers: retryHeaders,
+          body: encodedBody,
+        );
       } else {
         onAuthExpired?.call();
         throw const ApiException(
@@ -210,15 +240,18 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     final Uri uri = _resolveUri(path, queryParameters);
-    final Map<String, String> headers = await _buildHeaders(requiresAuth: requiresAuth);
+    final Map<String, String> headers = await _buildHeaders(
+      requiresAuth: requiresAuth,
+    );
 
     http.Response response = await _client.delete(uri, headers: headers);
 
     if (response.statusCode == 401 && requiresAuth) {
       final bool refreshed = await _tryRefreshToken();
       if (refreshed) {
-        final Map<String, String> retryHeaders =
-            await _buildHeaders(requiresAuth: true);
+        final Map<String, String> retryHeaders = await _buildHeaders(
+          requiresAuth: true,
+        );
         response = await _client.delete(uri, headers: retryHeaders);
       } else {
         onAuthExpired?.call();

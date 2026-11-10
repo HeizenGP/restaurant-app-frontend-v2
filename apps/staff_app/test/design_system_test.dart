@@ -40,16 +40,25 @@ void main() {
       expect(AsiaTypography.headingLarge.fontFamily, 'DM Sans');
     });
 
-    test('AsiaTheme builds valid dark and light theme data with tokens extension', () {
-      final ThemeData dark = AsiaTheme.dark();
-      expect(dark.brightness, Brightness.dark);
-      expect(dark.extension<AsiaThemeTokens>(), isNotNull);
-      expect(dark.extension<AsiaThemeTokens>()?.canvas, AsiaPalette.darkCanvas);
+    test(
+      'AsiaTheme builds valid dark and light theme data with tokens extension',
+      () {
+        final ThemeData dark = AsiaTheme.dark();
+        expect(dark.brightness, Brightness.dark);
+        expect(dark.extension<AsiaThemeTokens>(), isNotNull);
+        expect(
+          dark.extension<AsiaThemeTokens>()?.canvas,
+          AsiaPalette.darkCanvas,
+        );
 
-      final ThemeData light = AsiaTheme.light();
-      expect(light.brightness, Brightness.light);
-      expect(light.extension<AsiaThemeTokens>(), isNotNull);
-      expect(light.extension<AsiaThemeTokens>()?.canvas, AsiaPalette.lightCanvas);
-    });
+        final ThemeData light = AsiaTheme.light();
+        expect(light.brightness, Brightness.light);
+        expect(light.extension<AsiaThemeTokens>(), isNotNull);
+        expect(
+          light.extension<AsiaThemeTokens>()?.canvas,
+          AsiaPalette.lightCanvas,
+        );
+      },
+    );
   });
 }

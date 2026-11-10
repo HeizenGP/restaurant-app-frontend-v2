@@ -3,10 +3,7 @@ import '../../../core/storage/auth_storage.dart';
 import '../domain/auth_models.dart';
 
 class AuthRepository {
-  const AuthRepository({
-    required this.apiClient,
-    required this.storage,
-  });
+  const AuthRepository({required this.apiClient, required this.storage});
 
   final ApiClient apiClient;
   final AuthStorage storage;

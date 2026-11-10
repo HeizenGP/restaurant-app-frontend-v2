@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum ScreenType {
-  mobile,
-  tablet,
-  desktop,
-}
+enum ScreenType { mobile, tablet, desktop }
 
 abstract final class Breakpoints {
   static const double mobileMax = 767.0;

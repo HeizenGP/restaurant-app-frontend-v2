@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../core/network/api_client.dart';
 import '../domain/order_models.dart';
 import '../infrastructure/order_repository.dart';
@@ -30,10 +31,15 @@ class OrderController extends ChangeNotifier {
           _statusFilter == null || order.status == _statusFilter;
       final bool matchesModality =
           _modalityFilter == null || order.modality == _modalityFilter;
-      final bool matchesSearch = _searchQuery.isEmpty ||
+      final bool matchesSearch =
+          _searchQuery.isEmpty ||
           order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          (order.contactName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
-          (order.tableId?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+          (order.contactName?.toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              ) ??
+              false) ||
+          (order.tableId?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+              false);
       return matchesStatus && matchesModality && matchesSearch;
     }).toList();
   }
@@ -81,8 +87,10 @@ class OrderController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final StaffOrder updated =
-          await repository.decideOrder(orderId, approved: approved);
+      final StaffOrder updated = await repository.decideOrder(
+        orderId,
+        approved: approved,
+      );
       _updateOrderInList(updated);
       _isActionLoading = false;
       notifyListeners();

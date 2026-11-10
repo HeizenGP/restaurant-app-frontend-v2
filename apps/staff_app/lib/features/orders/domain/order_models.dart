@@ -23,13 +23,13 @@ enum OrderStatus {
   }
 
   String get displayName => switch (this) {
-        OrderStatus.requested => 'Solicitado',
-        OrderStatus.approved => 'Aprobado',
-        OrderStatus.rejected => 'Rechazado',
-        OrderStatus.confirmed => 'Confirmado',
-        OrderStatus.cancelled => 'Cancelado',
-        OrderStatus.closed => 'Cerrado',
-      };
+    OrderStatus.requested => 'Solicitado',
+    OrderStatus.approved => 'Aprobado',
+    OrderStatus.rejected => 'Rechazado',
+    OrderStatus.confirmed => 'Confirmado',
+    OrderStatus.cancelled => 'Cancelado',
+    OrderStatus.closed => 'Cerrado',
+  };
 }
 
 enum OrderModality {
@@ -51,10 +51,10 @@ enum OrderModality {
   }
 
   String get displayName => switch (this) {
-        OrderModality.local => 'Mesa / Salón',
-        OrderModality.pickup => 'Para Llevar (Pickup)',
-        OrderModality.delivery => 'Delivery',
-      };
+    OrderModality.local => 'Mesa / Salón',
+    OrderModality.pickup => 'Para Llevar (Pickup)',
+    OrderModality.delivery => 'Delivery',
+  };
 }
 
 class OrderItem {
@@ -78,13 +78,12 @@ class OrderItem {
     return OrderItem(
       id: json['id'] as String? ?? '',
       productId: json['product_id'] as String? ?? '',
-      productName: json['product_name_snapshot'] as String? ??
+      productName:
+          json['product_name_snapshot'] as String? ??
           json['product_name'] as String? ??
           'Producto',
-      quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-      unitPrice: (json['unit_price_snapshot'] as num?)?.toDouble() ??
-          (json['unit_price'] as num?)?.toDouble() ??
-          0.0,
+      quantity: _asInt(json['quantity'], 1),
+      unitPrice: _asDouble(json['unit_price_snapshot'] ?? json['unit_price']),
     );
   }
 }
@@ -123,17 +122,19 @@ class StaffOrder {
 
   factory StaffOrder.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawItems =
-        json['items'] as List<dynamic>? ?? <dynamic>[];
+        (json['lines'] ?? json['items']) as List<dynamic>? ?? <dynamic>[];
     final List<OrderItem> items = rawItems
         .map((dynamic item) => OrderItem.fromJson(item as Map<String, dynamic>))
         .toList();
 
     return StaffOrder(
       id: json['id'] as String? ?? '',
-      modality: OrderModality.fromString(json['modality'] as String? ?? 'LOCAL'),
+      modality: OrderModality.fromString(
+        json['modality'] as String? ?? 'LOCAL',
+      ),
       channel: json['channel'] as String? ?? 'APP',
       status: OrderStatus.fromString(json['status'] as String? ?? 'REQUESTED'),
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: _asDouble(json['total_amount']),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -144,4 +145,16 @@ class StaffOrder {
       contactPhone: json['contact_phone'] as String?,
     );
   }
+}
+
+double _asDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+int _asInt(Object? value, [int defaultValue = 0]) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? defaultValue;
+  return defaultValue;
 }

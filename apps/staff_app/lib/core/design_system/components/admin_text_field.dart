@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_spacing.dart';
@@ -77,9 +78,7 @@ class _AdminTextFieldState extends State<AdminTextField> {
           readOnly: widget.readOnly,
           enabled: widget.enabled,
           autofocus: widget.autofocus,
-          style: AsiaTypography.bodyMedium.copyWith(
-            color: tokens.textPrimary,
-          ),
+          style: AsiaTypography.bodyMedium.copyWith(color: tokens.textPrimary),
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: AsiaTypography.bodyMedium.copyWith(
@@ -91,7 +90,9 @@ class _AdminTextFieldState extends State<AdminTextField> {
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
-                      _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscured
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       size: 18,
                       color: tokens.textTertiary,
                     ),
@@ -100,7 +101,10 @@ class _AdminTextFieldState extends State<AdminTextField> {
                 : widget.suffixIcon,
             filled: true,
             fillColor: tokens.cardElevated,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: AsiaRadii.md,
               borderSide: BorderSide(color: tokens.border),

@@ -23,13 +23,13 @@ enum RoleCode {
   }
 
   String get displayName => switch (this) {
-        RoleCode.customer => 'Cliente',
-        RoleCode.waiter => 'Mozo',
-        RoleCode.cashier => 'Cajero',
-        RoleCode.admin => 'Administrador',
-        RoleCode.kitchen => 'Cocinero',
-        RoleCode.superAdmin => 'Super Admin',
-      };
+    RoleCode.customer => 'Cliente',
+    RoleCode.waiter => 'Mozo',
+    RoleCode.cashier => 'Cajero',
+    RoleCode.admin => 'Administrador',
+    RoleCode.kitchen => 'Cocinero',
+    RoleCode.superAdmin => 'Super Admin',
+  };
 }
 
 class StaffUser {
@@ -63,7 +63,8 @@ class StaffUser {
   bool hasRole(RoleCode role) => isSuperAdmin || roles.contains(role);
 
   factory StaffUser.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> rolesRaw = json['roles'] as List<dynamic>? ?? <dynamic>[];
+    final List<dynamic> rolesRaw =
+        json['roles'] as List<dynamic>? ?? <dynamic>[];
     final Set<RoleCode> parsedRoles = rolesRaw
         .map((dynamic r) => RoleCode.fromString(r.toString()))
         .toSet();
@@ -97,11 +98,7 @@ class StaffUser {
 }
 
 class StaffSession {
-  const StaffSession({
-    required this.accessToken,
-    this.refreshToken,
-    this.user,
-  });
+  const StaffSession({required this.accessToken, this.refreshToken, this.user});
 
   final String accessToken;
   final String? refreshToken;

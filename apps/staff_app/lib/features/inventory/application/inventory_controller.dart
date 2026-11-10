@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../products/domain/catalog_models.dart';
 import '../domain/inventory_models.dart';
@@ -27,8 +28,10 @@ class InventoryController extends ChangeNotifier {
 
   List<Product> get filteredProducts {
     return _products.where((Product p) {
-      final bool matchesLowStock = !_onlyLowStock || p.isLowStock || p.isOutOfStock;
-      final bool matchesSearch = _searchQuery.isEmpty ||
+      final bool matchesLowStock =
+          !_onlyLowStock || p.isLowStock || p.isOutOfStock;
+      final bool matchesSearch =
+          _searchQuery.isEmpty ||
           p.name.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesLowStock && matchesSearch;
     }).toList();
@@ -70,7 +73,10 @@ class InventoryController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final Product updated = await repository.adjustStock(productId, newQuantity);
+      final Product updated = await repository.adjustStock(
+        productId,
+        newQuantity,
+      );
       final int idx = _products.indexWhere((Product p) => p.id == productId);
       if (idx != -1) {
         _products[idx] = updated;

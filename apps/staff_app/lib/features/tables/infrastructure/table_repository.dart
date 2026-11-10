@@ -10,8 +10,10 @@ class TableRepository {
     final dynamic response = await apiClient.get('/tables');
     if (response is! List<dynamic>) return <RestaurantTable>[];
     return response
-        .map((dynamic item) =>
-            RestaurantTable.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) =>
+              RestaurantTable.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -23,7 +25,9 @@ class TableRepository {
       '/tables',
       body: <String, dynamic>{
         'code': code.trim(),
-        'area_label': areaLabel?.trim().isEmpty ?? true ? null : areaLabel!.trim(),
+        'area_label': areaLabel?.trim().isEmpty ?? true
+            ? null
+            : areaLabel!.trim(),
       },
       requiresAuth: true,
     );
@@ -37,7 +41,9 @@ class TableRepository {
   }) async {
     final Map<String, dynamic> body = <String, dynamic>{};
     if (code != null) body['code'] = code.trim();
-    if (areaLabel != null) body['area_label'] = areaLabel.trim().isEmpty ? null : areaLabel.trim();
+    if (areaLabel != null) {
+      body['area_label'] = areaLabel.trim().isEmpty ? null : areaLabel.trim();
+    }
 
     final dynamic response = await apiClient.patch(
       '/tables/$tableId',

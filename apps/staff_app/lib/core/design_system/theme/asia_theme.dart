@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_typography.dart';
@@ -21,9 +22,7 @@ abstract final class AsiaTheme {
         onSurface: tokens.textPrimary,
         outline: tokens.border,
       ),
-      extensions: const <ThemeExtension<dynamic>>[
-        tokens,
-      ],
+      extensions: const <ThemeExtension<dynamic>>[tokens],
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: tokens.cardElevated,
@@ -43,7 +42,10 @@ abstract final class AsiaTheme {
           borderRadius: AsiaRadii.md,
           borderSide: BorderSide(color: tokens.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: tokens.card,
@@ -70,9 +72,7 @@ abstract final class AsiaTheme {
         onSurface: tokens.textPrimary,
         outline: tokens.border,
       ),
-      extensions: const <ThemeExtension<dynamic>>[
-        tokens,
-      ],
+      extensions: const <ThemeExtension<dynamic>>[tokens],
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: tokens.cardElevated,
@@ -92,7 +92,10 @@ abstract final class AsiaTheme {
           borderRadius: AsiaRadii.md,
           borderSide: BorderSide(color: tokens.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: tokens.card,

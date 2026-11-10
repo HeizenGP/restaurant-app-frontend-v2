@@ -10,7 +10,9 @@ class OrderRepository {
     final dynamic response = await apiClient.get('/orders');
     if (response is! List<dynamic>) return <StaffOrder>[];
     return response
-        .map((dynamic item) => StaffOrder.fromJson(item as Map<String, dynamic>))
+        .map(
+          (dynamic item) => StaffOrder.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 

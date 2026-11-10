@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_text_field.dart';
 import '../../../core/design_system/components/kairo_logo.dart';
@@ -85,9 +86,13 @@ class _LoginPageState extends State<LoginPage> {
                   border: Border.all(color: tokens.border),
                 ),
                 child: IconButton(
-                  tooltip: isDark ? 'Cambiar a Tema Claro' : 'Cambiar a Tema Oscuro',
+                  tooltip: isDark
+                      ? 'Cambiar a Tema Claro'
+                      : 'Cambiar a Tema Oscuro',
                   icon: Icon(
-                    isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                    isDark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined,
                     size: 20,
                     color: tokens.textSecondary,
                   ),
@@ -108,9 +113,7 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(AsiaSpacing.xxxl),
         decoration: BoxDecoration(
           color: isDark ? tokens.sidebar : tokens.cardElevated,
-          border: Border(
-            right: BorderSide(color: tokens.border, width: 1.0),
-          ),
+          border: Border(right: BorderSide(color: tokens.border, width: 1.0)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +142,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Row(
               children: <Widget>[
-                Icon(LucideIcons.shieldCheck, size: 16, color: tokens.brandGold),
+                Icon(
+                  LucideIcons.shieldCheck,
+                  size: 16,
+                  color: tokens.brandGold,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Acceso seguro para administradores y personal autorizado',
@@ -214,8 +221,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Row(
                       children: <Widget>[
-                        Icon(Icons.error_outline_rounded,
-                            size: 18, color: tokens.error),
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 18,
+                          color: tokens.error,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

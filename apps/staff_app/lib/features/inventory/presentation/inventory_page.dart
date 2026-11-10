@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../../core/design_system/components/admin_badge.dart';
 import '../../../core/design_system/components/admin_button.dart';
 import '../../../core/design_system/components/admin_card.dart';
@@ -23,7 +24,8 @@ class InventoryPage extends StatefulWidget {
   State<InventoryPage> createState() => _InventoryPageState();
 }
 
-class _InventoryPageState extends State<InventoryPage> with SingleTickerProviderStateMixin {
+class _InventoryPageState extends State<InventoryPage>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -48,8 +50,10 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
     return ListenableBuilder(
       listenable: widget.inventoryController,
       builder: (BuildContext context, _) {
-        final List<Product> products = widget.inventoryController.filteredProducts;
-        final List<StockMovement> movements = widget.inventoryController.movements;
+        final List<Product> products =
+            widget.inventoryController.filteredProducts;
+        final List<StockMovement> movements =
+            widget.inventoryController.movements;
         final bool isLoading = widget.inventoryController.isLoading;
         final int lowStockTotal = widget.inventoryController.products
             .where((Product p) => p.isLowStock || p.isOutOfStock)
@@ -101,7 +105,9 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                   decoration: BoxDecoration(
                     color: tokens.warning.withValues(alpha: 0.1),
                     borderRadius: AsiaRadii.md,
-                    border: Border.all(color: tokens.warning.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: tokens.warning.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: <Widget>[
@@ -124,7 +130,10 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
 
               // Tab Bar
               AdminCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: TabBar(
                   controller: _tabController,
                   labelColor: tokens.brandCrimson,
@@ -192,7 +201,9 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                 padding: const EdgeInsets.all(AsiaSpacing.xxxl),
                 child: Text(
                   'No hay productos registrados.',
-                  style: AsiaTypography.bodyMedium.copyWith(color: tokens.textTertiary),
+                  style: AsiaTypography.bodyMedium.copyWith(
+                    color: tokens.textTertiary,
+                  ),
                 ),
               ),
             )
@@ -228,7 +239,9 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                             fontWeight: FontWeight.w700,
                             color: p.isOutOfStock
                                 ? tokens.error
-                                : (p.isLowStock ? tokens.warning : tokens.success),
+                                : (p.isLowStock
+                                      ? tokens.warning
+                                      : tokens.success),
                           ),
                         ),
                       ),
@@ -240,8 +253,8 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                           variant: p.isOutOfStock
                               ? AdminBadgeVariant.error
                               : (p.isLowStock
-                                  ? AdminBadgeVariant.warning
-                                  : AdminBadgeVariant.success),
+                                    ? AdminBadgeVariant.warning
+                                    : AdminBadgeVariant.success),
                         ),
                       ),
                       DataCell(
@@ -303,20 +316,21 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                 DataCell(
                   Text(
                     DateFormat('dd/MM/yyyy HH:mm').format(m.recordedAt),
-                    style: AsiaTypography.caption.copyWith(color: tokens.textTertiary),
+                    style: AsiaTypography.caption.copyWith(
+                      color: tokens.textTertiary,
+                    ),
                   ),
                 ),
                 DataCell(
                   Text(
                     m.productName,
-                    style: AsiaTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                    style: AsiaTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 DataCell(
-                  AdminBadge(
-                    label: m.kind,
-                    variant: AdminBadgeVariant.neutral,
-                  ),
+                  AdminBadge(label: m.kind, variant: AdminBadgeVariant.neutral),
                 ),
                 DataCell(
                   Text(
@@ -329,8 +343,12 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                 ),
                 DataCell(
                   Text(
-                    m.actorUserId != null ? m.actorUserId!.substring(0, 8) : 'Sistema',
-                    style: AsiaTypography.caption.copyWith(color: tokens.textSecondary),
+                    m.actorUserId != null
+                        ? m.actorUserId!.substring(0, 8)
+                        : 'Sistema',
+                    style: AsiaTypography.caption.copyWith(
+                      color: tokens.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -342,21 +360,25 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
   }
 
   void _openAdjustModal(BuildContext context, Product product) {
-    final TextEditingController qtyCtrl =
-        TextEditingController(text: product.stockQty.toString());
+    final TextEditingController qtyCtrl = TextEditingController(
+      text: product.stockQty.toString(),
+    );
 
     showDialog<void>(
       context: context,
       builder: (BuildContext ctx) => AdminDialog(
         title: 'Ajuste de Existencias',
-        subtitle: 'Actualiza la cantidad de unidades en almacén para "${product.name}".',
+        subtitle:
+            'Actualiza la cantidad de unidades en almacén para "${product.name}".',
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
               'Stock actual registrado: ${product.stockQty} unidades.',
-              style: AsiaTypography.bodySmall.copyWith(color: ctx.tokens.textSecondary),
+              style: AsiaTypography.bodySmall.copyWith(
+                color: ctx.tokens.textSecondary,
+              ),
             ),
             const SizedBox(height: AsiaSpacing.md),
             AdminTextField(
@@ -371,8 +393,10 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
         onConfirm: () async {
           final int? newQty = int.tryParse(qtyCtrl.text.trim());
           if (newQty != null && newQty >= 0) {
-            final bool ok = await widget.inventoryController
-                .adjustStock(product.id, newQty);
+            final bool ok = await widget.inventoryController.adjustStock(
+              product.id,
+              newQty,
+            );
             if (ok && ctx.mounted) {
               Navigator.of(ctx).pop();
             }

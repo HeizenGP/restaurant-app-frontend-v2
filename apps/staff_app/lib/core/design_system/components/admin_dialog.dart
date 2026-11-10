@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundations/asia_colors.dart';
 import '../foundations/asia_radii.dart';
 import '../foundations/asia_spacing.dart';
@@ -72,7 +73,11 @@ class AdminDialog extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close_rounded, size: 20, color: tokens.textTertiary),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: tokens.textTertiary,
+                    ),
                     onPressed: onCancel ?? () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -92,7 +97,9 @@ class AdminDialog extends StatelessWidget {
                   if (onConfirm != null)
                     AdminButton(
                       label: confirmLabel,
-                      variant: isDanger ? AdminButtonVariant.danger : AdminButtonVariant.primary,
+                      variant: isDanger
+                          ? AdminButtonVariant.danger
+                          : AdminButtonVariant.primary,
                       isLoading: isConfirmLoading,
                       onPressed: onConfirm,
                     ),

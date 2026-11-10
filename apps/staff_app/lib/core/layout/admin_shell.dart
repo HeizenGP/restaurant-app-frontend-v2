@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/domain/auth_models.dart';
 import '../design_system/components/kairo_logo.dart';
@@ -24,49 +25,75 @@ class AdminNavItem {
   final bool adminOnly;
 }
 
-const List<AdminNavItem> kNavItems = <AdminNavItem>[
-  AdminNavItem(
-    path: '/dashboard',
-    label: 'Dashboard',
-    icon: LucideIcons.layoutDashboard,
+class AdminNavSection {
+  const AdminNavSection({required this.title, required this.items});
+
+  final String title;
+  final List<AdminNavItem> items;
+}
+
+const AdminNavItem kDashboardItem = AdminNavItem(
+  path: '/dashboard',
+  label: 'Dashboard',
+  icon: LucideIcons.layoutGrid,
+);
+
+const List<AdminNavSection> kNavSections = <AdminNavSection>[
+  AdminNavSection(
+    title: 'OPERACIÓN DIARIA',
+    items: <AdminNavItem>[
+      AdminNavItem(path: '/tables', label: 'Mesas', icon: LucideIcons.armchair),
+      AdminNavItem(
+        path: '/orders',
+        label: 'Pedidos',
+        icon: LucideIcons.shoppingBag,
+      ),
+      AdminNavItem(path: '/payments', label: 'Caja', icon: LucideIcons.wallet),
+    ],
   ),
-  AdminNavItem(
-    path: '/orders',
-    label: 'Pedidos',
-    icon: LucideIcons.shoppingBag,
+  AdminNavSection(
+    title: 'GESTIÓN DEL RESTAURANTE',
+    items: <AdminNavItem>[
+      AdminNavItem(
+        path: '/products',
+        label: 'Carta y productos',
+        icon: LucideIcons.bookOpen,
+      ),
+      AdminNavItem(
+        path: '/inventory',
+        label: 'Inventario',
+        icon: LucideIcons.box,
+      ),
+    ],
   ),
-  AdminNavItem(
-    path: '/products',
-    label: 'Productos',
-    icon: LucideIcons.utensils,
+  AdminNavSection(
+    title: 'ADMINISTRACIÓN',
+    items: <AdminNavItem>[
+      AdminNavItem(
+        path: '/staff',
+        label: 'Personal',
+        icon: LucideIcons.users,
+        adminOnly: true,
+      ),
+      AdminNavItem(
+        path: '/reports',
+        label: 'Reportes',
+        icon: LucideIcons.barChart3,
+        adminOnly: true,
+      ),
+      AdminNavItem(
+        path: '/settings',
+        label: 'Configuración',
+        icon: LucideIcons.settings,
+        adminOnly: true,
+      ),
+    ],
   ),
-  AdminNavItem(
-    path: '/inventory',
-    label: 'Inventario',
-    icon: LucideIcons.boxes,
-  ),
-  AdminNavItem(
-    path: '/tables',
-    label: 'Mesas',
-    icon: LucideIcons.armchair,
-  ),
-  AdminNavItem(
-    path: '/payments',
-    label: 'Pagos & Caja',
-    icon: LucideIcons.creditCard,
-  ),
-  AdminNavItem(
-    path: '/staff',
-    label: 'Personal',
-    icon: LucideIcons.users,
-    adminOnly: true,
-  ),
-  AdminNavItem(
-    path: '/reports',
-    label: 'Reportes',
-    icon: LucideIcons.barChart3,
-    adminOnly: true,
-  ),
+];
+
+List<AdminNavItem> get kNavItems => <AdminNavItem>[
+  kDashboardItem,
+  for (final AdminNavSection section in kNavSections) ...section.items,
 ];
 
 class AdminShell extends StatefulWidget {
@@ -115,7 +142,11 @@ class _AdminShellState extends State<AdminShell> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, String currentRoute, bool isDesktop) {
+  Widget _buildTopBar(
+    BuildContext context,
+    String currentRoute,
+    bool isDesktop,
+  ) {
     final AsiaThemeTokens tokens = context.tokens;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final StaffUser? user = widget.authController.currentUser;
@@ -133,9 +164,7 @@ class _AdminShellState extends State<AdminShell> {
       padding: const EdgeInsets.symmetric(horizontal: AsiaSpacing.lg),
       decoration: BoxDecoration(
         color: tokens.card,
-        border: Border(
-          bottom: BorderSide(color: tokens.border, width: 1.0),
-        ),
+        border: Border(bottom: BorderSide(color: tokens.border, width: 1.0)),
       ),
       child: Row(
         children: <Widget>[
@@ -202,7 +231,7 @@ class _AdminShellState extends State<AdminShell> {
             onPressed: widget.onToggleTheme,
           ),
           const SizedBox(width: AsiaSpacing.sm),
-          // User Badge
+          // User Badge in TopBar
           if (user != null) ...<Widget>[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -217,7 +246,9 @@ class _AdminShellState extends State<AdminShell> {
                     radius: 14,
                     backgroundColor: tokens.brandCrimson.withValues(alpha: 0.2),
                     child: Text(
-                      user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : 'U',
+                      user.displayName.isNotEmpty
+                          ? user.displayName[0].toUpperCase()
+                          : 'U',
                       style: AsiaTypography.caption.copyWith(
                         color: tokens.brandCrimson,
                         fontWeight: FontWeight.w700,
@@ -256,11 +287,7 @@ class _AdminShellState extends State<AdminShell> {
             const SizedBox(width: AsiaSpacing.xs),
             IconButton(
               tooltip: 'Cerrar Sesión',
-              icon: Icon(
-                Icons.logout_rounded,
-                size: 20,
-                color: tokens.error,
-              ),
+              icon: Icon(Icons.logout_rounded, size: 20, color: tokens.error),
               onPressed: () => _confirmLogout(context),
             ),
           ],
@@ -271,60 +298,213 @@ class _AdminShellState extends State<AdminShell> {
 
   Widget _buildDesktopSidebar(BuildContext context, String currentRoute) {
     final AsiaThemeTokens tokens = context.tokens;
-    final double width = _sidebarCollapsed ? 76.0 : 250.0;
+    final double width = _sidebarCollapsed ? 76.0 : 256.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: width,
       decoration: BoxDecoration(
         color: tokens.sidebar,
-        border: Border(
-          right: BorderSide(color: tokens.border, width: 1.0),
-        ),
+        border: Border(right: BorderSide(color: tokens.border, width: 1.0)),
       ),
       child: Column(
         children: <Widget>[
-          // Logo Header
+          // Logo Header (Preservando el logo del negocio)
           Container(
-            height: 64,
+            height: 68,
             padding: const EdgeInsets.symmetric(horizontal: AsiaSpacing.md),
             alignment: Alignment.centerLeft,
             child: Row(
               children: <Widget>[
-                KairoAdminLogo(compact: _sidebarCollapsed),
+                KairoAdminLogo(
+                  compact: _sidebarCollapsed,
+                  subtitle: 'ADMINISTRACIÓN',
+                ),
                 if (!_sidebarCollapsed) const Spacer(),
                 IconButton(
+                  tooltip: _sidebarCollapsed ? 'Expandir' : 'Colapsar',
                   icon: Icon(
                     _sidebarCollapsed
-                        ? Icons.chevron_right_rounded
-                        : Icons.chevron_left_rounded,
-                    size: 20,
+                        ? LucideIcons.panelLeftOpen
+                        : LucideIcons.panelLeftClose,
+                    size: 19,
                     color: tokens.textTertiary,
                   ),
-                  onPressed: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
+                  onPressed: () =>
+                      setState(() => _sidebarCollapsed = !_sidebarCollapsed),
                 ),
               ],
             ),
           ),
           Divider(color: tokens.border.withValues(alpha: 0.5), height: 1),
-          const SizedBox(height: AsiaSpacing.md),
-          // Nav items list
+
+          // Scrollable Sections
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              children: kNavItems.map((AdminNavItem item) {
-                if (item.adminOnly && !widget.authController.isAdmin) {
-                  return const SizedBox.shrink();
-                }
-                final bool isSelected = currentRoute.startsWith(item.path);
-                return _buildNavItemTile(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              children: <Widget>[
+                // 1. Dashboard
+                _buildNavItemTile(
                   context: context,
-                  item: item,
-                  isSelected: isSelected,
+                  item: kDashboardItem,
+                  isSelected: currentRoute.startsWith(kDashboardItem.path),
                   collapsed: _sidebarCollapsed,
-                );
-              }).toList(),
+                ),
+                const SizedBox(height: 6),
+                Divider(color: tokens.border.withValues(alpha: 0.5), height: 1),
+                const SizedBox(height: 6),
+
+                // 2. Sections
+                for (final AdminNavSection section in kNavSections) ...<Widget>[
+                  if (!_sidebarCollapsed) ...<Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 12,
+                        right: 12,
+                        top: 10,
+                        bottom: 6,
+                      ),
+                      child: Text(
+                        section.title,
+                        style: AsiaTypography.caption.copyWith(
+                          color: tokens.textTertiary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10.5,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                  ] else ...<Widget>[const SizedBox(height: 6)],
+                  for (final AdminNavItem item in section.items) ...<Widget>[
+                    if (!item.adminOnly || widget.authController.isAdmin)
+                      _buildNavItemTile(
+                        context: context,
+                        item: item,
+                        isSelected: currentRoute.startsWith(item.path),
+                        collapsed: _sidebarCollapsed,
+                      ),
+                  ],
+                  const SizedBox(height: 6),
+                  Divider(
+                    color: tokens.border.withValues(alpha: 0.5),
+                    height: 1,
+                  ),
+                  const SizedBox(height: 6),
+                ],
+              ],
             ),
+          ),
+
+          // Pinned User Footer
+          Divider(color: tokens.border.withValues(alpha: 0.5), height: 1),
+          _buildSidebarFooter(context, tokens, _sidebarCollapsed),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarFooter(
+    BuildContext context,
+    AsiaThemeTokens tokens,
+    bool collapsed,
+  ) {
+    final StaffUser? user = widget.authController.currentUser;
+    final String roleTitle = user != null && user.roles.isNotEmpty
+        ? (user.isSuperAdmin
+              ? 'Administrador'
+              : (user.isAdmin ? 'Administrador' : user.roles.first.displayName))
+        : 'Administrador';
+
+    if (collapsed) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Tooltip(
+              message: '$roleTitle\nKAIRO · Panel de gestión',
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: tokens.brandCrimson.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  LucideIcons.user,
+                  size: 20,
+                  color: tokens.brandCrimson,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            IconButton(
+              tooltip: 'Cerrar Sesión',
+              icon: Icon(
+                LucideIcons.logOut,
+                size: 18,
+                color: tokens.textSecondary,
+              ),
+              onPressed: () => _confirmLogout(context),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: tokens.brandCrimson.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(LucideIcons.user, size: 20, color: tokens.brandCrimson),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  roleTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AsiaTypography.bodyMedium.copyWith(
+                    color: tokens.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'KAIRO · Panel de gestión',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AsiaTypography.caption.copyWith(
+                    color: tokens.textTertiary,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Cerrar Sesión',
+            icon: Icon(
+              LucideIcons.logOut,
+              size: 18,
+              color: tokens.textSecondary,
+            ),
+            onPressed: () => _confirmLogout(context),
           ),
         ],
       ),
@@ -343,35 +523,80 @@ class _AdminShellState extends State<AdminShell> {
               padding: const EdgeInsets.all(AsiaSpacing.lg),
               child: Row(
                 children: <Widget>[
-                  const KairoAdminLogo(),
+                  const KairoAdminLogo(subtitle: 'ADMINISTRACIÓN'),
                   const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.close_rounded, color: tokens.textSecondary),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: tokens.textSecondary,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
             ),
             Divider(color: tokens.border, height: 1),
-            const SizedBox(height: AsiaSpacing.md),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: kNavItems.map((AdminNavItem item) {
-                  if (item.adminOnly && !widget.authController.isAdmin) {
-                    return const SizedBox.shrink();
-                  }
-                  final bool isSelected = currentRoute.startsWith(item.path);
-                  return _buildNavItemTile(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                children: <Widget>[
+                  _buildNavItemTile(
                     context: context,
-                    item: item,
-                    isSelected: isSelected,
+                    item: kDashboardItem,
+                    isSelected: currentRoute.startsWith(kDashboardItem.path),
                     collapsed: false,
                     onTapExtra: () => Navigator.of(context).pop(),
-                  );
-                }).toList(),
+                  ),
+                  const SizedBox(height: 6),
+                  Divider(
+                    color: tokens.border.withValues(alpha: 0.5),
+                    height: 1,
+                  ),
+                  const SizedBox(height: 6),
+                  for (final AdminNavSection section
+                      in kNavSections) ...<Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 12,
+                        right: 12,
+                        top: 10,
+                        bottom: 6,
+                      ),
+                      child: Text(
+                        section.title,
+                        style: AsiaTypography.caption.copyWith(
+                          color: tokens.textTertiary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10.5,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                    for (final AdminNavItem item in section.items) ...<Widget>[
+                      if (!item.adminOnly || widget.authController.isAdmin)
+                        _buildNavItemTile(
+                          context: context,
+                          item: item,
+                          isSelected: currentRoute.startsWith(item.path),
+                          collapsed: false,
+                          onTapExtra: () => Navigator.of(context).pop(),
+                        ),
+                    ],
+                    const SizedBox(height: 6),
+                    Divider(
+                      color: tokens.border.withValues(alpha: 0.5),
+                      height: 1,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                ],
               ),
             ),
+            Divider(color: tokens.border, height: 1),
+            _buildSidebarFooter(context, tokens, false),
           ],
         ),
       ),
@@ -391,11 +616,11 @@ class _AdminShellState extends State<AdminShell> {
     final Color fg = isSelected ? tokens.brandCrimson : tokens.textSecondary;
     final Color bg = isSelected
         ? (isDark
-            ? tokens.brandCrimson.withValues(alpha: 0.12)
-            : tokens.sidebarSelected)
+              ? tokens.brandCrimson.withValues(alpha: 0.12)
+              : tokens.sidebarSelected)
         : Colors.transparent;
 
-    return Padding(
+    final Widget tile = Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
         color: Colors.transparent,
@@ -408,7 +633,7 @@ class _AdminShellState extends State<AdminShell> {
           child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: collapsed ? 0 : 12,
-              vertical: 11,
+              vertical: 10,
             ),
             decoration: BoxDecoration(
               color: bg,
@@ -421,8 +646,9 @@ class _AdminShellState extends State<AdminShell> {
                   : null,
             ),
             child: Row(
-              mainAxisAlignment:
-                  collapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+              mainAxisAlignment: collapsed
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: <Widget>[
                 Icon(item.icon, size: 20, color: fg),
                 if (!collapsed) ...<Widget>[
@@ -432,9 +658,14 @@ class _AdminShellState extends State<AdminShell> {
                       item.label,
                       style: AsiaTypography.bodyMedium.copyWith(
                         color: isSelected
-                            ? (isDark ? tokens.textPrimary : tokens.brandCrimson)
-                            : tokens.textSecondary,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            ? (isDark
+                                  ? tokens.textPrimary
+                                  : tokens.brandCrimson)
+                            : tokens.textPrimary,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        fontSize: 13.5,
                       ),
                     ),
                   ),
@@ -445,6 +676,11 @@ class _AdminShellState extends State<AdminShell> {
         ),
       ),
     );
+
+    if (collapsed) {
+      return Tooltip(message: item.label, child: tile);
+    }
+    return tile;
   }
 
   void _confirmLogout(BuildContext context) {
@@ -452,7 +688,9 @@ class _AdminShellState extends State<AdminShell> {
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
         title: const Text('Cerrar Sesión'),
-        content: const Text('¿Estás seguro de que deseas salir del panel administrativo?'),
+        content: const Text(
+          '¿Estás seguro de que deseas salir del panel administrativo?',
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),

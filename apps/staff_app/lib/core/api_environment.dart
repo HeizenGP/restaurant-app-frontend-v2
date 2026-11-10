@@ -38,8 +38,9 @@ final class ApiEnvironment {
       return localUrl;
     }
 
-    // Default to local backend for development if none explicitly specified
-    return localUrl;
+    // Safe shared default: customer_app and staff_app must target the same API.
+    // Local development remains explicit through USE_LOCAL=true.
+    return renderUrl;
   }
 
   static Uri _parseBaseUrl(String value) {

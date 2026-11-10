@@ -1,8 +1,17 @@
+double _asDouble(Object? value, [double defaultValue = 0.0]) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? defaultValue;
+  return defaultValue;
+}
+
+int _asInt(Object? value, [int defaultValue = 0]) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? defaultValue;
+  return defaultValue;
+}
+
 class Category {
-  const Category({
-    required this.id,
-    required this.name,
-  });
+  const Category({required this.id, required this.name});
 
   final String id;
   final String name;
@@ -64,26 +73,31 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final int qty = _asInt(json['stock_qty'], 50);
+    final bool available =
+        json['is_available'] as bool? ??
+        json['available_for_sale'] as bool? ??
+        true;
     return Product(
       id: json['id'] as String? ?? '',
       categoryId: json['category_id'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      stockQty: (json['stock_qty'] as num?)?.toInt() ?? 0,
-      isAvailable: json['is_available'] as bool? ?? true,
+      price: _asDouble(json['price']),
+      stockQty: qty,
+      isAvailable: available,
       imageUrl: json['image_url'] as String?,
       description: json['description'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'category_id': categoryId,
-        'name': name,
-        'price': price,
-        'stock_qty': stockQty,
-        'is_available': isAvailable,
-        'image_url': imageUrl,
-        'description': description,
-      };
+    'id': id,
+    'category_id': categoryId,
+    'name': name,
+    'price': price,
+    'stock_qty': stockQty,
+    'is_available': isAvailable,
+    'image_url': imageUrl,
+    'description': description,
+  };
 }

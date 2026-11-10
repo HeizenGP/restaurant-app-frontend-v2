@@ -1,3 +1,9 @@
+int _asInt(Object? value, [int defaultValue = 0]) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? defaultValue;
+  return defaultValue;
+}
+
 class StockMovement {
   const StockMovement({
     required this.id,
@@ -23,7 +29,7 @@ class StockMovement {
       productId: json['product_id'] as String? ?? '',
       productName: json['product_name'] as String? ?? 'Producto',
       kind: json['kind'] as String? ?? 'MANUAL',
-      quantityDelta: (json['quantity_delta'] as num?)?.toInt() ?? 0,
+      quantityDelta: _asInt(json['quantity_delta']),
       recordedAt: json['recorded_at'] != null
           ? DateTime.tryParse(json['recorded_at'] as String) ?? DateTime.now()
           : DateTime.now(),

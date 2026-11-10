@@ -62,35 +62,73 @@ void main() {
       });
 
       expect(p2.isLowStock, isFalse);
+
+      final Product p3 = Product.fromJson(<String, dynamic>{
+        'id': 'prod-3',
+        'name': 'Aeropuerto Especial',
+        'price': '25.00',
+        'available_for_sale': true,
+      });
+
+      expect(p3.price, 25.00);
+      expect(p3.isAvailable, isTrue);
     });
   });
 
   group('Order Models', () {
-    test('StaffOrder parses json and calculates modality and status labels', () {
+    test(
+      'StaffOrder parses json and calculates modality and status labels',
+      () {
+        final StaffOrder order = StaffOrder.fromJson(<String, dynamic>{
+          'id': 'ord-999',
+          'modality': 'LOCAL',
+          'channel': 'TABLE_QR',
+          'status': 'CONFIRMED',
+          'total_amount': 75.50,
+          'created_at': '2026-11-07T12:00:00Z',
+          'table_id': 'tbl-4',
+          'items': <dynamic>[
+            <String, dynamic>{
+              'id': 'item-1',
+              'product_id': 'prod-1',
+              'product_name': 'Arroz Chaufa',
+              'unit_price': 25.00,
+              'quantity': 2,
+              'subtotal': 50.00,
+            },
+          ],
+        });
+
+        expect(order.modality.displayName, 'Mesa / Salón');
+        expect(order.status.displayName, 'Confirmado');
+        expect(order.items.length, 1);
+        expect(order.items.first.subtotal, 50.00);
+      },
+    );
+
+    test('parses the backend lines contract and decimal strings', () {
       final StaffOrder order = StaffOrder.fromJson(<String, dynamic>{
-        'id': 'ord-999',
+        'id': 'ord-render',
         'modality': 'LOCAL',
-        'channel': 'TABLE_QR',
-        'status': 'CONFIRMED',
-        'total_amount': 75.50,
+        'channel': 'APP',
+        'status': 'REQUESTED',
+        'total_amount': '25.00',
         'created_at': '2026-11-07T12:00:00Z',
-        'table_id': 'tbl-4',
-        'items': <dynamic>[
+        'table_id': 'table-1',
+        'lines': <dynamic>[
           <String, dynamic>{
-            'id': 'item-1',
-            'product_id': 'prod-1',
-            'product_name': 'Arroz Chaufa',
-            'unit_price': 25.00,
+            'product_id': 'product-1',
+            'product_name_snapshot': 'Chaufa',
+            'unit_price_snapshot': '12.50',
             'quantity': 2,
-            'subtotal': 50.00,
           },
         ],
       });
 
-      expect(order.modality.displayName, 'Mesa / Salón');
-      expect(order.status.displayName, 'Confirmado');
-      expect(order.items.length, 1);
-      expect(order.items.first.subtotal, 50.00);
+      expect(order.status, OrderStatus.requested);
+      expect(order.totalAmount, 25.0);
+      expect(order.items.single.productName, 'Chaufa');
+      expect(order.items.single.subtotal, 25.0);
     });
   });
 
@@ -110,6 +148,41 @@ void main() {
       expect(record.amount, 75.50);
       expect(record.methodLabel, 'YAPE');
       expect(record.referenceCode, '128492');
+    });
+
+    test('parses a consolidated table account with orders and balances', () {
+      final TableAccountSummary account = TableAccountSummary.fromJson(
+        <String, dynamic>{
+          'id': 'account-1',
+          'table_id': 'table-1',
+          'table_code': 'Mesa 1',
+          'status': 'OPEN',
+          'total_amount': '30.00',
+          'advance_amount': '0.00',
+          'paid_amount': '10.00',
+          'balance': '20.00',
+          'orders': <dynamic>[
+            <String, dynamic>{
+              'id': 'order-1',
+              'status': 'CONFIRMED',
+              'total_amount': '30.00',
+              'paid_amount': '10.00',
+              'balance': '20.00',
+              'lines': <dynamic>[
+                <String, dynamic>{
+                  'product_name': 'Chaufa',
+                  'quantity': 2,
+                  'unit_price': '15.00',
+                  'subtotal': '30.00',
+                },
+              ],
+            },
+          ],
+        },
+      );
+
+      expect(account.balance, 20.0);
+      expect(account.orders.single.lines.single.productName, 'Chaufa');
     });
   });
 
@@ -157,15 +230,9 @@ void main() {
           'TAKEAWAY': 6,
           'DELIVERY': 4,
         },
-        'orders_by_status': <String, dynamic>{
-          'DELIVERED': 31,
-          'PREPARING': 4,
-        },
+        'orders_by_status': <String, dynamic>{'DELIVERED': 31, 'PREPARING': 4},
         'top_products': <dynamic>[
-          <String, dynamic>{
-            'name': 'Chaufa Especial',
-            'total_quantity': 42,
-          },
+          <String, dynamic>{'name': 'Chaufa Especial', 'total_quantity': 42},
         ],
         'recent_orders': <dynamic>[],
       });
@@ -175,5 +242,43 @@ void main() {
       expect(stats.topProducts.first.name, 'Chaufa Especial');
       expect(stats.topProducts.first.totalQuantity, 42);
     });
+
+    test(
+      'DashboardStats handles strings and nulls safely without crashing',
+      () {
+        final DashboardStats stats = DashboardStats.fromJson(<String, dynamic>{
+          'today_sales': '1450.50',
+          'today_orders_count': '15',
+          'active_orders_count': 2,
+          'occupied_tables_count': '3',
+          'total_tables_count': 10,
+          'total_products_count': '25',
+          'low_stock_count': null,
+          'orders_by_modality': <String, dynamic>{'LOCAL': '8', 'DELIVERY': 5},
+          'orders_by_status': <String, dynamic>{'CONFIRMED': '3'},
+          'top_products': <dynamic>[
+            <String, dynamic>{'name': 'Aeropuerto', 'total_quantity': '18'},
+          ],
+          'recent_orders': <dynamic>[
+            <String, dynamic>{
+              'id': 'abc', // Short ID
+              'modality': 'LOCAL',
+              'channel': 'TABLE_QR',
+              'status': 'CONFIRMED',
+              'total_amount': '35.00',
+              'table_id': '1', // Short table ID
+            },
+          ],
+        });
+
+        expect(stats.todaySales, 1450.50);
+        expect(stats.todayOrdersCount, 15);
+        expect(stats.lowStockCount, 0);
+        expect(stats.ordersByModality['LOCAL'], 8);
+        expect(stats.topProducts.first.totalQuantity, 18);
+        expect(stats.recentOrders.first.id, 'abc');
+        expect(stats.recentOrders.first.tableId, '1');
+      },
+    );
   });
 }

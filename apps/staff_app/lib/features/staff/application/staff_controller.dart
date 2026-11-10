@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../auth/domain/auth_models.dart';
 import '../infrastructure/staff_repository.dart';
@@ -25,8 +26,10 @@ class StaffController extends ChangeNotifier {
   List<StaffUser> get filteredStaff {
     return _staffList.where((StaffUser user) {
       if (!user.isStaff) return false;
-      final bool matchesRole = _roleFilter == null || user.hasRole(_roleFilter!);
-      final bool matchesSearch = _searchQuery.isEmpty ||
+      final bool matchesRole =
+          _roleFilter == null || user.hasRole(_roleFilter!);
+      final bool matchesSearch =
+          _searchQuery.isEmpty ||
           user.displayName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           user.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           (user.phone?.contains(_searchQuery) ?? false);
@@ -95,7 +98,10 @@ class StaffController extends ChangeNotifier {
 
   Future<bool> toggleUserStatus(String userId, bool newStatus) async {
     try {
-      final StaffUser updated = await repository.setUserStatus(userId, newStatus);
+      final StaffUser updated = await repository.setUserStatus(
+        userId,
+        newStatus,
+      );
       final int idx = _staffList.indexWhere((StaffUser u) => u.id == userId);
       if (idx != -1) {
         _staffList[idx] = updated;
