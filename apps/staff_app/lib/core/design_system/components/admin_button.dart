@@ -92,22 +92,26 @@ class _AdminButtonState extends State<AdminButton> {
     EdgeInsets padding;
     double fontSize;
     double iconSize;
+    double iconGap;
 
     switch (widget.size) {
       case AdminButtonSize.sm:
-        padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 6);
+        padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 6);
         fontSize = 12;
         iconSize = 14;
+        iconGap = 5;
         break;
       case AdminButtonSize.md:
         padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10);
         fontSize = 13.5;
         iconSize = 16;
+        iconGap = AsiaSpacing.sm;
         break;
       case AdminButtonSize.lg:
         padding = const EdgeInsets.symmetric(horizontal: 22, vertical: 14);
         fontSize = 15;
         iconSize = 18;
+        iconGap = AsiaSpacing.sm;
         break;
     }
 
@@ -128,14 +132,18 @@ class _AdminButtonState extends State<AdminButton> {
         children: <Widget>[
           if (widget.icon != null) ...<Widget>[
             Icon(widget.icon, size: iconSize, color: fg),
-            const SizedBox(width: AsiaSpacing.sm),
+            SizedBox(width: iconGap),
           ],
-          Text(
-            widget.label,
-            style: AsiaTypography.headingMedium.copyWith(
-              color: fg,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              widget.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AsiaTypography.headingMedium.copyWith(
+                color: fg,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

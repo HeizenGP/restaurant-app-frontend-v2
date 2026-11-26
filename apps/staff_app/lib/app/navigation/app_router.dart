@@ -8,6 +8,8 @@ import '../../features/dashboard/application/dashboard_controller.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
 import '../../features/inventory/application/inventory_controller.dart';
 import '../../features/inventory/presentation/inventory_page.dart';
+import '../../features/kitchen/application/kitchen_controller.dart';
+import '../../features/kitchen/presentation/kitchen_page.dart';
 import '../../features/orders/application/order_controller.dart';
 import '../../features/orders/presentation/orders_page.dart';
 import '../../features/payments/application/payment_controller.dart';
@@ -36,6 +38,7 @@ GoRouter createAppRouter({
   required DashboardController dashboardController,
   required CatalogController catalogController,
   required OrderController orderController,
+  required KitchenController kitchenController,
   required InventoryController inventoryController,
   required TableController tableController,
   required StaffController staffController,
@@ -103,7 +106,19 @@ GoRouter createAppRouter({
           GoRoute(
             path: '/orders',
             builder: (BuildContext context, GoRouterState state) {
-              return OrdersPage(orderController: orderController);
+              return OrdersPage(
+                orderController: orderController,
+                tableController: tableController,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/kitchen',
+            builder: (BuildContext context, GoRouterState state) {
+              return KitchenPage(
+                kitchenController: kitchenController,
+                orderController: orderController,
+              );
             },
           ),
           GoRoute(
@@ -156,6 +171,8 @@ GoRouter createAppRouter({
               return TablesPage(
                 tableController: tableController,
                 paymentController: paymentController,
+                orderController: orderController,
+                catalogController: catalogController,
                 authController: authController,
               );
             },

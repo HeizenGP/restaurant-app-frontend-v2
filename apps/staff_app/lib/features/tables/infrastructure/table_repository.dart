@@ -61,4 +61,8 @@ class TableRepository {
     );
     return RestaurantTable.fromJson(response as Map<String, dynamic>);
   }
+
+  Future<void> deleteTable(String tableId) async {
+    await apiClient.delete('/tables/$tableId', requiresAuth: true);
+  }
 }

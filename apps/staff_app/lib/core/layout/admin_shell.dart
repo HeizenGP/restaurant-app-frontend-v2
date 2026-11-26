@@ -48,6 +48,11 @@ const List<AdminNavSection> kNavSections = <AdminNavSection>[
         label: 'Pedidos',
         icon: LucideIcons.shoppingBag,
       ),
+      AdminNavItem(
+        path: '/kitchen',
+        label: 'Cocina',
+        icon: LucideIcons.chefHat,
+      ),
       AdminNavItem(path: '/payments', label: 'Caja', icon: LucideIcons.wallet),
     ],
   ),
@@ -312,29 +317,63 @@ class _AdminShellState extends State<AdminShell> {
           // Logo Header (Preservando el logo del negocio)
           Container(
             height: 68,
-            padding: const EdgeInsets.symmetric(horizontal: AsiaSpacing.md),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: <Widget>[
-                KairoAdminLogo(
-                  compact: _sidebarCollapsed,
-                  subtitle: 'ADMINISTRACIÓN',
-                ),
-                if (!_sidebarCollapsed) const Spacer(),
-                IconButton(
-                  tooltip: _sidebarCollapsed ? 'Expandir' : 'Colapsar',
-                  icon: Icon(
-                    _sidebarCollapsed
-                        ? LucideIcons.panelLeftOpen
-                        : LucideIcons.panelLeftClose,
-                    size: 19,
-                    color: tokens.textTertiary,
-                  ),
-                  onPressed: () =>
-                      setState(() => _sidebarCollapsed = !_sidebarCollapsed),
-                ),
-              ],
+            padding: EdgeInsets.symmetric(
+              horizontal: _sidebarCollapsed ? 8 : AsiaSpacing.md,
             ),
+            alignment: Alignment.center,
+            child: _sidebarCollapsed
+                ? Tooltip(
+                    message: 'Expandir menú',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => setState(() => _sidebarCollapsed = false),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: <Widget>[
+                          const KairoAdminLogo(compact: true),
+                          Positioned(
+                            right: -4,
+                            bottom: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: tokens.cardElevated,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: tokens.border,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                LucideIcons.panelLeftOpen,
+                                size: 11,
+                                color: tokens.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Row(
+                    children: <Widget>[
+                      const KairoAdminLogo(
+                        compact: false,
+                        subtitle: 'ADMINISTRACIÓN',
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Colapsar',
+                        icon: Icon(
+                          LucideIcons.panelLeftClose,
+                          size: 19,
+                          color: tokens.textTertiary,
+                        ),
+                        onPressed: () =>
+                            setState(() => _sidebarCollapsed = true),
+                      ),
+                    ],
+                  ),
           ),
           Divider(color: tokens.border.withValues(alpha: 0.5), height: 1),
 

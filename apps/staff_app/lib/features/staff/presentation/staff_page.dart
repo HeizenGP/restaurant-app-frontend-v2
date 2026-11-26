@@ -245,12 +245,25 @@ class _StaffPageState extends State<StaffPage> {
                               ),
                             ),
                             DataCell(
-                              Switch(
-                                value: user.isActive,
-                                activeThumbColor: tokens.brandJade,
-                                onChanged: (bool val) => widget.staffController
-                                    .toggleUserStatus(user.id, val),
-                              ),
+                              user.isSuperAdmin
+                                  ? Tooltip(
+                                      message:
+                                          'El Super Admin no puede desactivarse',
+                                      child: Switch(
+                                        value: true,
+                                        activeThumbColor: tokens.brandJade,
+                                        onChanged: null,
+                                      ),
+                                    )
+                                  : Switch(
+                                      value: user.isActive,
+                                      activeThumbColor: tokens.brandJade,
+                                      onChanged: (bool val) =>
+                                          widget.staffController.toggleUserStatus(
+                                            user.id,
+                                            val,
+                                          ),
+                                    ),
                             ),
                             DataCell(
                               AdminButton(

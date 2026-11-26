@@ -21,6 +21,30 @@ class OrderRepository {
     return StaffOrder.fromJson(response as Map<String, dynamic>);
   }
 
+  Future<StaffOrder> createOrder({
+    required String modality,
+    required String? tableId,
+    required List<Map<String, dynamic>> items,
+    String? deliveryAddress,
+    String? contactName,
+    String? contactPhone,
+  }) async {
+    final dynamic response = await apiClient.post(
+      '/orders',
+      body: <String, dynamic>{
+        'modality': modality,
+        'table_id': ?tableId,
+        'items': items,
+        'delivery_address': ?deliveryAddress,
+        'contact_name': ?contactName,
+        'contact_phone': ?contactPhone,
+      },
+      requiresAuth: true,
+      requiresIdempotency: true,
+    );
+    return StaffOrder.fromJson(response as Map<String, dynamic>);
+  }
+
   Future<StaffOrder> decideOrder(
     String orderId, {
     required bool approved,

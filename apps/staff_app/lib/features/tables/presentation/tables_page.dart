@@ -13,8 +13,12 @@ import '../../../core/design_system/foundations/asia_radii.dart';
 import '../../../core/design_system/foundations/asia_spacing.dart';
 import '../../../core/design_system/foundations/asia_typography.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../orders/application/order_controller.dart';
+import '../../orders/domain/order_models.dart';
 import '../../payments/application/payment_controller.dart';
 import '../../payments/domain/payment_models.dart';
+import '../../products/application/catalog_controller.dart';
+import '../../products/domain/catalog_models.dart';
 import '../application/table_controller.dart';
 import '../domain/table_models.dart';
 
@@ -22,12 +26,16 @@ class TablesPage extends StatefulWidget {
   const TablesPage({
     required this.tableController,
     required this.paymentController,
+    this.orderController,
+    this.catalogController,
     this.authController,
     super.key,
   });
 
   final TableController tableController;
   final PaymentController paymentController;
+  final OrderController? orderController;
+  final CatalogController? catalogController;
   final AuthController? authController;
 
   @override
@@ -42,6 +50,7 @@ class _TablesPageState extends State<TablesPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.tableController.loadTables();
+      widget.catalogController?.loadCatalog(silent: true);
     });
     _refreshTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (mounted) {
@@ -208,7 +217,9 @@ class _TablesPageState extends State<TablesPage> {
                         crossAxisCount: crossAxisCount,
                         crossAxisSpacing: AsiaSpacing.lg,
                         mainAxisSpacing: AsiaSpacing.lg,
-                        childAspectRatio: 1.15,
+                        childAspectRatio: width > 1200
+                            ? 0.92
+                            : (width > 900 ? 0.95 : (width > 600 ? 1.05 : 1.15)),
                       ),
                       itemCount: tables.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -284,27 +295,80 @@ class _TablesPageState extends State<TablesPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: occupied
-                      ? tokens.brandGold.withValues(alpha: 0.15)
-                      : tokens.cardElevated,
-                  borderRadius: AsiaRadii.sm,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  LucideIcons.armchair,
-                  size: 18,
-                  color: occupied ? tokens.brandGold : tokens.textSecondary,
-                ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: occupied
+                          ? tokens.brandGold.withValues(alpha: 0.15)
+                          : tokens.cardElevated,
+                      borderRadius: AsiaRadii.sm,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      LucideIcons.armchair,
+                      size: 18,
+                      color: occupied ? tokens.brandGold : tokens.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  AdminBadge(
+                    label: occupied ? 'OCUPADA' : 'DISPONIBLE',
+                    variant: occupied
+                        ? AdminBadgeVariant.warning
+                        : AdminBadgeVariant.success,
+                  ),
+                ],
               ),
-              AdminBadge(
-                label: occupied ? 'OCUPADA' : 'DISPONIBLE',
-                variant: occupied
-                    ? AdminBadgeVariant.warning
-                    : AdminBadgeVariant.success,
+              PopupMenuButton<String>(
+                icon: Icon(
+                  LucideIcons.moreVertical,
+                  size: 18,
+                  color: tokens.textSecondary,
+                ),
+                tooltip: 'Opciones de mesa',
+                onSelected: (String action) {
+                  if (action == 'edit') {
+                    _openEditTableDialog(context, table);
+                  } else if (action == 'delete') {
+                    _confirmDeleteTable(context, table);
+                  }
+                },
+                itemBuilder: (BuildContext ctx) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'edit',
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          LucideIcons.pencil,
+                          size: 15,
+                          color: tokens.textPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Editar mesa'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          LucideIcons.trash2,
+                          size: 15,
+                          color: tokens.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Eliminar mesa',
+                          style: TextStyle(color: tokens.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -323,10 +387,15 @@ class _TablesPageState extends State<TablesPage> {
           ),
           const Spacer(),
           Divider(color: tokens.borderSubtle, height: 1),
-          const SizedBox(height: AsiaSpacing.md),
+          const SizedBox(height: AsiaSpacing.sm),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
+              Icon(
+                occupied ? LucideIcons.clock : LucideIcons.checkCircle2,
+                size: 13,
+                color: occupied ? tokens.brandGold : tokens.textSecondary,
+              ),
+              const SizedBox(width: 5),
               Text(
                 occupied ? 'En servicio' : 'Lista para asignar',
                 style: AsiaTypography.caption.copyWith(
@@ -334,79 +403,111 @@ class _TablesPageState extends State<TablesPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              if (occupied) ...<Widget>[
-                Wrap(
-                  spacing: AsiaSpacing.xs,
-                  children: <Widget>[
-                    AdminButton(
-                      label: 'Liberar',
-                      icon: LucideIcons.logOut,
-                      variant: AdminButtonVariant.secondary,
-                      size: AdminButtonSize.sm,
-                      onPressed: () async {
-                        final ScaffoldMessengerState messenger =
-                            ScaffoldMessenger.of(context);
-                        final bool ok = await widget.tableController
-                            .toggleOccupancy(table.id, false);
-                        if (!ok && context.mounted) {
-                          final String msg =
-                              widget.tableController.errorMessage ??
-                              'No se pudo liberar la mesa.';
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(msg),
-                              backgroundColor: tokens.error,
-                              duration: const Duration(seconds: 4),
-                            ),
-                          );
-                        } else if (ok && context.mounted) {
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Mesa ${table.code} liberada con éxito',
-                              ),
-                              backgroundColor: AsiaPalette.jade,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    AdminButton(
-                      label: 'Cobrar mesa',
-                      icon: LucideIcons.walletCards,
-                      variant: AdminButtonVariant.primary,
-                      size: AdminButtonSize.sm,
-                      onPressed: () => _openChargeTableDialog(context, table),
-                    ),
-                  ],
-                ),
-              ] else ...<Widget>[
-                AdminButton(
-                  label: 'Ocupar',
-                  icon: LucideIcons.circleCheck,
-                  variant: AdminButtonVariant.secondary,
-                  size: AdminButtonSize.sm,
-                  onPressed: () async {
-                    final ScaffoldMessengerState messenger =
-                        ScaffoldMessenger.of(context);
-                    final bool ok = await widget.tableController
-                        .toggleOccupancy(table.id, true);
-                    if (!ok && context.mounted) {
-                      final String msg =
-                          widget.tableController.errorMessage ??
-                          'No se pudo ocupar la mesa.';
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(msg),
-                          backgroundColor: tokens.error,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
             ],
           ),
+          const SizedBox(height: AsiaSpacing.xs),
+          if (occupied) ...<Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: AdminButton(
+                    label: 'Agregar pedido',
+                    icon: LucideIcons.plusCircle,
+                    variant: AdminButtonVariant.secondary,
+                    size: AdminButtonSize.sm,
+                    onPressed: () => _openAddOrderDialog(context, table),
+                  ),
+                ),
+                const SizedBox(width: AsiaSpacing.xs),
+                Expanded(
+                  child: AdminButton(
+                    label: 'Cobrar mesa',
+                    icon: LucideIcons.walletCards,
+                    variant: AdminButtonVariant.primary,
+                    size: AdminButtonSize.sm,
+                    onPressed: () => _openChargeTableDialog(context, table),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AsiaSpacing.xs),
+            SizedBox(
+              width: double.infinity,
+              child: AdminButton(
+                label: 'Liberar mesa',
+                icon: LucideIcons.logOut,
+                variant: AdminButtonVariant.ghost,
+                size: AdminButtonSize.sm,
+                onPressed: () async {
+                  final ScaffoldMessengerState messenger =
+                      ScaffoldMessenger.of(context);
+                  final bool ok = await widget.tableController
+                      .toggleOccupancy(table.id, false);
+                  if (!ok && context.mounted) {
+                    final String msg =
+                        widget.tableController.errorMessage ??
+                        'No se pudo liberar la mesa.';
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(msg),
+                        backgroundColor: tokens.error,
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  } else if (ok && context.mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Mesa ${table.code} liberada con éxito',
+                        ),
+                        backgroundColor: AsiaPalette.jade,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ] else ...<Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: AdminButton(
+                    label: 'Tomar pedido',
+                    icon: LucideIcons.plusCircle,
+                    variant: AdminButtonVariant.primary,
+                    size: AdminButtonSize.sm,
+                    onPressed: () => _openAddOrderDialog(context, table),
+                  ),
+                ),
+                const SizedBox(width: AsiaSpacing.xs),
+                Expanded(
+                  child: AdminButton(
+                    label: 'Ocupar mesa',
+                    icon: LucideIcons.circleCheck,
+                    variant: AdminButtonVariant.secondary,
+                    size: AdminButtonSize.sm,
+                    onPressed: () async {
+                      final ScaffoldMessengerState messenger =
+                          ScaffoldMessenger.of(context);
+                      final bool ok = await widget.tableController
+                          .toggleOccupancy(table.id, true);
+                      if (!ok && context.mounted) {
+                        final String msg =
+                            widget.tableController.errorMessage ??
+                            'No se pudo ocupar la mesa.';
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(msg),
+                            backgroundColor: tokens.error,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -540,16 +641,33 @@ class _TablesPageState extends State<TablesPage> {
     }
 
     // State for payment method
-    bool isSplitPayment =
-        false; // false = Pago Único, true = Pago Mixto (Efectivo + Yape)
+    bool isSplitPayment = false; // false = Pago Único, true = Pago Mixto
     String singleMethod = 'EFECTIVO';
+    String splitMethod1 = 'EFECTIVO';
+    String splitMethod2 = 'YAPE';
 
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final TextEditingController singleAmountCtrl = TextEditingController();
     final TextEditingController singleRefCtrl = TextEditingController();
-    final TextEditingController splitCashCtrl = TextEditingController();
-    final TextEditingController splitYapeCtrl = TextEditingController();
-    final TextEditingController splitYapeRefCtrl = TextEditingController();
+    final TextEditingController splitAmount1Ctrl = TextEditingController();
+    final TextEditingController splitAmount2Ctrl = TextEditingController();
+    final TextEditingController splitRef1Ctrl = TextEditingController();
+    final TextEditingController splitRef2Ctrl = TextEditingController();
+
+    String getMethodName(String code) {
+      switch (code) {
+        case 'EFECTIVO':
+          return 'Efectivo';
+        case 'YAPE':
+          return 'Yape';
+        case 'PLIN':
+          return 'Plin';
+        case 'TARJETA':
+          return 'Tarjeta';
+        default:
+          return code;
+      }
+    }
 
     double computeSelectedTotal() {
       if (account.orders.isEmpty) {
@@ -570,8 +688,8 @@ class _TablesPageState extends State<TablesPage> {
       final double capped = total > account.balance ? account.balance : total;
       singleAmountCtrl.text = capped.toStringAsFixed(2);
       final double half = double.parse((capped / 2).toStringAsFixed(2));
-      splitCashCtrl.text = half.toStringAsFixed(2);
-      splitYapeCtrl.text = (capped - half).toStringAsFixed(2);
+      splitAmount1Ctrl.text = half.toStringAsFixed(2);
+      splitAmount2Ctrl.text = (capped - half).toStringAsFixed(2);
     }
 
     syncControllers(computeSelectedTotal());
@@ -627,23 +745,26 @@ class _TablesPageState extends State<TablesPage> {
                                 : singleRefCtrl.text.trim()),
                     );
               } else {
-                // Split payment mode: Cash + Yape
-                final double cashAmount = double.parse(
-                  splitCashCtrl.text.trim(),
+                // Split payment mode: Two selectable methods
+                final double amount1 = double.parse(
+                  splitAmount1Ctrl.text.trim(),
                 );
-                final double yapeAmount = double.parse(
-                  splitYapeCtrl.text.trim(),
+                final double amount2 = double.parse(
+                  splitAmount2Ctrl.text.trim(),
                 );
-                final String yapeRef = splitYapeRefCtrl.text.trim();
+                final String ref1 = splitRef1Ctrl.text.trim();
+                final String ref2 = splitRef2Ctrl.text.trim();
 
                 TableAccountSummary? step1;
-                if (cashAmount > 0) {
+                if (amount1 > 0) {
                   step1 = await widget.paymentController
                       .recordTableAccountPayment(
                         tableId: table.id,
-                        amount: cashAmount,
-                        methodCode: 'EFECTIVO',
-                        referenceCode: null,
+                        amount: amount1,
+                        methodCode: splitMethod1,
+                        referenceCode: splitMethod1 == 'EFECTIVO'
+                            ? null
+                            : (ref1.isEmpty ? null : ref1),
                       );
 
                   if (step1 == null) {
@@ -651,7 +772,7 @@ class _TablesPageState extends State<TablesPage> {
                       SnackBar(
                         content: Text(
                           widget.paymentController.errorMessage ??
-                              'Error al procesar el cobro en efectivo.',
+                              'Error al procesar el cobro con ${getMethodName(splitMethod1)}.',
                         ),
                         backgroundColor: tokens.error,
                       ),
@@ -660,20 +781,22 @@ class _TablesPageState extends State<TablesPage> {
                   }
                 }
 
-                if (yapeAmount > 0 &&
+                if (amount2 > 0 &&
                     (step1 == null || step1.balance > 0.001)) {
-                  final double chargeYape = step1 != null
-                      ? (yapeAmount > step1.balance
+                  final double charge2 = step1 != null
+                      ? (amount2 > step1.balance
                             ? step1.balance
-                            : yapeAmount)
-                      : yapeAmount;
+                            : amount2)
+                      : amount2;
 
                   updated = await widget.paymentController
                       .recordTableAccountPayment(
                         tableId: table.id,
-                        amount: chargeYape,
-                        methodCode: 'YAPE',
-                        referenceCode: yapeRef,
+                        amount: charge2,
+                        methodCode: splitMethod2,
+                        referenceCode: splitMethod2 == 'EFECTIVO'
+                            ? null
+                            : (ref2.isEmpty ? null : ref2),
                       );
                 } else {
                   updated = step1;
@@ -1030,7 +1153,7 @@ class _TablesPageState extends State<TablesPage> {
                           Expanded(
                             child: ChoiceChip(
                               label: const Center(
-                                child: Text('Pago Mixto (Efectivo + Yape)'),
+                                child: Text('Pago Mixto (2 Métodos)'),
                               ),
                               selected: isSplitPayment,
                               selectedColor: tokens.brandCrimson,
@@ -1107,41 +1230,69 @@ class _TablesPageState extends State<TablesPage> {
                         ),
                         if (singleMethod != 'EFECTIVO') ...<Widget>[
                           const SizedBox(height: AsiaSpacing.md),
-                          AdminTextField(
-                            controller: singleRefCtrl,
-                            label:
-                                (singleMethod == 'YAPE' ||
-                                    singleMethod == 'PLIN')
-                                ? 'Número de Celular $singleMethod'
-                                : 'Código de Operación (9 dígitos)',
-                            hintText:
-                                (singleMethod == 'YAPE' ||
-                                    singleMethod == 'PLIN')
-                                ? 'ej. 987654321 (inicia con 9)'
-                                : 'ej. 123456789',
-                            prefixIcon: LucideIcons.hash,
-                            keyboardType: TextInputType.number,
-                            validator: (String? val) {
-                              final String trimmed = val?.trim() ?? '';
-                              if (trimmed.isEmpty) {
-                                return 'Obligatorio para pagos con $singleMethod';
-                              }
-                              if (singleMethod == 'YAPE' ||
-                                  singleMethod == 'PLIN') {
-                                if (!RegExp(r'^9[0-9]{8}$').hasMatch(trimmed)) {
-                                  return '$singleMethod requiere un número de 9 dígitos que inicie con 9';
-                                }
-                              } else if (singleMethod == 'TARJETA') {
-                                if (!RegExp(r'^[0-9]{9}$').hasMatch(trimmed)) {
-                                  return 'Tarjeta requiere un número de operación de 9 dígitos';
-                                }
-                              }
-                              return null;
-                            },
+                          Container(
+                            padding: const EdgeInsets.all(AsiaSpacing.md),
+                            decoration: BoxDecoration(
+                              color: tokens.cardElevated,
+                              borderRadius: AsiaRadii.md,
+                              border: Border.all(
+                                color: tokens.brandCrimson.withValues(alpha: 0.25),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Icon(
+                                      LucideIcons.receiptText,
+                                      size: 16,
+                                      color: tokens.brandCrimson,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Control de Voucher · $singleMethod',
+                                      style: AsiaTypography.caption.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: tokens.brandCrimson,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Ingresa el código o número de operación del voucher para el registro y control de caja.',
+                                  style: AsiaTypography.caption.copyWith(
+                                    color: tokens.textSecondary,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                                const SizedBox(height: AsiaSpacing.sm),
+                                AdminTextField(
+                                  controller: singleRefCtrl,
+                                  label: 'Código de Operación (Voucher)',
+                                  hintText: (singleMethod == 'YAPE' ||
+                                          singleMethod == 'PLIN')
+                                      ? 'ej. 12345678 (N° de operación del voucher)'
+                                      : 'ej. 000123 (N° de operación del POS)',
+                                  prefixIcon: LucideIcons.hash,
+                                  validator: (String? val) {
+                                    final String trimmed = val?.trim() ?? '';
+                                    if (trimmed.isEmpty) {
+                                      return 'Ingresa el código de operación del voucher';
+                                    }
+                                    if (trimmed.length < 3) {
+                                      return 'El código debe tener al menos 3 caracteres';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ] else ...<Widget>[
-                        // Fields for Split Payment Mode (Efectivo + Yape)
+                        // Fields for Split Payment Mode (Dos métodos seleccionables)
                         Container(
                           padding: const EdgeInsets.all(AsiaSpacing.sm),
                           decoration: BoxDecoration(
@@ -1161,7 +1312,7 @@ class _TablesPageState extends State<TablesPage> {
                               const SizedBox(width: AsiaSpacing.xs),
                               Expanded(
                                 child: Text(
-                                  'Cobro dividido: Efectivo + Yape (Total objetivo: S/ ${effectiveCharge.toStringAsFixed(2)})',
+                                  'Cobro dividido: ${getMethodName(splitMethod1)} + ${getMethodName(splitMethod2)} (Total objetivo: S/ ${effectiveCharge.toStringAsFixed(2)})',
                                   style: AsiaTypography.caption.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: tokens.textPrimary,
@@ -1177,10 +1328,9 @@ class _TablesPageState extends State<TablesPage> {
                                     final double half = double.parse(
                                       (effectiveCharge / 2).toStringAsFixed(2),
                                     );
-                                    splitCashCtrl.text = half.toStringAsFixed(
-                                      2,
-                                    );
-                                    splitYapeCtrl.text =
+                                    splitAmount1Ctrl.text =
+                                        half.toStringAsFixed(2);
+                                    splitAmount2Ctrl.text =
                                         (effectiveCharge - half)
                                             .toStringAsFixed(2);
                                   });
@@ -1190,107 +1340,74 @@ class _TablesPageState extends State<TablesPage> {
                           ),
                         ),
                         const SizedBox(height: AsiaSpacing.md),
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: AdminTextField(
-                                controller: splitCashCtrl,
-                                label: 'Monto en Efectivo (S/)',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                prefixIcon: LucideIcons.banknote,
-                                onChanged: (String val) {
-                                  final double? cash = double.tryParse(
-                                    val.trim(),
-                                  );
-                                  if (cash != null && cash <= effectiveCharge) {
-                                    setDialogState(() {
-                                      splitYapeCtrl.text =
-                                          (effectiveCharge - cash)
-                                              .toStringAsFixed(2);
-                                    });
-                                  }
-                                },
-                                validator: (String? val) {
-                                  final double? p = double.tryParse(
-                                    val?.trim() ?? '',
-                                  );
-                                  if (p == null || p < 0)
-                                    return 'Monto inválido';
-                                  final double yapeVal =
-                                      double.tryParse(
-                                        splitYapeCtrl.text.trim(),
-                                      ) ??
-                                      0.0;
-                                  if ((p + yapeVal - effectiveCharge).abs() >
-                                      0.02) {
-                                    return 'Suma ≠ S/ ${effectiveCharge.toStringAsFixed(2)}';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: AsiaSpacing.md),
-                            Expanded(
-                              child: AdminTextField(
-                                controller: splitYapeCtrl,
-                                label: 'Monto en Yape (S/)',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                prefixIcon: LucideIcons.smartphone,
-                                onChanged: (String val) {
-                                  final double? yape = double.tryParse(
-                                    val.trim(),
-                                  );
-                                  if (yape != null && yape <= effectiveCharge) {
-                                    setDialogState(() {
-                                      splitCashCtrl.text =
-                                          (effectiveCharge - yape)
-                                              .toStringAsFixed(2);
-                                    });
-                                  }
-                                },
-                                validator: (String? val) {
-                                  final double? p = double.tryParse(
-                                    val?.trim() ?? '',
-                                  );
-                                  if (p == null || p < 0)
-                                    return 'Monto inválido';
-                                  final double cashVal =
-                                      double.tryParse(
-                                        splitCashCtrl.text.trim(),
-                                      ) ??
-                                      0.0;
-                                  if ((p + cashVal - effectiveCharge).abs() >
-                                      0.02) {
-                                    return 'Suma ≠ S/ ${effectiveCharge.toStringAsFixed(2)}';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AsiaSpacing.md),
-                        AdminTextField(
-                          controller: splitYapeRefCtrl,
-                          label: 'Número de Celular Yape (Referencia)',
-                          hintText: 'ej. 987654321 (9 dígitos)',
-                          prefixIcon: LucideIcons.hash,
-                          keyboardType: TextInputType.number,
-                          validator: (String? val) {
-                            final String trimmed = val?.trim() ?? '';
-                            if (trimmed.isEmpty) {
-                              return 'Ingresa el número celular de la constancia Yape';
+                        LayoutBuilder(
+                          builder: (
+                            BuildContext ctx,
+                            BoxConstraints constraints,
+                          ) {
+                            final bool isRow = constraints.maxWidth > 500;
+                            final Widget col1 = _buildSplitPaymentColumn(
+                              tokens: tokens,
+                              title: 'Primer Método',
+                              selectedMethod: splitMethod1,
+                              amountCtrl: splitAmount1Ctrl,
+                              refCtrl: splitRef1Ctrl,
+                              otherAmountCtrl: splitAmount2Ctrl,
+                              effectiveCharge: effectiveCharge,
+                              onMethodChanged: (String? val) {
+                                if (val != null) {
+                                  setDialogState(() => splitMethod1 = val);
+                                }
+                              },
+                              onAmountChanged: (double val) {
+                                setDialogState(() {
+                                  splitAmount2Ctrl.text =
+                                      (effectiveCharge - val)
+                                          .toStringAsFixed(2);
+                                });
+                              },
+                            );
+
+                            final Widget col2 = _buildSplitPaymentColumn(
+                              tokens: tokens,
+                              title: 'Segundo Método',
+                              selectedMethod: splitMethod2,
+                              amountCtrl: splitAmount2Ctrl,
+                              refCtrl: splitRef2Ctrl,
+                              otherAmountCtrl: splitAmount1Ctrl,
+                              effectiveCharge: effectiveCharge,
+                              onMethodChanged: (String? val) {
+                                if (val != null) {
+                                  setDialogState(() => splitMethod2 = val);
+                                }
+                              },
+                              onAmountChanged: (double val) {
+                                setDialogState(() {
+                                  splitAmount1Ctrl.text =
+                                      (effectiveCharge - val)
+                                          .toStringAsFixed(2);
+                                });
+                              },
+                            );
+
+                            if (isRow) {
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Expanded(child: col1),
+                                  const SizedBox(width: AsiaSpacing.md),
+                                  Expanded(child: col2),
+                                ],
+                              );
                             }
-                            if (!RegExp(r'^9[0-9]{8}$').hasMatch(trimmed)) {
-                              return 'Yape requiere un número de 9 dígitos que comience con 9';
-                            }
-                            return null;
+
+                            return Column(
+                              children: <Widget>[
+                                col1,
+                                const SizedBox(height: AsiaSpacing.md),
+                                col2,
+                              ],
+                            );
                           },
                         ),
                       ],
@@ -1306,9 +1423,113 @@ class _TablesPageState extends State<TablesPage> {
 
     singleAmountCtrl.dispose();
     singleRefCtrl.dispose();
-    splitCashCtrl.dispose();
-    splitYapeCtrl.dispose();
-    splitYapeRefCtrl.dispose();
+    splitAmount1Ctrl.dispose();
+    splitAmount2Ctrl.dispose();
+    splitRef1Ctrl.dispose();
+    splitRef2Ctrl.dispose();
+  }
+
+  Widget _buildSplitPaymentColumn({
+    required AsiaThemeTokens tokens,
+    required String title,
+    required String selectedMethod,
+    required TextEditingController amountCtrl,
+    required TextEditingController refCtrl,
+    required TextEditingController otherAmountCtrl,
+    required double effectiveCharge,
+    required ValueChanged<String?> onMethodChanged,
+    required ValueChanged<double> onAmountChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AsiaSpacing.md),
+      decoration: BoxDecoration(
+        color: tokens.cardElevated,
+        borderRadius: AsiaRadii.md,
+        border: Border.all(color: tokens.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            title,
+            style: AsiaTypography.caption.copyWith(
+              fontWeight: FontWeight.bold,
+              color: tokens.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            initialValue: selectedMethod,
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+            ),
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem(value: 'EFECTIVO', child: Text('Efectivo')),
+              DropdownMenuItem(value: 'YAPE', child: Text('Yape')),
+              DropdownMenuItem(value: 'PLIN', child: Text('Plin')),
+              DropdownMenuItem(
+                value: 'TARJETA',
+                child: Text('Tarjeta de Crédito / Débito'),
+              ),
+            ],
+            onChanged: onMethodChanged,
+          ),
+          const SizedBox(height: AsiaSpacing.md),
+          AdminTextField(
+            controller: amountCtrl,
+            label: 'Monto a Cobrar (S/)',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            prefixIcon: LucideIcons.dollarSign,
+            onChanged: (String val) {
+              final double? parsed = double.tryParse(val.trim());
+              if (parsed != null && parsed <= effectiveCharge) {
+                onAmountChanged(parsed);
+              }
+            },
+            validator: (String? val) {
+              final double? p = double.tryParse(val?.trim() ?? '');
+              if (p == null || p < 0) {
+                return 'Monto inválido';
+              }
+              final double otherVal =
+                  double.tryParse(otherAmountCtrl.text.trim()) ?? 0.0;
+              if ((p + otherVal - effectiveCharge).abs() > 0.02) {
+                return 'Suma ≠ S/ ${effectiveCharge.toStringAsFixed(2)}';
+              }
+              return null;
+            },
+          ),
+          if (selectedMethod != 'EFECTIVO') ...<Widget>[
+            const SizedBox(height: AsiaSpacing.md),
+            AdminTextField(
+              controller: refCtrl,
+              label: 'Código de Operación ($selectedMethod)',
+              hintText: (selectedMethod == 'YAPE' || selectedMethod == 'PLIN')
+                  ? 'ej. 12345678 (constancia)'
+                  : 'ej. 000123 (voucher POS)',
+              prefixIcon: LucideIcons.hash,
+              validator: (String? val) {
+                final double p =
+                    double.tryParse(amountCtrl.text.trim()) ?? 0.0;
+                if (p <= 0) return null;
+                final String trimmed = val?.trim() ?? '';
+                if (trimmed.isEmpty) {
+                  return 'Obligatorio para $selectedMethod';
+                }
+                if (trimmed.length < 3) {
+                  return 'Mínimo 3 caracteres';
+                }
+                return null;
+              },
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   void _openCreateTableDialog(BuildContext context) {
@@ -1350,6 +1571,403 @@ class _TablesPageState extends State<TablesPage> {
               Navigator.of(ctx).pop();
             }
           }
+        },
+      ),
+    );
+  }
+
+  void _openEditTableDialog(BuildContext context, RestaurantTable table) {
+    final AsiaThemeTokens tokens = context.tokens;
+    final TextEditingController codeCtrl = TextEditingController(
+      text: table.code,
+    );
+    final TextEditingController areaCtrl = TextEditingController(
+      text: table.area,
+    );
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) => StatefulBuilder(
+        builder: (BuildContext dialogContext, StateSetter setDialogState) {
+          return AdminDialog(
+            title: 'Editar Mesa ${table.code}',
+            subtitle: 'Actualiza el código o la zona asignada a esta mesa.',
+            maxWidth: 450,
+            confirmLabel: 'Guardar Cambios',
+            isConfirmLoading: widget.tableController.isSaving,
+            onConfirm: () async {
+              final String newCode = codeCtrl.text.trim();
+              final String newArea = areaCtrl.text.trim();
+              if (newCode.isEmpty) return;
+
+              final ScaffoldMessengerState messenger =
+                  ScaffoldMessenger.of(context);
+              final bool ok = await widget.tableController.updateTable(
+                tableId: table.id,
+                code: newCode,
+                areaLabel: newArea.isEmpty ? null : newArea,
+              );
+
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+              }
+              if (ok) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Mesa $newCode actualizada correctamente.'),
+                    backgroundColor: AsiaPalette.jade,
+                  ),
+                );
+              } else {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      widget.tableController.errorMessage ??
+                          'Error al actualizar la mesa.',
+                    ),
+                    backgroundColor: tokens.error,
+                  ),
+                );
+              }
+            },
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                AdminTextField(
+                  controller: codeCtrl,
+                  label: 'Código de Mesa',
+                  hintText: 'ej. MESA-01',
+                  prefixIcon: LucideIcons.armchair,
+                ),
+                const SizedBox(height: AsiaSpacing.md),
+                AdminTextField(
+                  controller: areaCtrl,
+                  label: 'Área / Ubicación',
+                  hintText: 'ej. Salón Principal, Terraza, VIP',
+                  prefixIcon: LucideIcons.mapPin,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _confirmDeleteTable(BuildContext context, RestaurantTable table) {
+    final AsiaThemeTokens tokens = context.tokens;
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
+    if (table.isOccupied) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'La mesa ${table.code} está actualmente en servicio. Debes liberarla o cobrarla antes de eliminarla.',
+          ),
+          backgroundColor: tokens.brandCrimson,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) => AdminDialog(
+        title: '¿Eliminar Mesa ${table.code}?',
+        subtitle:
+            'Esta acción removerá la mesa del restaurante de forma definitiva.',
+        confirmLabel: 'Eliminar Mesa',
+        isDanger: true,
+        onConfirm: () async {
+          Navigator.of(ctx).pop();
+          final bool ok = await widget.tableController.deleteTable(table.id);
+          if (ok) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Mesa ${table.code} eliminada con éxito.'),
+                backgroundColor: AsiaPalette.jade,
+              ),
+            );
+          } else {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(
+                  widget.tableController.errorMessage ??
+                      'No se pudo eliminar la mesa.',
+                ),
+                backgroundColor: tokens.error,
+              ),
+            );
+          }
+        },
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Confirmas que deseas eliminar la mesa "${table.code}" situada en "${table.area}".',
+            style: AsiaTypography.bodyMedium.copyWith(
+              color: tokens.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openAddOrderDialog(
+    BuildContext context,
+    RestaurantTable table,
+  ) async {
+    final AsiaThemeTokens tokens = context.tokens;
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
+    if (widget.orderController == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('El controlador de pedidos no está disponible.'),
+        ),
+      );
+      return;
+    }
+
+    if (widget.catalogController != null) {
+      if (widget.catalogController!.products.isEmpty) {
+        await widget.catalogController!.loadCatalog();
+      }
+    }
+
+    final List<Product> availableProducts =
+        widget.catalogController?.products ?? <Product>[];
+    if (availableProducts.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text(
+            'No hay productos disponibles en el catálogo para ordenar.',
+          ),
+          backgroundColor: tokens.brandCrimson,
+        ),
+      );
+      return;
+    }
+    if (!context.mounted) return;
+
+    final Map<String, int> cart = <String, int>{};
+    String filterText = '';
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) {
+          final List<Product> filtered = availableProducts.where((Product p) {
+            if (!p.isAvailable) return false;
+            if (filterText.isEmpty) return true;
+            return p.name.toLowerCase().contains(filterText.toLowerCase()) ||
+                (p.description?.toLowerCase().contains(
+                      filterText.toLowerCase(),
+                    ) ??
+                    false);
+          }).toList();
+
+          double totalOrder = 0.0;
+          cart.forEach((String prodId, int qty) {
+            final Product? prod = availableProducts.cast<Product?>().firstWhere(
+              (Product? p) => p?.id == prodId,
+              orElse: () => null,
+            );
+            if (prod != null) {
+              totalOrder += prod.price * qty;
+            }
+          });
+
+          return AdminDialog(
+            title: 'Agregar Pedido · Mesa ${table.code}',
+            subtitle:
+                'Selecciona los productos y cantidades para enviar la comanda a cocina.',
+            maxWidth: 650,
+            confirmLabel:
+                'Enviar Pedido (S/ ${totalOrder.toStringAsFixed(2)})',
+            isConfirmLoading: widget.orderController!.isActionLoading,
+            onConfirm: () async {
+              if (cart.isEmpty) {
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Selecciona al menos un producto para el pedido.',
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              final List<Map<String, dynamic>> items = <Map<String, dynamic>>[];
+              cart.forEach((String prodId, int qty) {
+                if (qty > 0) {
+                  items.add(<String, dynamic>{
+                    'product_id': prodId,
+                    'quantity': qty,
+                  });
+                }
+              });
+
+              final StaffOrder? created = await widget.orderController!
+                  .createTableOrder(tableId: table.id, items: items);
+
+              if (created != null) {
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+                await widget.tableController.toggleOccupancy(table.id, true);
+                await widget.tableController.loadTables(silent: true);
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '¡Pedido #${created.id.length > 8 ? created.id.substring(0, 8).toUpperCase() : created.id} creado y enviado a cocina para ${table.code}!',
+                    ),
+                    backgroundColor: AsiaPalette.jade,
+                  ),
+                );
+              } else {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      widget.orderController!.errorMessage ??
+                          'Error al crear el pedido.',
+                    ),
+                    backgroundColor: tokens.error,
+                  ),
+                );
+              }
+            },
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 520),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  AdminTextField(
+                    label: 'Buscar Producto',
+                    hintText: 'Filtrar por nombre del plato o bebida...',
+                    prefixIcon: LucideIcons.search,
+                    onChanged: (String val) {
+                      setDialogState(() => filterText = val.trim());
+                    },
+                  ),
+                  const SizedBox(height: AsiaSpacing.sm),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(AsiaSpacing.xl),
+                              child: Text(
+                                'No se encontraron productos coincidentes.',
+                                style: AsiaTypography.caption.copyWith(
+                                  color: tokens.textTertiary,
+                                ),
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: filtered.length,
+                            separatorBuilder: (BuildContext _, int _) =>
+                                const Divider(height: 1),
+                            itemBuilder: (BuildContext ctx, int index) {
+                              final Product p = filtered[index];
+                              final int qty = cart[p.id] ?? 0;
+
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            p.name,
+                                            style: AsiaTypography.bodyMedium
+                                                .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: tokens.textPrimary,
+                                                ),
+                                          ),
+                                          Text(
+                                            'S/ ${p.price.toStringAsFixed(2)}',
+                                            style: AsiaTypography.caption
+                                                .copyWith(
+                                                  color: tokens.brandCrimson,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        IconButton(
+                                          icon: Icon(
+                                            LucideIcons.minusCircle,
+                                            size: 22,
+                                            color: qty > 0
+                                                ? tokens.brandCrimson
+                                                : tokens.border,
+                                          ),
+                                          onPressed: qty > 0
+                                              ? () {
+                                                  setDialogState(() {
+                                                    if (qty <= 1) {
+                                                      cart.remove(p.id);
+                                                    } else {
+                                                      cart[p.id] = qty - 1;
+                                                    }
+                                                  });
+                                                }
+                                              : null,
+                                        ),
+                                        Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 28,
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            '$qty',
+                                            style: AsiaTypography.bodyLarge
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: qty > 0
+                                                      ? tokens.brandCrimson
+                                                      : tokens.textTertiary,
+                                                ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            LucideIcons.plusCircle,
+                                            size: 22,
+                                            color: tokens.brandCrimson,
+                                          ),
+                                          onPressed: () {
+                                            setDialogState(() {
+                                              cart[p.id] = qty + 1;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );

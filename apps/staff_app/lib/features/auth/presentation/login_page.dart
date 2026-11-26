@@ -148,10 +148,12 @@ class _LoginPageState extends State<LoginPage> {
                   color: tokens.brandGold,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Acceso seguro para administradores y personal autorizado',
-                  style: AsiaTypography.caption.copyWith(
-                    color: tokens.textTertiary,
+                Expanded(
+                  child: Text(
+                    'Acceso seguro para administradores y personal autorizado',
+                    style: AsiaTypography.caption.copyWith(
+                      color: tokens.textTertiary,
+                    ),
                   ),
                 ),
               ],
@@ -202,8 +204,17 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Ingresa tus credenciales del personal de KAIRO',
+                  'Soy Kairo, me llamo Heizen Guevara',
                   style: AsiaTypography.bodySmall.copyWith(
+                    color: tokens.brandGold,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ingresa tus credenciales del personal de KAIRO',
+                  style: AsiaTypography.caption.copyWith(
                     color: tokens.textSecondary,
                   ),
                   textAlign: TextAlign.center,

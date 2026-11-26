@@ -97,6 +97,16 @@ class StaffController extends ChangeNotifier {
   }
 
   Future<bool> toggleUserStatus(String userId, bool newStatus) async {
+    final StaffUser? target = _staffList.cast<StaffUser?>().firstWhere(
+      (StaffUser? u) => u?.id == userId,
+      orElse: () => null,
+    );
+    if (target != null && target.isSuperAdmin && !newStatus) {
+      _errorMessage = 'El usuario Super Admin no puede ser desactivado.';
+      notifyListeners();
+      return false;
+    }
+
     try {
       final StaffUser updated = await repository.setUserStatus(
         userId,

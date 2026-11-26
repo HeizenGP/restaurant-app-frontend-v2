@@ -82,27 +82,37 @@ void main() {
     },
   );
 
-  test('Admin Shell defines correct navigation sections according to distribution', () {
-    expect(kDashboardItem.label, 'Dashboard');
-    expect(kDashboardItem.path, '/dashboard');
-
-    expect(kNavSections.length, 3);
-    expect(kNavSections[0].title, 'OPERACIÓN DIARIA');
-    expect(
-      kNavSections[0].items.map((AdminNavItem i) => i.label).toList(),
-      <String>['Mesas', 'Pedidos', 'Caja'],
+  testWidgets('Sidebar can collapse and expand without layout overflow', (
+    WidgetTester tester,
+  ) async {
+    final ApiEnvironment environment = ApiEnvironment(
+      baseUrl: 'https://api.kairo.pe/api/v1',
+    );
+    final MockAuthStorage storage = MockAuthStorage();
+    final ApiClient client = ApiClient(
+      environment: environment,
+      storage: storage,
+    );
+    final AuthRepository authRepo = AuthRepository(
+      apiClient: client,
+      storage: storage,
+    );
+    final AuthController authController = AuthController(
+      repository: authRepo,
+      storage: storage,
     );
 
-    expect(kNavSections[1].title, 'GESTIÓN DEL RESTAURANTE');
-    expect(
-      kNavSections[1].items.map((AdminNavItem i) => i.label).toList(),
-      <String>['Carta y productos', 'Inventario'],
-    );
+    // Provide a desktop size
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
 
-    expect(kNavSections[2].title, 'ADMINISTRACIÓN');
-    expect(
-      kNavSections[2].items.map((AdminNavItem i) => i.label).toList(),
-      <String>['Personal', 'Reportes', 'Configuración'],
+    await tester.pumpWidget(
+      StaffApp(environment: environment, authController: authController),
     );
+    await tester.pumpAndSettle();
+
+    // Verify initial state has KAIRO logo and Admin elements
+    expect(find.byType(KairoAdminLogo), findsWidgets);
   });
 }

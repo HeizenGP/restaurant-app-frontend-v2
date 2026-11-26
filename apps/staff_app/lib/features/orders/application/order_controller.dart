@@ -208,6 +208,44 @@ class OrderController extends ChangeNotifier {
     }
   }
 
+  Future<StaffOrder?> createTableOrder({
+    required String tableId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    _isActionLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final StaffOrder created = await repository.createOrder(
+        modality: 'LOCAL',
+        tableId: tableId,
+        items: items,
+      );
+      // Auto-approve and confirm local table order for staff/admin
+      await repository.decideOrder(
+        created.id,
+        approved: true,
+        tableVerified: true,
+      );
+      final StaffOrder confirmed = await repository.confirmOrder(created.id);
+      _updateOrderInList(confirmed);
+      _isActionLoading = false;
+      notifyListeners();
+      return confirmed;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isActionLoading = false;
+      notifyListeners();
+      return null;
+    } catch (_) {
+      _errorMessage = 'No se pudo crear el pedido para la mesa.';
+      _isActionLoading = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
   void _updateOrderInList(StaffOrder updated) {
     final int idx = _orders.indexWhere((StaffOrder o) => o.id == updated.id);
     if (idx != -1) {

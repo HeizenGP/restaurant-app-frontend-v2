@@ -90,6 +90,67 @@ class TableController extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateTable({
+    required String tableId,
+    String? code,
+    String? areaLabel,
+  }) async {
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final RestaurantTable updated = await repository.updateTable(
+        tableId,
+        code: code,
+        areaLabel: areaLabel,
+      );
+      final int idx = _tables.indexWhere(
+        (RestaurantTable t) => t.id == tableId,
+      );
+      if (idx != -1) {
+        _tables[idx] = updated;
+      }
+      _isSaving = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    } catch (_) {
+      _errorMessage = 'No se pudo actualizar la mesa.';
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteTable(String tableId) async {
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await repository.deleteTable(tableId);
+      _tables.removeWhere((RestaurantTable t) => t.id == tableId);
+      _isSaving = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    } catch (_) {
+      _errorMessage = 'No se pudo eliminar la mesa.';
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> toggleOccupancy(String tableId, bool newOccupancy) async {
     _errorMessage = null;
     try {

@@ -11,6 +11,8 @@ import '../features/dashboard/application/dashboard_controller.dart';
 import '../features/dashboard/infrastructure/dashboard_repository.dart';
 import '../features/inventory/application/inventory_controller.dart';
 import '../features/inventory/infrastructure/inventory_repository.dart';
+import '../features/kitchen/application/kitchen_controller.dart';
+import '../features/kitchen/infrastructure/kitchen_repository.dart';
 import '../features/orders/application/order_controller.dart';
 import '../features/orders/infrastructure/order_repository.dart';
 import '../features/payments/application/payment_controller.dart';
@@ -30,6 +32,7 @@ class StaffApp extends StatefulWidget {
     this.dashboardController,
     this.catalogController,
     this.orderController,
+    this.kitchenController,
     this.inventoryController,
     this.tableController,
     this.staffController,
@@ -42,6 +45,7 @@ class StaffApp extends StatefulWidget {
   final DashboardController? dashboardController;
   final CatalogController? catalogController;
   final OrderController? orderController;
+  final KitchenController? kitchenController;
   final InventoryController? inventoryController;
   final TableController? tableController;
   final StaffController? staffController;
@@ -59,6 +63,7 @@ class _StaffAppState extends State<StaffApp> {
   late final DashboardController _dashboardController;
   late final CatalogController _catalogController;
   late final OrderController _orderController;
+  late final KitchenController _kitchenController;
   late final InventoryController _inventoryController;
   late final TableController _tableController;
   late final StaffController _staffController;
@@ -94,6 +99,10 @@ class _StaffAppState extends State<StaffApp> {
         widget.orderController ??
         OrderController(repository: OrderRepository(apiClient: _apiClient));
 
+    _kitchenController =
+        widget.kitchenController ??
+        KitchenController(repository: KitchenRepository(apiClient: _apiClient));
+
     _inventoryController =
         widget.inventoryController ??
         InventoryController(
@@ -117,6 +126,7 @@ class _StaffAppState extends State<StaffApp> {
       dashboardController: _dashboardController,
       catalogController: _catalogController,
       orderController: _orderController,
+      kitchenController: _kitchenController,
       inventoryController: _inventoryController,
       tableController: _tableController,
       staffController: _staffController,

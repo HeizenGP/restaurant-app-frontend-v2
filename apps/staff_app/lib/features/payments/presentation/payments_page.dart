@@ -528,37 +528,65 @@ class _PaymentsPageState extends State<PaymentsPage> {
                     ),
                     if (selectedMethod != 'EFECTIVO') ...<Widget>[
                       const SizedBox(height: AsiaSpacing.md),
-                      AdminTextField(
-                        controller: referenceCtrl,
-                        label:
-                            (selectedMethod == 'YAPE' ||
-                                selectedMethod == 'PLIN')
-                            ? 'Número de Celular $selectedMethod'
-                            : 'Código de Operación (9 dígitos)',
-                        hintText:
-                            (selectedMethod == 'YAPE' ||
-                                selectedMethod == 'PLIN')
-                            ? 'ej. 987654321 (inicia con 9)'
-                            : 'ej. 123456789',
-                        prefixIcon: LucideIcons.hash,
-                        keyboardType: TextInputType.number,
-                        validator: (String? val) {
-                          final String trimmed = val?.trim() ?? '';
-                          if (trimmed.isEmpty) {
-                            return 'Obligatorio para pagos con $selectedMethod';
-                          }
-                          if (selectedMethod == 'YAPE' ||
-                              selectedMethod == 'PLIN') {
-                            if (!RegExp(r'^9[0-9]{8}$').hasMatch(trimmed)) {
-                              return '$selectedMethod requiere un número de 9 dígitos que inicie con 9';
-                            }
-                          } else if (selectedMethod == 'TARJETA') {
-                            if (!RegExp(r'^[0-9]{9}$').hasMatch(trimmed)) {
-                              return 'Tarjeta requiere un número de operación de 9 dígitos';
-                            }
-                          }
-                          return null;
-                        },
+                      Container(
+                        padding: const EdgeInsets.all(AsiaSpacing.md),
+                        decoration: BoxDecoration(
+                          color: tokens.cardElevated,
+                          borderRadius: AsiaRadii.md,
+                          border: Border.all(
+                            color: tokens.brandCrimson.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Icon(
+                                  LucideIcons.receiptText,
+                                  size: 16,
+                                  color: tokens.brandCrimson,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Control de Voucher · $selectedMethod',
+                                  style: AsiaTypography.caption.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: tokens.brandCrimson,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ingresa el código o número de operación del voucher para el registro y arqueo de caja.',
+                              style: AsiaTypography.caption.copyWith(
+                                color: tokens.textSecondary,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                            const SizedBox(height: AsiaSpacing.sm),
+                            AdminTextField(
+                              controller: referenceCtrl,
+                              label: 'Código de Operación (Voucher)',
+                              hintText: (selectedMethod == 'YAPE' ||
+                                      selectedMethod == 'PLIN')
+                                  ? 'ej. 12345678 (N° de operación del voucher)'
+                                  : 'ej. 000123 (N° de operación del POS)',
+                              prefixIcon: LucideIcons.hash,
+                              validator: (String? val) {
+                                final String trimmed = val?.trim() ?? '';
+                                if (trimmed.isEmpty) {
+                                  return 'Ingresa el código de operación del voucher';
+                                }
+                                if (trimmed.length < 3) {
+                                  return 'El código debe tener al menos 3 caracteres';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ],
